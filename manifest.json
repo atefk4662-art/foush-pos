@@ -1,22 +1,93 @@
 {
     "name": "طواجن فوش - نظام إدارة المطعم",
-    "short_name": "طواجن فوش",
-    "description": "نظام إدارة ذكي لمطعم طواجن فوش",
-    "start_url": "./index.html",
+    "short_name": "فوش",
+    "description": "نظام إدارة ذكي لمطعم طواجن فوش - POS System",
+    "start_url": "./index.html?source=pwa",
     "display": "standalone",
-    "background_color": "#0a0f0d",
-    "theme_color": "#064e3b",
-    "orientation": "any",
-    "icons": [
+    "orientation": "portrait-primary",
+    "scope": "./",
+    "background_color": "#0f172a",
+    "theme_color": "#fbbf24",
+    "dir": "rtl",
+    "lang": "ar-EG",
+    "categories": ["business", "productivity"],
+    "screenshots": [
         {
             "src": "assets/icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "form_factor": "narrow"
         },
         {
             "src": "assets/icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "form_factor": "wide"
+        }
+    ],
+    "icons": [
+        {
+            "src": "assets/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "assets/icon-192-maskable.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "assets/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "assets/icon-512-maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "share_target": {
+        "action": "./index.html",
+        "method": "POST",
+        "enctype": "multipart/form-data",
+        "params": {
+            "files": [
+                {
+                    "name": "media",
+                    "accept": ["image/*"]
+                }
+            ]
+        }
+    },
+    "shortcuts": [
+        {
+            "name": "تسجيل دخول",
+            "short_name": "دخول",
+            "description": "الدخول السريع لتطبيق فوش",
+            "url": "./index.html?role=login",
+            "icons": [
+                {
+                    "src": "assets/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "الكاشير",
+            "short_name": "POS",
+            "description": "نظام المبيعات",
+            "url": "./index.html?page=pos",
+            "icons": [
+                {
+                    "src": "assets/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }
