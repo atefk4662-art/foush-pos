@@ -176,9 +176,72 @@
             #print-area { display: block !important; width: 80mm; background: #fff !important; color: #000 !important; font-family: 'Cairo', sans-serif !important; padding: 5mm; margin: 0; } 
             #print-area * { color: #000 !important; }
         }
+
+        /* PWA Custom Banner */
+        .pwa-banner {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(15px);
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 999999;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(251, 191, 36, 0.2);
+            animation: slideDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes slideDown {
+            from { top: -100px; opacity: 0; }
+            to { top: 20px; opacity: 1; }
+        }
+        .pwa-banner-content { display: flex; align-items: center; gap: 12px; }
+        .pwa-banner-logo { width: 50px; height: 50px; border-radius: 12px; border: 2px solid var(--primary); }
+        .pwa-banner-text h4 { font-size: 0.95rem; color: var(--primary); font-weight: 900; }
+        .pwa-banner-text p { font-size: 0.75rem; opacity: 0.8; margin-top: 3px; font-weight: 700; line-height: 1.3; text-align: right; }
+        .pwa-banner-actions { display: flex; align-items: center; gap: 10px; }
+        .pwa-close-btn { background: transparent; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; opacity: 0.6; padding: 0 5px; }
+        .pwa-close-btn:hover { opacity: 1; }
     </style>
 </head>
 <body>
+
+<!-- PWA Custom Install Banner -->
+<div id="pwa-install-banner" class="pwa-banner" style="display: none;">
+    <div class="pwa-banner-content">
+        <img src="logo.png" alt="Logo" class="pwa-banner-logo">
+        <div class="pwa-banner-text">
+            <h4>تطبيق طواجن فؤش 🥘</h4>
+            <p>ثبّت التطبيق على شاشة موبايلك لتجربة أسرع بدون متصفح!</p>
+        </div>
+    </div>
+    <div class="pwa-banner-actions">
+        <button id="pwa-install-btn" class="btn-luxury" style="padding: 8px 15px; font-size: 0.9rem; width: auto; font-weight: 900;">تثبيت 📲</button>
+        <button onclick="document.getElementById('pwa-install-banner').style.display='none'" class="pwa-close-btn">&times;</button>
+    </div>
+</div>
+
+<!-- iOS PWA Helper Modal -->
+<div id="ios-pwa-modal" class="overlay" style="display: none;">
+    <div class="modal-body" style="text-align: center; max-width: 380px;">
+        <div class="role-logo-main" style="width: 100px; height: 100px; margin: 0 auto 15px;"></div>
+        <h3 style="color: var(--primary); margin-bottom: 10px;">تثبيت التطبيق على الآيفون 🍏</h3>
+        <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; opacity: 0.9; text-align: center;">
+            لتشغيل التطبيق كبرنامج كامل على شاشتك الرئيسية:
+            <br><br>
+            1. اضغط على زر **المشاركة 📥** (Share) في متصفح سفاري بالأسفل.
+            <br>
+            2. اختر **إضافة إلى الشاشة الرئيسية ➕** (Add to Home Screen).
+        </p>
+        <button onclick="document.getElementById('ios-pwa-modal').style.display='none'" class="btn-luxury">فهمت ✅</button>
+    </div>
+</div>
 
 <div class="foush-persistent-bg"></div>
 <div id="toast"></div>
@@ -865,6 +928,79 @@
                 .catch(err => console.error('Service Worker registration failed! ❌', err));
         });
     }
+
+    // PWA Custom Install Flow Handler
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Only show install banner if the user is already logged in (meaning role is active)
+        if(window.state.role) {
+            const banner = document.getElementById('pwa-install-banner');
+            if (banner) banner.style.display = 'flex';
+        }
+    });
+
+    const installBtn = document.getElementById('pwa-install-btn');
+    if (installBtn) {
+        installBtn.addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the PWA install prompt');
+                    }
+                    deferredPrompt = null;
+                    const banner = document.getElementById('pwa-install-banner');
+                    if (banner) banner.style.display = 'none';
+                });
+            }
+        });
+    }
+
+    // iOS Safari PWA Prompt
+    window.addEventListener('load', () => {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+        
+        // Show iOS help popup after role login if on Safari and not standalone
+        if (isIOS && !isStandalone && window.state.role) {
+            const hasSeenPrompt = localStorage.getItem('foush_ios_prompt_seen');
+            if (!hasSeenPrompt) {
+                setTimeout(() => {
+                    const iosModal = document.getElementById('ios-pwa-modal');
+                    if (iosModal) iosModal.style.display = 'flex';
+                    localStorage.setItem('foush_ios_prompt_seen', 'true');
+                }, 3000); // Friendly delay
+            }
+        }
+    });
+
+    // Also trigger PWA prompt if role is chosen during session
+    const originalLogin = window.login;
+    window.login = (r) => {
+        originalLogin(r);
+        // If login succeeded, check if we had a deferred install prompt
+        if (window.state.role && deferredPrompt) {
+            setTimeout(() => {
+                const banner = document.getElementById('pwa-install-banner');
+                if (banner) banner.style.display = 'flex';
+            }, 1000);
+        }
+        // iOS Check right after role selection
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+        if (isIOS && !isStandalone && window.state.role) {
+            const hasSeenPrompt = localStorage.getItem('foush_ios_prompt_seen');
+            if (!hasSeenPrompt) {
+                setTimeout(() => {
+                    const iosModal = document.getElementById('ios-pwa-modal');
+                    if (iosModal) iosModal.style.display = 'flex';
+                    localStorage.setItem('foush_ios_prompt_seen', 'true');
+                }, 2000);
+            }
+        }
+    };
 </script>
 </body>
 </html>
