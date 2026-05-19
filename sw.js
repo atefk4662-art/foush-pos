@@ -1,11 +1,11 @@
-const CACHE_NAME = 'foush-v6';
+const CACHE_NAME = 'foush-v7';
 const ASSETS = [
   './',
   './index.html',
   './logo.png',
   './manifest.json',
-  './assets/icon-192.png',
-  './assets/icon-512.png',
+  './icon-192.png',
+  './icon-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css',
   'https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Orbitron:wght@400;900&display=swap',
   'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
