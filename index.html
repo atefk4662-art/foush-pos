@@ -760,16 +760,54 @@
                 overflow-y: auto !important;
             }
 
-            /* POS Mobile Tabs (Hidden for Mini-Desktop layout) */
+            /* POS Mobile Tabs */
             .pos-mobile-tabs {
-                display: none !important;
+                display: flex !important;
+                gap: 8px !important;
+                margin-bottom: 12px !important;
+                width: 100% !important;
             }
 
-            /* POS Mobile Layout (Mini-Desktop Side-by-Side) */
+            .pos-tab-btn {
+                flex: 1;
+                padding: 10px !important;
+                background: #1e293b !important;
+                border: 1px solid rgba(255,255,255,0.05) !important;
+                color: #fff !important;
+                border-radius: 12px !important;
+                font-weight: 700 !important;
+                font-size: 0.9rem !important;
+                cursor: pointer;
+                transition: 0.2s;
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+            }
+
+            .pos-tab-btn.active {
+                background: var(--primary) !important;
+                color: #000 !important;
+                border-color: var(--primary) !important;
+            }
+
+            .cart-badge-count {
+                background: var(--danger) !important;
+                color: #fff !important;
+                border-radius: 50% !important;
+                padding: 2px 6px !important;
+                font-size: 0.75rem !important;
+                font-weight: bold !important;
+                display: inline-block !important;
+                margin-right: 4px !important;
+            }
+
+            /* POS Mobile Layout (Tabbed) */
             .pos-layout {
-                grid-template-columns: 1.5fr 1fr !important;
-                height: calc(100% - 10px) !important;
-                gap: 6px !important;
+                grid-template-columns: 1fr !important;
+                height: calc(100% - 50px) !important;
+                gap: 0 !important;
                 width: 100% !important;
                 overflow-x: hidden !important;
             }
@@ -780,49 +818,49 @@
                 width: 100% !important;
             }
 
-            /* Keep both sides visible and scaled down */
             .items-side {
-                display: flex !important;
                 height: 100% !important;
                 min-height: 0 !important;
                 min-width: 0 !important;
                 overflow-x: hidden !important;
+                display: flex !important;
                 flex-direction: column !important;
             }
 
-            .cart-side {
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+                gap: 8px !important;
+                flex: 1 !important;
+                overflow-y: auto !important;
+            }
+
+            .pos-layout.show-items .items-side {
                 display: flex !important;
                 width: 100% !important;
-                padding: 6px !important;
+            }
+
+            .pos-layout.show-items .cart-side {
+                display: none !important;
+            }
+
+            .pos-layout.show-cart .items-side {
+                display: none !important;
+            }
+
+            .pos-layout.show-cart .cart-side {
+                display: flex !important;
+                width: 100% !important;
+                padding: 8px !important;
                 height: 100% !important;
                 min-height: 0 !important;
                 overflow-y: auto !important;
             }
 
-            /* Hide the show-items / show-cart logic since we show both */
-            .pos-layout.show-items .items-side,
-            .pos-layout.show-cart .items-side { display: flex !important; }
-            
-            .pos-layout.show-items .cart-side,
-            .pos-layout.show-cart .cart-side { display: flex !important; }
-
-            .items-grid {
-                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)) !important;
-                gap: 4px !important;
-                flex: 1 !important;
-                overflow-y: auto !important;
-            }
-            .pos-card { padding: 6px !important; border-radius: 8px !important; }
-            .pos-card h3 { font-size: 0.65rem !important; }
-            .pos-card p { font-size: 0.6rem !important; }
-
-            .cart-side h3 { font-size: 0.8rem !important; }
-            .cart-items span { font-size: 0.65rem !important; }
-            .cart-items strong { font-size: 0.7rem !important; }
-            .cart-items button { padding: 2px !important; font-size:0.6rem !important; }
-            .cart-side h1 { font-size: 1.2rem !important; margin-bottom: 4px !important; }
-            .cart-side .btn-luxury { font-size: 0.8rem !important; padding: 6px !important; }
-            .btn-luxury { padding: 6px !important; font-size: 0.75rem !important; }
+            .cart-side h3 { font-size: 1rem !important; }
+            .cart-items span { font-size: 0.85rem !important; }
+            .cart-items strong { font-size: 0.9rem !important; }
+            .cart-items button { padding: 6px !important; }
+            .btn-luxury { padding: 10px !important; font-size: 0.9rem !important; }
 
             /* Stat Cards on Dashboard */
             .stat-card {
