@@ -663,17 +663,45 @@
         }
 
         @media (max-width: 900px) {
+            :root {
+                --sidebar-w: 60px !important;
+            }
+
             #app {
-                grid-template-columns: 1fr !important;
+                grid-template-columns: var(--sidebar-w) 1fr !important;
             }
 
             .sidebar {
-                display: none;
+                display: flex !important;
+                padding: 10px 4px !important;
+                align-items: center !important;
+                width: 60px !important;
+            }
+
+            .sidebar > div:first-child {
+                display: none !important;
+            }
+
+            .sidebar-link {
+                justify-content: center !important;
+                gap: 0 !important;
+                padding: 10px 4px !important;
+                border-radius: 8px !important;
+                font-size: 0 !important;
+            }
+
+            .sidebar-link i {
+                font-size: 1.2rem !important;
+                margin: 0 !important;
+            }
+
+            .sidebar-label {
+                display: none !important;
             }
 
             .main-content {
                 padding: 8px !important;
-                padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)) !important;
+                padding-bottom: env(safe-area-inset-bottom, 8px) !important;
             }
 
             header {
@@ -713,47 +741,13 @@
                 white-space: nowrap;
             }
 
-            /* Bottom Nav Bar Styles */
+            /* Bottom Nav Bar Styles (Disabled to use Sidebar) */
             .mobile-nav {
-                display: flex;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                height: calc(60px + env(safe-area-inset-bottom, 0px));
-                background: rgba(15, 23, 42, 0.95);
-                backdrop-filter: blur(15px);
-                border-top: 1px solid rgba(255, 255, 255, 0.08);
-                z-index: 9999;
-                justify-content: space-around;
-                align-items: flex-start;
-                padding: 5px 0;
-                padding-bottom: env(safe-area-inset-bottom, 0px);
+                display: none !important;
             }
 
             .mobile-nav-btn {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                color: #94a3b8;
-                font-size: 0.7rem;
-                border: none;
-                background: transparent;
-                cursor: pointer;
-                flex: 1;
-                transition: 0.2s;
-                gap: 4px;
-                font-weight: 700;
-                height: 100%;
-            }
-
-            .mobile-nav-btn i {
-                font-size: 1.2rem;
-            }
-
-            .mobile-nav-btn.active {
-                color: var(--primary) !important;
+                display: none !important;
             }
 
             /* Modals Responsiveness */
@@ -777,7 +771,7 @@
 
             /* POS Mobile Layout Side-by-Side */
             .pos-layout {
-                grid-template-columns: minmax(0, 1fr) 130px !important;
+                grid-template-columns: calc(100% - 135px) 130px !important;
                 height: 100% !important;
                 gap: 5px !important;
                 width: 100% !important;
@@ -881,10 +875,10 @@
             }
 
             .expenses-layout-grid {
-                grid-template-columns: 1fr !important;
-                height: auto !important;
-                overflow-y: auto !important;
-                gap: 15px !important;
+                grid-template-columns: 140px minmax(0, 1fr) !important;
+                height: 100% !important;
+                overflow-y: hidden !important;
+                gap: 8px !important;
             }
 
             .waiter-tables-grid {
@@ -893,8 +887,8 @@
             }
 
             .waiter-tracking-grid {
-                grid-template-columns: 1fr !important;
-                gap: 10px !important;
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+                gap: 8px !important;
             }
 
             /* Dashboard Columns */
@@ -913,7 +907,7 @@
 
             /* Expense Page Header */
             .expenses-layout-grid .cart-side {
-                max-height: none !important;
+                max-height: 100% !important;
             }
 
             /* Cart side consistent */
