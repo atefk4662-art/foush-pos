@@ -768,55 +768,18 @@
 
             /* POS Mobile Tabs */
             .pos-mobile-tabs {
-                display: flex;
-                width: 100%;
-                gap: 8px;
-                margin-bottom: 8px;
-                background: rgba(0, 0, 0, 0.2);
-                padding: 5px;
-                border-radius: 12px;
-                flex-shrink: 0;
-            }
-
-            .pos-tab-btn {
-                flex: 1;
-                padding: 10px;
-                border-radius: 10px;
-                border: none;
-                background: transparent;
-                color: #fff;
-                font-weight: 700;
-                cursor: pointer;
-                transition: 0.2s;
-                position: relative;
-            }
-
-            .pos-tab-btn.active {
-                background: var(--primary);
-                color: #000;
+                display: none !important;
             }
 
             .cart-badge-count {
-                position: absolute;
-                top: -5px;
-                right: -5px;
-                background: var(--danger);
-                color: #fff;
-                font-size: 0.7rem;
-                font-weight: 900;
-                width: 18px;
-                height: 18px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                display: none !important;
             }
 
-            /* POS Mobile Layout Toggle */
+            /* POS Mobile Layout Side-by-Side */
             .pos-layout {
-                grid-template-columns: 1fr !important;
-                height: auto !important;
-                min-height: 0 !important;
+                grid-template-columns: 1fr 150px !important;
+                height: 100% !important;
+                gap: 6px !important;
             }
 
             #page-pos {
@@ -830,27 +793,28 @@
             }
 
             .items-grid {
-                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
             }
 
-            .pos-layout.show-items .cart-side {
-                display: none !important;
-            }
-
-            .pos-layout.show-items .items-side {
-                display: flex !important;
-            }
-
-            .pos-layout.show-cart .items-side {
-                display: none !important;
-            }
-
+            .pos-layout.show-items .cart-side,
             .pos-layout.show-cart .cart-side {
                 display: flex !important;
                 width: 100% !important;
+                padding: 6px !important;
                 min-height: auto !important;
                 height: auto !important;
             }
+
+            .pos-layout.show-items .items-side,
+            .pos-layout.show-cart .items-side {
+                display: flex !important;
+            }
+
+            .cart-side h3 { font-size: 1rem !important; }
+            .cart-items span { font-size: 0.75rem !important; }
+            .cart-items strong { font-size: 0.8rem !important; }
+            .cart-items button { padding: 4px !important; }
+            .btn-luxury { padding: 8px !important; font-size: 0.9rem !important; }
 
             /* Stat Cards on Dashboard */
             .stat-card {
@@ -874,65 +838,23 @@
 
             /* Kitchen Grid & Columns */
             .kitchen-mobile-tabs {
-                display: flex;
-                width: 100%;
-                gap: 6px;
-                margin-bottom: 12px;
-                background: rgba(0, 0, 0, 0.2);
-                padding: 5px;
-                border-radius: 12px;
-                overflow-x: auto;
-                flex-shrink: 0;
-            }
-
-            .kitchen-tab-btn {
-                flex: 1;
-                padding: 8px 4px;
-                border-radius: 10px;
-                border: none;
-                background: transparent;
-                color: #fff;
-                font-weight: 700;
-                cursor: pointer;
-                transition: 0.2s;
-                font-size: 0.75rem;
-                text-align: center;
-                white-space: nowrap;
-            }
-
-            .kitchen-tab-btn.active {
-                background: var(--primary);
-                color: #000;
-            }
-
-            .kitchen-layout-grid {
-                grid-template-columns: 1fr !important;
-                height: auto !important;
-                min-height: 0 !important;
-            }
-
-            .kitchen-layout-grid>div {
                 display: none !important;
             }
 
-            .kitchen-layout-grid.show-summary>div:nth-child(1) {
+            .kitchen-layout-grid {
+                grid-template-columns: repeat(4, 1fr) !important;
+                height: 100% !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
                 display: flex !important;
-                flex-direction: column !important;
             }
 
-            .kitchen-layout-grid.show-preparing>div:nth-child(2) {
+            .kitchen-layout-grid > div {
                 display: flex !important;
                 flex-direction: column !important;
-            }
-
-            .kitchen-layout-grid.show-ready_dinein>div:nth-child(3) {
-                display: flex !important;
-                flex-direction: column !important;
-            }
-
-            .kitchen-layout-grid.show-ready_external>div:nth-child(4) {
-                display: flex !important;
-                flex-direction: column !important;
+                min-width: 280px !important;
+                height: 100% !important;
+                flex-shrink: 0;
             }
 
             /* New Grid Overrides */
