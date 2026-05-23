@@ -1299,6 +1299,32 @@
                 font-size: 0.85rem !important;
                 padding: 8px 14px !important;
             }
+
+            /* --- Employees page grid (350px 1fr) --- */
+            [style*="grid-template-columns: 350px 1fr"],
+            [style*="grid-template-columns:350px 1fr"],
+            [style*="grid-template-columns: 320px 1fr"],
+            [style*="grid-template-columns:320px 1fr"] {
+                grid-template-columns: 1fr !important;
+                height: auto !important;
+                gap: 12px !important;
+            }
+
+            /* --- Admin inventory page (same kind of 2-column grid) --- */
+            [style*="grid-template-columns: 300px 1fr"],
+            [style*="grid-template-columns:300px 1fr"],
+            [style*="grid-template-columns: 280px 1fr"],
+            [style*="grid-template-columns:280px 1fr"] {
+                grid-template-columns: 1fr !important;
+                height: auto !important;
+                gap: 12px !important;
+            }
+
+            /* --- Generic two-column with pixel widths (catch-all) --- */
+            [style*="grid-template-columns: 1fr 1fr"],
+            [style*="grid-template-columns:1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
         }
 
         /* Tablets Fluid & Adaptive Screen Optimization */
