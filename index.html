@@ -38,12 +38,20 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            height: 100%;
+            height: -webkit-fill-available;
         }
 
         body {
             background: var(--bg);
             color: var(--text);
             height: 100vh;
+            height: 100dvh;
+            height: -webkit-fill-available;
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -626,16 +634,27 @@
 
             .main-content {
                 padding: 8px !important;
-                padding-bottom: 75px !important;
+                padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)) !important;
             }
 
             header {
                 padding: 0 10px;
+                height: auto !important;
+                min-height: var(--header-h);
+                flex-wrap: wrap;
+                gap: 5px;
+                padding-top: env(safe-area-inset-top, 0px);
+            }
+
+            header > div {
+                flex-shrink: 1;
+                min-width: 0;
             }
 
             header h2 {
                 font-size: 1.1rem !important;
                 letter-spacing: 1px !important;
+                white-space: nowrap;
             }
 
             #clock {
@@ -647,6 +666,24 @@
                 padding: 2px 6px !important;
             }
 
+            #end-shift-btn {
+                padding: 4px 10px !important;
+                font-size: 0.75rem !important;
+                white-space: nowrap;
+            }
+
+            #clear-storage-btn {
+                font-size: 0.65rem !important;
+                padding: 4px 8px !important;
+                white-space: nowrap;
+            }
+
+            #billing-badge {
+                font-size: 0.75rem !important;
+                padding: 4px 10px !important;
+                white-space: nowrap;
+            }
+
             /* Bottom Nav Bar Styles */
             .mobile-nav {
                 display: flex;
@@ -654,14 +691,15 @@
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                height: 60px;
+                height: calc(60px + env(safe-area-inset-bottom, 0px));
                 background: rgba(15, 23, 42, 0.95);
                 backdrop-filter: blur(15px);
                 border-top: 1px solid rgba(255, 255, 255, 0.08);
                 z-index: 9999;
                 justify-content: space-around;
-                align-items: center;
+                align-items: flex-start;
                 padding: 5px 0;
+                padding-bottom: env(safe-area-inset-bottom, 0px);
             }
 
             .mobile-nav-btn {
@@ -676,9 +714,10 @@
                 cursor: pointer;
                 flex: 1;
                 transition: 0.2s;
-                gap: 4px;
+                gap: 3px;
                 font-weight: 700;
-                height: 100%;
+                height: 55px;
+                min-width: 0;
             }
 
             .mobile-nav-btn i {
@@ -695,17 +734,20 @@
                 max-width: 450px !important;
                 padding: 15px !important;
                 border-radius: 15px !important;
+                max-height: 85vh !important;
+                overflow-y: auto !important;
             }
 
             /* POS Mobile Tabs */
             .pos-mobile-tabs {
                 display: flex;
                 width: 100%;
-                gap: 10px;
-                margin-bottom: 10px;
+                gap: 8px;
+                margin-bottom: 8px;
                 background: rgba(0, 0, 0, 0.2);
                 padding: 5px;
                 border-radius: 12px;
+                flex-shrink: 0;
             }
 
             .pos-tab-btn {
@@ -719,6 +761,7 @@
                 cursor: pointer;
                 transition: 0.2s;
                 position: relative;
+                font-size: 0.9rem;
             }
 
             .pos-tab-btn.active {
@@ -749,6 +792,11 @@
                 min-height: 0 !important;
             }
 
+            #page-pos {
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+            }
+
             .items-side {
                 height: auto !important;
                 min-height: 0 !important;
@@ -756,6 +804,8 @@
 
             .items-grid {
                 grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+                max-height: none !important;
+                overflow-y: visible !important;
             }
 
             .pos-layout.show-items .cart-side {
@@ -774,17 +824,26 @@
                 display: flex !important;
                 width: 100% !important;
                 min-height: auto !important;
-                height: 100% !important;
+                height: auto !important;
             }
 
             /* Stat Cards on Dashboard */
             .stat-card {
-                padding: 10px !important;
+                padding: 12px !important;
                 font-size: 0.9rem !important;
             }
 
             .stat-card h2 {
                 font-size: 1.2rem !important;
+            }
+
+            .stat-card i {
+                font-size: 1.3rem !important;
+                margin-bottom: 6px !important;
+            }
+
+            .stat-card p {
+                font-size: 0.75rem !important;
             }
 
             /* Tables Grid */
@@ -798,10 +857,10 @@
             }
 
             /* Kitchen Grid & Columns */
-            .kitchen-mobile-tabs { display: flex; width: 100%; gap: 6px; margin-bottom: 12px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; overflow-x: auto; }
+            .kitchen-mobile-tabs { display: flex; width: 100%; gap: 6px; margin-bottom: 12px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; overflow-x: auto; flex-shrink: 0; }
             .kitchen-tab-btn { flex: 1; padding: 8px 4px; border-radius: 10px; border: none; background: transparent; color: #fff; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.75rem; text-align: center; white-space: nowrap; }
             .kitchen-tab-btn.active { background: var(--primary); color: #000; }
-            
+
             .kitchen-layout-grid {
                 grid-template-columns: 1fr !important;
                 height: auto !important;
@@ -814,16 +873,45 @@
             .kitchen-layout-grid.show-ready_external > div:nth-child(4) { display: flex !important; flex-direction: column !important; }
 
             /* New Grid Overrides */
-            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; margin-bottom: 10px !important; }
-            .quick-access-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
-            .expenses-layout-grid { grid-template-columns: 1fr !important; height: auto !important; overflow-y: auto !important; gap: 15px !important; }
-            
-            .waiter-tables-grid { grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)) !important; gap: 8px !important; }
-            .waiter-tracking-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; margin-bottom: 12px !important; }
+            .quick-access-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+            .expenses-layout-grid { grid-template-columns: 1fr !important; height: auto !important; overflow-y: visible !important; gap: 12px !important; }
+
+            .waiter-tables-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important; gap: 10px !important; }
+            .waiter-tracking-grid { grid-template-columns: 1fr !important; gap: 10px !important; height: auto !important; }
+
+            /* Waiter table cards adaptive sizing */
+            .waiter-tables-grid .table-btn {
+                width: auto !important;
+                height: auto !important;
+                min-height: 100px !important;
+                font-size: 1.2rem !important;
+                padding: 10px !important;
+            }
 
             /* Dashboard Columns */
             .dashboard-columns {
                 grid-template-columns: 1fr !important;
+            }
+
+            /* Manager Welcome Banner */
+            .page-container [style*="font-size:3.5rem"] {
+                font-size: 2rem !important;
+            }
+
+            /* Expense Page Header */
+            .expenses-layout-grid .cart-side {
+                max-height: none !important;
+            }
+
+            /* Cart side consistent */
+            .cart-side {
+                border-radius: 15px !important;
+            }
+
+            /* Order cards */
+            .order-card {
+                border-radius: 12px !important;
             }
 
             /* Table Edit & Modal Details */
@@ -836,6 +924,18 @@
             .foush-table td {
                 padding: 8px !important;
                 font-size: 0.8rem !important;
+            }
+
+            /* btn-luxury touch friendly */
+            .btn-luxury {
+                min-height: 40px;
+            }
+
+            /* Page containers should scroll */
+            .page-container.active {
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch;
             }
         }
 
@@ -909,6 +1009,33 @@
             .role-content button {
                 padding: 14px !important;
                 font-size: 0.95rem !important;
+            }
+
+            /* Small phone grid adjustments */
+            .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+            .quick-access-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+            .waiter-tables-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important; gap: 8px !important; }
+
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+            }
+
+            .pos-card h3 {
+                font-size: 0.85rem !important;
+            }
+
+            .pos-card p {
+                font-size: 0.8rem !important;
+            }
+
+            /* Header compact */
+            header h2 {
+                font-size: 0.95rem !important;
+                letter-spacing: 0.5px !important;
+            }
+
+            #clock {
+                font-size: 1rem !important;
             }
         }
 
@@ -3507,7 +3634,7 @@
                 const myOrders = (window.state.db.orders || []).filter(o => o.type === 'salla' && o.status !== 'completed' && !o.paid);
                 const ready = myOrders.filter(o => o.status === 'ready');
                 const prep = myOrders.filter(o => o.status === 'preparing');
-                contentHtml = `<div class="waiter-tracking-grid" style="height:calc(100vh - 150px);">
+                contentHtml = `<div class="waiter-tracking-grid" style="height:calc(100dvh - 150px);">
                 <div class="cart-side" style="border-color:var(--success); overflow-y:auto;">
                     <h3 style="text-align:center; color:var(--success); margin-bottom:10px; font-family:'Orbitron';">جاهز للاستلام ✅ (${ready.length})</h3>
                     <div style="display:flex; flex-direction:column; gap:10px;">${ready.map(o => `<div class="order-card" style="border-color:var(--success); padding:10px;"><div style="display:flex; justify-content:space-between; align-items:center;"><h4>${o.table}</h4><span class="badge badge-ready">جاهز</span></div><div style="margin:8px 0; opacity:0.9; font-size:0.9rem;">${o.items.map(i => `${i.name} x${i.qty}`).join('<br>')}</div><button onclick="window.waiterServeOrder('${o.id}')" class="btn-luxury" style="background:var(--success); color:#fff; width:100%; padding:10px; margin-top:5px; font-size:1.1rem; border:none;">تم التقديم للعميل 🍽️</button></div>`).join('') || '<p style="text-align:center; opacity:0.5;">لا توجد طلبات جاهزة</p>'}</div>
