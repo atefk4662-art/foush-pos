@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>فؤش ابن سيد للطواجن | FOUSH POS v11.83</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a0f0d">
@@ -15,7 +16,7 @@
         href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Orbitron:wght@400;900&display=swap"
         rel="stylesheet">
     <script>
-        window.onerror = function(msg, url, lineNo, columnNo, error) {
+        window.onerror = function (msg, url, lineNo, columnNo, error) {
             document.body.innerHTML = '<div style="color:white; background:red; padding:20px; z-index:999999; position:fixed; top:0; left:0; width:100%; height:100%; overflow:auto;"><h2>CRITICAL ERROR</h2><p>' + msg + '</p><p>Line: ' + lineNo + '</p><pre>' + (error && error.stack ? error.stack : '') + '</pre></div>';
             return false;
         };
@@ -615,13 +616,51 @@
         }
 
         /* New Responsive Layout Helpers */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; width: 100%; margin-bottom: 20px; }
-        .quick-access-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        .expenses-layout-grid { display: grid; grid-template-columns: 320px 1fr; gap: 15px; height: 100%; min-height: 0; }
-        .expense-form-grid { display: flex; flex-direction: column; gap: 12px; }
-        .waiter-tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; padding: 10px; }
-        .waiter-tracking-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
-        .kitchen-mobile-tabs { display: none; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .quick-access-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .expenses-layout-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 15px;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .expense-form-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .waiter-tables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            padding: 10px;
+        }
+
+        .waiter-tracking-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .kitchen-mobile-tabs {
+            display: none;
+        }
 
         @media (max-width: 900px) {
             #app {
@@ -639,22 +678,12 @@
 
             header {
                 padding: 0 10px;
-                height: auto !important;
-                min-height: var(--header-h);
-                flex-wrap: wrap;
-                gap: 5px;
                 padding-top: env(safe-area-inset-top, 0px);
-            }
-
-            header > div {
-                flex-shrink: 1;
-                min-width: 0;
             }
 
             header h2 {
                 font-size: 1.1rem !important;
                 letter-spacing: 1px !important;
-                white-space: nowrap;
             }
 
             #clock {
@@ -714,10 +743,9 @@
                 cursor: pointer;
                 flex: 1;
                 transition: 0.2s;
-                gap: 3px;
+                gap: 4px;
                 font-weight: 700;
-                height: 55px;
-                min-width: 0;
+                height: 100%;
             }
 
             .mobile-nav-btn i {
@@ -761,7 +789,6 @@
                 cursor: pointer;
                 transition: 0.2s;
                 position: relative;
-                font-size: 0.9rem;
             }
 
             .pos-tab-btn.active {
@@ -804,8 +831,6 @@
 
             .items-grid {
                 grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
-                max-height: none !important;
-                overflow-y: visible !important;
             }
 
             .pos-layout.show-items .cart-side {
@@ -829,21 +854,12 @@
 
             /* Stat Cards on Dashboard */
             .stat-card {
-                padding: 12px !important;
+                padding: 10px !important;
                 font-size: 0.9rem !important;
             }
 
             .stat-card h2 {
                 font-size: 1.2rem !important;
-            }
-
-            .stat-card i {
-                font-size: 1.3rem !important;
-                margin-bottom: 6px !important;
-            }
-
-            .stat-card p {
-                font-size: 0.75rem !important;
             }
 
             /* Tables Grid */
@@ -857,36 +873,95 @@
             }
 
             /* Kitchen Grid & Columns */
-            .kitchen-mobile-tabs { display: flex; width: 100%; gap: 6px; margin-bottom: 12px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 12px; overflow-x: auto; flex-shrink: 0; }
-            .kitchen-tab-btn { flex: 1; padding: 8px 4px; border-radius: 10px; border: none; background: transparent; color: #fff; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.75rem; text-align: center; white-space: nowrap; }
-            .kitchen-tab-btn.active { background: var(--primary); color: #000; }
+            .kitchen-mobile-tabs {
+                display: flex;
+                width: 100%;
+                gap: 6px;
+                margin-bottom: 12px;
+                background: rgba(0, 0, 0, 0.2);
+                padding: 5px;
+                border-radius: 12px;
+                overflow-x: auto;
+                flex-shrink: 0;
+            }
+
+            .kitchen-tab-btn {
+                flex: 1;
+                padding: 8px 4px;
+                border-radius: 10px;
+                border: none;
+                background: transparent;
+                color: #fff;
+                font-weight: 700;
+                cursor: pointer;
+                transition: 0.2s;
+                font-size: 0.75rem;
+                text-align: center;
+                white-space: nowrap;
+            }
+
+            .kitchen-tab-btn.active {
+                background: var(--primary);
+                color: #000;
+            }
 
             .kitchen-layout-grid {
                 grid-template-columns: 1fr !important;
                 height: auto !important;
                 min-height: 0 !important;
             }
-            .kitchen-layout-grid > div { display: none !important; }
-            .kitchen-layout-grid.show-summary > div:nth-child(1) { display: flex !important; flex-direction: column !important; }
-            .kitchen-layout-grid.show-preparing > div:nth-child(2) { display: flex !important; flex-direction: column !important; }
-            .kitchen-layout-grid.show-ready_dinein > div:nth-child(3) { display: flex !important; flex-direction: column !important; }
-            .kitchen-layout-grid.show-ready_external > div:nth-child(4) { display: flex !important; flex-direction: column !important; }
+
+            .kitchen-layout-grid>div {
+                display: none !important;
+            }
+
+            .kitchen-layout-grid.show-summary>div:nth-child(1) {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            .kitchen-layout-grid.show-preparing>div:nth-child(2) {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            .kitchen-layout-grid.show-ready_dinein>div:nth-child(3) {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            .kitchen-layout-grid.show-ready_external>div:nth-child(4) {
+                display: flex !important;
+                flex-direction: column !important;
+            }
 
             /* New Grid Overrides */
-            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; margin-bottom: 12px !important; }
-            .quick-access-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
-            .expenses-layout-grid { grid-template-columns: 1fr !important; height: auto !important; overflow-y: visible !important; gap: 12px !important; }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+                margin-bottom: 10px !important;
+            }
 
-            .waiter-tables-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important; gap: 10px !important; }
-            .waiter-tracking-grid { grid-template-columns: 1fr !important; gap: 10px !important; height: auto !important; }
+            .quick-access-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
 
-            /* Waiter table cards adaptive sizing */
-            .waiter-tables-grid .table-btn {
-                width: auto !important;
+            .expenses-layout-grid {
+                grid-template-columns: 1fr !important;
                 height: auto !important;
-                min-height: 100px !important;
-                font-size: 1.2rem !important;
-                padding: 10px !important;
+                overflow-y: auto !important;
+                gap: 15px !important;
+            }
+
+            .waiter-tables-grid {
+                grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)) !important;
+                gap: 8px !important;
+            }
+
+            .waiter-tracking-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
             }
 
             /* Dashboard Columns */
@@ -1011,32 +1086,6 @@
                 font-size: 0.95rem !important;
             }
 
-            /* Small phone grid adjustments */
-            .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
-            .quick-access-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
-            .waiter-tables-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important; gap: 8px !important; }
-
-            .items-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
-            }
-
-            .pos-card h3 {
-                font-size: 0.85rem !important;
-            }
-
-            .pos-card p {
-                font-size: 0.8rem !important;
-            }
-
-            /* Header compact */
-            header h2 {
-                font-size: 0.95rem !important;
-                letter-spacing: 0.5px !important;
-            }
-
-            #clock {
-                font-size: 1rem !important;
-            }
         }
 
         @media print {
@@ -1272,14 +1321,19 @@
     </div>
 
     <div id="shift-modal" class="overlay" style="display:none;">
-        <div class="modal-body" style="text-align:center; width:450px; background: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(0,0,0,0.98)); border:2px solid var(--danger); box-shadow:0 0 40px rgba(239,68,68,0.3);">
-            <div style="width:100px; height:100px; border-radius:50%; background:rgba(239,68,68,0.15); display:flex; align-items:center; justify-content:center; margin:0 auto 20px auto;">
+        <div class="modal-body"
+            style="text-align:center; width:450px; background: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(0,0,0,0.98)); border:2px solid var(--danger); box-shadow:0 0 40px rgba(239,68,68,0.3);">
+            <div
+                style="width:100px; height:100px; border-radius:50%; background:rgba(239,68,68,0.15); display:flex; align-items:center; justify-content:center; margin:0 auto 20px auto;">
                 <i class="fa-solid fa-lock" style="font-size:3.5rem; color:var(--danger);"></i>
             </div>
-            <h2 style="color:var(--danger); font-family:'Cairo'; font-size:2.2rem; margin-bottom:10px;">النظام مقفل حالياً 🚫</h2>
-            <p id="shift-modal-text" style="font-size:1.1rem; opacity:0.8; margin-bottom:30px; line-height:1.5;">لا توجد وردية نشطة حالياً. يرجى فتح وردية جديدة للبدء في استقبال طلبات العملاء وتشغيل النظام.</p>
+            <h2 style="color:var(--danger); font-family:'Cairo'; font-size:2.2rem; margin-bottom:10px;">النظام مقفل
+                حالياً 🚫</h2>
+            <p id="shift-modal-text" style="font-size:1.1rem; opacity:0.8; margin-bottom:30px; line-height:1.5;">لا توجد
+                وردية نشطة حالياً. يرجى فتح وردية جديدة للبدء في استقبال طلبات العملاء وتشغيل النظام.</p>
             <button id="shift-modal-btn" onclick="window.startShift()" class="btn-luxury"
-                style="margin-top:10px; font-size:1.8rem; padding:20px; background:var(--danger); color:#fff; border:none; box-shadow:0 5px 15px rgba(239,68,68,0.4);">تأكيد فتح وردية جديدة 🔓</button>
+                style="margin-top:10px; font-size:1.8rem; padding:20px; background:var(--danger); color:#fff; border:none; box-shadow:0 5px 15px rgba(239,68,68,0.4);">تأكيد
+                فتح وردية جديدة 🔓</button>
         </div>
     </div>
 
@@ -1375,7 +1429,8 @@
 
     <div id="admin-inventory-add-modal" class="overlay" style="display:none;">
         <div class="modal-body" style="width:450px;">
-            <h2 style="margin-bottom:20px; color:var(--primary);"><i class="fa-solid fa-box-open"></i> إضافة خامة للمخزن</h2>
+            <h2 style="margin-bottom:20px; color:var(--primary);"><i class="fa-solid fa-box-open"></i> إضافة خامة للمخزن
+            </h2>
             <div style="display:flex; flex-direction:column; gap:15px;">
                 <div>
                     <label style="font-size:0.85rem; opacity:0.7;">اسم الخامة (مثال: لحم بلدي)</label>
@@ -1397,15 +1452,19 @@
                 </div>
             </div>
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button onclick="window.finalizeAdminInventoryAdd()" class="btn-luxury" style="flex:1; padding:15px; background:var(--success); color:#fff; border:none;">حفظ الخامة ✅</button>
-                <button onclick="document.getElementById('admin-inventory-add-modal').style.display='none'" class="btn-luxury danger" style="padding:15px; width:auto;">إلغاء</button>
+                <button onclick="window.finalizeAdminInventoryAdd()" class="btn-luxury"
+                    style="flex:1; padding:15px; background:var(--success); color:#fff; border:none;">حفظ الخامة
+                    ✅</button>
+                <button onclick="document.getElementById('admin-inventory-add-modal').style.display='none'"
+                    class="btn-luxury danger" style="padding:15px; width:auto;">إلغاء</button>
             </div>
         </div>
     </div>
 
     <div id="admin-inventory-edit-modal" class="overlay" style="display:none;">
         <div class="modal-body" style="width:450px;">
-            <h2 style="margin-bottom:20px; color:var(--primary);"><i class="fa-solid fa-pen-to-square"></i> تعديل خامة المخزن</h2>
+            <h2 style="margin-bottom:20px; color:var(--primary);"><i class="fa-solid fa-pen-to-square"></i> تعديل خامة
+                المخزن</h2>
             <input type="hidden" id="admin-inv-edit-id">
             <div style="display:flex; flex-direction:column; gap:15px;">
                 <div>
@@ -1428,8 +1487,11 @@
                 </div>
             </div>
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <button onclick="window.finalizeAdminInventoryEdit()" class="btn-luxury" style="flex:1; padding:15px; background:var(--primary); color:#000; border:none;">حفظ التعديلات ✅</button>
-                <button onclick="document.getElementById('admin-inventory-edit-modal').style.display='none'" class="btn-luxury danger" style="padding:15px; width:auto;">إلغاء</button>
+                <button onclick="window.finalizeAdminInventoryEdit()" class="btn-luxury"
+                    style="flex:1; padding:15px; background:var(--primary); color:#000; border:none;">حفظ التعديلات
+                    ✅</button>
+                <button onclick="document.getElementById('admin-inventory-edit-modal').style.display='none'"
+                    class="btn-luxury danger" style="padding:15px; width:auto;">إلغاء</button>
             </div>
         </div>
     </div>
@@ -1438,19 +1500,26 @@
         <div class="modal-body" style="width:400px; max-height:80vh;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h2 style="color:var(--success);"><i class="fa-solid fa-hand-holding-box"></i> سحب خامات للمطبخ</h2>
-                <button onclick="document.getElementById('kitchen-withdrawal-modal').style.display='none'" class="btn-luxury danger" style="padding:8px 15px; font-size:0.8rem;">إغلاق ❌</button>
+                <button onclick="document.getElementById('kitchen-withdrawal-modal').style.display='none'"
+                    class="btn-luxury danger" style="padding:8px 15px; font-size:0.8rem;">إغلاق ❌</button>
             </div>
             <div style="display:flex; flex-direction:column; gap:15px;">
-                <p style="opacity:0.6; font-size:0.85rem; margin:0; text-align:center;">حدد الخامة والكمية التي يتم سحبها حالياً للمطبخ لخصمها من رصيد المخزن الرئيسي.</p>
+                <p style="opacity:0.6; font-size:0.85rem; margin:0; text-align:center;">حدد الخامة والكمية التي يتم
+                    سحبها حالياً للمطبخ لخصمها من رصيد المخزن الرئيسي.</p>
                 <div>
-                    <label style="opacity:0.8; font-size:0.9rem; margin-bottom:5px; display:block;">الخامة المسحوبة</label>
+                    <label style="opacity:0.8; font-size:0.9rem; margin-bottom:5px; display:block;">الخامة
+                        المسحوبة</label>
                     <select id="kw-item" class="input-luxury" style="background:rgba(0,0,0,0.5);"></select>
                 </div>
                 <div>
-                    <label style="opacity:0.8; font-size:0.9rem; margin-bottom:5px; display:block;">الكمية المسحوبة</label>
-                    <input type="number" id="kw-qty" class="input-luxury" style="background:rgba(0,0,0,0.5);" placeholder="أدخل الكمية المسحوبة...">
+                    <label style="opacity:0.8; font-size:0.9rem; margin-bottom:5px; display:block;">الكمية
+                        المسحوبة</label>
+                    <input type="number" id="kw-qty" class="input-luxury" style="background:rgba(0,0,0,0.5);"
+                        placeholder="أدخل الكمية المسحوبة...">
                 </div>
-                <button onclick="window.saveKitchenWithdrawal()" class="btn-luxury" style="background:var(--success); color:#fff; border:none; margin-top:10px;"><i class="fa-solid fa-check"></i> تأكيد السحب 📦</button>
+                <button onclick="window.saveKitchenWithdrawal()" class="btn-luxury"
+                    style="background:var(--success); color:#fff; border:none; margin-top:10px;"><i
+                        class="fa-solid fa-check"></i> تأكيد السحب 📦</button>
             </div>
         </div>
     </div>
@@ -1458,21 +1527,28 @@
         <div class="modal-body" style="width:400px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h2 style="color:var(--danger);"><i class="fa-solid fa-trash-can"></i> تسجيل هادر</h2>
-                <button onclick="document.getElementById('waste-modal').style.display='none'" class="btn-luxury" style="padding:8px 15px; font-size:0.8rem; background:rgba(255,255,255,0.1); border:none;">إلغاء ❌</button>
+                <button onclick="document.getElementById('waste-modal').style.display='none'" class="btn-luxury"
+                    style="padding:8px 15px; font-size:0.8rem; background:rgba(255,255,255,0.1); border:none;">إلغاء
+                    ❌</button>
             </div>
             <div style="display:flex; flex-direction:column; gap:15px;">
                 <p style="opacity:0.8; font-size:0.9rem; margin:0;" id="waste-item-name"></p>
                 <input type="hidden" id="waste-item-id">
                 <input type="hidden" id="waste-inv-type">
                 <div>
-                    <label style="opacity:0.8; font-size:0.9rem; margin-bottom:5px; display:block;">الكمية المهدرة / التالفة</label>
-                    <input type="number" id="waste-qty" class="input-luxury" style="background:rgba(0,0,0,0.5);" placeholder="الكمية...">
+                    <label style="opacity:0.8; font-size:0.9rem; margin-bottom:5px; display:block;">الكمية المهدرة /
+                        التالفة</label>
+                    <input type="number" id="waste-qty" class="input-luxury" style="background:rgba(0,0,0,0.5);"
+                        placeholder="الكمية...">
                 </div>
                 <div>
-                    <label style="opacity:0.8; font-size:0.9rem; margin-bottom:5px; display:block;">السبب / التفاصيل (اختياري)</label>
-                    <input type="text" id="waste-reason" class="input-luxury" style="background:rgba(0,0,0,0.5);" placeholder="سبب الهادر...">
+                    <label style="opacity:0.8; font-size:0.9rem; margin-bottom:5px; display:block;">السبب / التفاصيل
+                        (اختياري)</label>
+                    <input type="text" id="waste-reason" class="input-luxury" style="background:rgba(0,0,0,0.5);"
+                        placeholder="سبب الهادر...">
                 </div>
-                <button onclick="window.saveWaste()" class="btn-luxury danger" style="border:none; margin-top:10px;"><i class="fa-solid fa-check"></i> تأكيد الخصم كـ هادر</button>
+                <button onclick="window.saveWaste()" class="btn-luxury danger" style="border:none; margin-top:10px;"><i
+                        class="fa-solid fa-check"></i> تأكيد الخصم كـ هادر</button>
             </div>
         </div>
     </div>
@@ -1497,20 +1573,33 @@
 
     <div id="frequent-expenses-modal" class="overlay" style="display:none;">
         <div class="modal-body" style="width:480px; max-height:80vh; display:flex; flex-direction:column;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
-                <h2 style="color:var(--primary); margin:0;"><i class="fa-solid fa-list-check"></i> إدارة المصروفات المسجلة</h2>
-                <button onclick="document.getElementById('frequent-expenses-modal').style.display='none'" class="btn-luxury" style="width:auto; padding:5px 10px; background:rgba(255,255,255,0.05); border:none; margin:0;"><i class="fa-solid fa-xmark"></i></button>
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+                <h2 style="color:var(--primary); margin:0;"><i class="fa-solid fa-list-check"></i> إدارة المصروفات
+                    المسجلة</h2>
+                <button onclick="document.getElementById('frequent-expenses-modal').style.display='none'"
+                    class="btn-luxury"
+                    style="width:auto; padding:5px 10px; background:rgba(255,255,255,0.05); border:none; margin:0;"><i
+                        class="fa-solid fa-xmark"></i></button>
             </div>
-            <div style="background:rgba(255,255,255,0.02); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.05); margin-bottom:15px; display:flex; flex-direction:column; gap:10px;">
-                <h4 style="margin:0; color:var(--primary); font-size:0.9rem;"><i class="fa-solid fa-plus"></i> إضافة مصروف مسجل جديد</h4>
+            <div
+                style="background:rgba(255,255,255,0.02); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.05); margin-bottom:15px; display:flex; flex-direction:column; gap:10px;">
+                <h4 style="margin:0; color:var(--primary); font-size:0.9rem;"><i class="fa-solid fa-plus"></i> إضافة
+                    مصروف مسجل جديد</h4>
                 <div style="display:flex; gap:10px;">
-                    <input id="new-freq-name" class="input-luxury" placeholder="الاسم (مثال: فاتورة الغاز)" style="margin:0; flex:1; font-size:0.9rem; padding:8px 12px;">
-                    <input id="new-freq-details" class="input-luxury" placeholder="البيان/الوصف (اختياري)" style="margin:0; flex:1; font-size:0.9rem; padding:8px 12px;">
+                    <input id="new-freq-name" class="input-luxury" placeholder="الاسم (مثال: فاتورة الغاز)"
+                        style="margin:0; flex:1; font-size:0.9rem; padding:8px 12px;">
+                    <input id="new-freq-details" class="input-luxury" placeholder="البيان/الوصف (اختياري)"
+                        style="margin:0; flex:1; font-size:0.9rem; padding:8px 12px;">
                 </div>
-                <button onclick="window.addFrequentExpenseFromModal()" class="btn-luxury" style="padding:8px; background:var(--primary); color:#000; font-weight:bold; font-size:0.9rem; margin:0;">إضافة لقائمة المسجلات ➕</button>
+                <button onclick="window.addFrequentExpenseFromModal()" class="btn-luxury"
+                    style="padding:8px; background:var(--primary); color:#000; font-weight:bold; font-size:0.9rem; margin:0;">إضافة
+                    لقائمة المسجلات ➕</button>
             </div>
-            <div style="flex:1; overflow-y:auto; padding-right:5px; margin-bottom:15px; display:flex; flex-direction:column; gap:8px;" id="frequent-expenses-list-container"></div>
-            <button onclick="document.getElementById('frequent-expenses-modal').style.display='none'" class="btn-luxury" style="padding:12px; background:rgba(255,255,255,0.1); border:none; margin:0;">إغلاق ❌</button>
+            <div style="flex:1; overflow-y:auto; padding-right:5px; margin-bottom:15px; display:flex; flex-direction:column; gap:8px;"
+                id="frequent-expenses-list-container"></div>
+            <button onclick="document.getElementById('frequent-expenses-modal').style.display='none'" class="btn-luxury"
+                style="padding:12px; background:rgba(255,255,255,0.1); border:none; margin:0;">إغلاق ❌</button>
         </div>
     </div>
 
@@ -1652,7 +1741,7 @@
                     osc.start();
                     osc.stop(ctx.currentTime + 0.5);
                 }
-            } catch (e) {}
+            } catch (e) { }
         };
 
         // Audio unlock: bypass browser autoplay policy on first user interaction
@@ -1668,7 +1757,7 @@
                 _audioUnlocked = true;
                 document.removeEventListener('click', _unlockAudio);
                 document.removeEventListener('touchstart', _unlockAudio);
-            } catch (e) {}
+            } catch (e) { }
         };
         document.addEventListener('click', _unlockAudio);
         document.addEventListener('touchstart', _unlockAudio);
@@ -2014,20 +2103,20 @@
             else if (type === 'kitchen') { title.textContent = "أوردرات المطبخ الآن"; content.innerHTML = orders.filter(o => o.status === 'preparing').map(o => `<div class="order-card"><h4>#${o.id} - ${o.table}</h4><p>${o.items.map(i => `${i.name} x${i.qty}`).join('، ')}</p></div>`).join('') || '<p style="text-align:center;">المطبخ هادي حالياً 🧊</p>'; }
             else if (type === 'ready') { title.textContent = "أوردرات جاهزة للتسليم"; content.innerHTML = orders.filter(o => o.status === 'ready').map(o => `<div class="order-card" style="border-right-color:var(--success);"><h4>#${o.id} - ${o.table}</h4><p>${o.items.map(i => `${i.name} x${i.qty}`).join('، ')}</p></div>`).join('') || '<p style="text-align:center;">لا توجد أوردرات جاهزة</p>'; }
             else if (type === 'canceled') { title.textContent = "الأوردرات الملغاة"; content.innerHTML = orders.filter(o => o.status === 'canceled').map(o => `<div class="order-card" style="border-right-color:var(--danger);"><h4>#${o.id} - ${o.table}</h4><p>${o.items.map(i => `${i.name} x${i.qty}`).join('، ')}</p><p style="color:var(--danger); font-weight:900;">${o.total} ج (تم الاسترجاع)</p></div>`).join('') || '<p style="text-align:center;">لا توجد أوردرات ملغاة</p>'; }
-            else if (type === 'all_orders') { title.textContent = "إجمالي أوردرات اليوم"; content.innerHTML = orders.map(o => `<div class="order-card" style="border-right-color:${o.status==='canceled'?'var(--danger)':(o.paid?'var(--primary)':'#ccc')};"><h4>#${o.id} - ${o.table}</h4><p>${o.items.map(i => `${i.name} x${i.qty}`).join('، ')}</p><div style="display:flex; justify-content:space-between; margin-top:5px;"><span style="color:var(--primary); font-weight:900;">${o.total - (o.discount || 0)} ج</span><span class="badge ${o.paid?'badge-ready':'badge-preparing'}">${o.paid?'مدفوع':(o.status==='canceled'?'ملغي':'غير مدفوع')}</span></div></div>`).join('') || '<p style="text-align:center;">لا توجد أوردرات اليوم</p>'; }
-            else if (type === 'active') { title.textContent = "الطلبات النشطة حالياً"; content.innerHTML = orders.filter(o => o.status !== 'completed' && o.status !== 'canceled').map(o => `<div class="order-card" style="border-right-color:#3b82f6;"><h4>#${o.id} - ${o.table}</h4><p>${o.items.map(i => `${i.name} x${i.qty}`).join('، ')}</p><div style="display:flex; justify-content:space-between; margin-top:5px;"><span style="color:#3b82f6; font-weight:900;">${o.total} ج</span><span class="badge badge-preparing">${o.status==='preparing'?'بالمطبخ':(o.status==='ready'?'جاهز':'نشط')}</span></div></div>`).join('') || '<p style="text-align:center;">لا توجد طلبات نشطة</p>'; }
+            else if (type === 'all_orders') { title.textContent = "إجمالي أوردرات اليوم"; content.innerHTML = orders.map(o => `<div class="order-card" style="border-right-color:${o.status === 'canceled' ? 'var(--danger)' : (o.paid ? 'var(--primary)' : '#ccc')};"><h4>#${o.id} - ${o.table}</h4><p>${o.items.map(i => `${i.name} x${i.qty}`).join('، ')}</p><div style="display:flex; justify-content:space-between; margin-top:5px;"><span style="color:var(--primary); font-weight:900;">${o.total - (o.discount || 0)} ج</span><span class="badge ${o.paid ? 'badge-ready' : 'badge-preparing'}">${o.paid ? 'مدفوع' : (o.status === 'canceled' ? 'ملغي' : 'غير مدفوع')}</span></div></div>`).join('') || '<p style="text-align:center;">لا توجد أوردرات اليوم</p>'; }
+            else if (type === 'active') { title.textContent = "الطلبات النشطة حالياً"; content.innerHTML = orders.filter(o => o.status !== 'completed' && o.status !== 'canceled').map(o => `<div class="order-card" style="border-right-color:#3b82f6;"><h4>#${o.id} - ${o.table}</h4><p>${o.items.map(i => `${i.name} x${i.qty}`).join('، ')}</p><div style="display:flex; justify-content:space-between; margin-top:5px;"><span style="color:#3b82f6; font-weight:900;">${o.total} ج</span><span class="badge badge-preparing">${o.status === 'preparing' ? 'بالمطبخ' : (o.status === 'ready' ? 'جاهز' : 'نشط')}</span></div></div>`).join('') || '<p style="text-align:center;">لا توجد طلبات نشطة</p>'; }
         };
 
         window.printKitchenOrders = () => {
             const orders = window.state.db.orders || [];
-            const prep = orders.filter(o => o.status === 'preparing').sort((a,b)=>a.time-b.time);
-            if(prep.length === 0){ window.showToast('لا توجد أوردرات في المطبخ حالياً!'); return; }
+            const prep = orders.filter(o => o.status === 'preparing').sort((a, b) => a.time - b.time);
+            if (prep.length === 0) { window.showToast('لا توجد أوردرات في المطبخ حالياً!'); return; }
             let html = `<div style="color:#000; text-align:center; padding-top:10px;"><h2 style="font-family:'Orbitron'; font-size:1.8rem; margin:0;">FOUSH KITCHEN</h2><p style="margin:5px 0; font-weight:bold;">طباعة أوردرات المطبخ النشطة</p><p style="margin:5px 0; font-size:0.8rem;">${new Date().toLocaleString('ar-EG')}</p><hr style="border:1px dashed #000; margin:10px 0;">`;
             prep.forEach(o => {
                 html += `<div style="text-align:right; margin-bottom:10px; border-bottom:1px dashed #000; padding-bottom:5px;">
                 <h3 style="margin:0; font-size:1.2rem;">#${o.id} - ${o.table}</h3>
                 <ul style="list-style:none; padding:0; margin:5px 0; font-size:1rem; font-weight:bold;">
-                ${o.items.map(i=>`<li>${i.name} x${i.qty}</li>`).join('')}
+                ${o.items.map(i => `<li>${i.name} x${i.qty}</li>`).join('')}
                 </ul>
                 ${o.notes ? `<p style="margin:0; font-weight:bold; font-size:0.9rem; border:1px solid #000; padding:2px; display:inline-block;">ملاحظة: ${o.notes}</p>` : ''}
                 </div>`;
@@ -2063,7 +2152,7 @@
                 const isManager = window.state.role === 'manager';
                 const clearBtn = document.getElementById('clear-storage-btn');
                 if (clearBtn) clearBtn.style.display = isManager ? 'none' : 'block';
-            } catch (e) { 
+            } catch (e) {
                 console.error("Render Error:", e);
                 alert("خطأ أثناء عرض الصفحة: " + e.message + "\nسطر: " + (e.lineNumber || 'غير معروف') + "\nStack: " + e.stack);
             }
@@ -2107,30 +2196,30 @@
         </div>`;
 
             c.innerHTML = `${alertsHtml}${tabHtml}<div class="pos-layout ${window.state.posTab === 'cart' ? 'show-cart' : 'show-items'}"><div class="items-side"><div style="display:flex; gap:8px; margin-bottom:8px; overflow-x:auto;" class="hide-scroll">${['الكل', 'طواجن', 'أرز وفتة', 'شوربة', 'سلطات', 'مشروبات'].map(cat => `<button onclick="window.state.cat='${cat}'; window.render();" class="btn-luxury" style="width:auto; padding:8px 20px; background:${window.state.cat === cat ? 'var(--primary)' : '#1e293b'}; color:${window.state.cat === cat ? '#000' : '#fff'}">${cat}</button>`).join('')}</div><div class="items-grid hide-scroll">${window.state.db.menu.filter(m => window.state.cat === 'الكل' || m.category === window.state.cat).map(m => `<div class="pos-card ${(!m.unlimited && m.stock <= 0) ? 'out-of-stock' : ''} ${(!m.unlimited && m.stock < 10) ? 'low-stock' : ''}" onclick="window.addToCart(${m.id})"><h3>${m.name}</h3><p style="color:var(--primary); font-weight:900;">${m.price} ج</p>${!m.unlimited ? `<small style="opacity:0.7; font-weight:900; font-size:0.7rem;">متاح: ${m.stock}</small>` : ''}</div>`).join('')}</div></div><div class="cart-side"><div style="display:flex; gap:5px; margin-bottom:10px;">${['salla', 'takeaway', 'delivery'].map(t => `<button onclick="window.state.type='${t}'; window.render();" class="btn-luxury" style="background:${window.state.type === t ? 'var(--primary)' : '#0f172a'}; color:${window.state.type === t ? '#000' : '#fff'}; font-size:0.8rem;">${t === 'salla' ? 'صالة' : t === 'takeaway' ? 'تيك' : 'دلي'}</button>`).join('')}</div>${window.state.type === 'salla' ? '<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:10px;"><div class="table-grid">' + filteredTables.map(t => {
-    const busy = busyOrders.find(o => o.table === t.name);
-    let tableClass = '';
-    let tableLabel = 'متاحة ✅';
-    if (busy) {
-        if (busy.status === 'ready') {
-            tableClass = 'ready';
-            tableLabel = 'جاهز ✅';
-        } else if (busy.status === 'billing') {
-            tableClass = 'billing';
-            tableLabel = 'طلب حساب🔔';
-        } else {
-            tableClass = 'busy';
-            tableLabel = 'مطلوبة 🍽️';
-        }
-    }
-    return `<div onclick="${busy ? `window.settleOrder('${busy.id}')` : `window.state.selectedTable='${t.name}'; window.render();`}" class="table-btn ${window.state.selectedTable === t.name ? 'active' : ''} ${tableClass}"><span>${t.name}</span><br><small style="font-size:0.6rem; margin-top:4px; font-weight:900;">${tableLabel}</small></div>`;
-}).join('') + '</div></div>' : ''}<div class="cart-items hide-scroll">${window.state.cart.map((i, idx) => `<div style="display:flex; flex-direction:column; background:rgba(0,0,0,0.25); padding:6px 10px; border-radius:12px; margin-bottom:4px; border:1px solid rgba(255,255,255,0.05); gap:4px;"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-size:0.85rem; font-weight:700; color:#fff;">${i.name}</span><button onclick="window.updateCartQty(${idx}, -${i.qty})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.8rem;" title="حذف"><i class="fa-solid fa-trash-can"></i></button></div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;"><div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:1px 4px; border-radius:6px;"><button onclick="window.updateCartQty(${idx}, -1)" style="background:none; border:none; color:#94a3b8; cursor:pointer; width:18px; height:18px; font-weight:bold; display:flex; align-items:center; justify-content:center; font-size:0.8rem;">-</button><span style="color:var(--primary); font-weight:900; font-size:0.8rem; min-width:12px; text-align:center;">${i.qty}</span><button onclick="window.updateCartQty(${idx}, 1)" style="background:none; border:none; color:#94a3b8; cursor:pointer; width:18px; height:18px; font-weight:bold; display:flex; align-items:center; justify-content:center; font-size:0.8rem;">+</button></div><div style="text-align:left; font-size:0.75rem; opacity:0.9;"><span style="color:#94a3b8; font-size:0.7rem;">(${i.price} ج)</span><strong style="color:var(--primary); font-family:'Orbitron'; font-size:0.85rem; margin-right:4px;">${i.price * i.qty} ج</strong></div></div></div>`).join('')}</div><input id="pos-notes" placeholder="ملاحظات للمطبخ (بدون بصل، زيادة رز...)" class="input-luxury" style="margin-bottom:8px; font-size:0.9rem;" value="${window.state.posNotes || ''}" onchange="window.state.posNotes=this.value"><div style="border-top:2px solid var(--primary); padding-top:12px; text-align:center;"><h1 style="color:var(--primary); font-size:2.8rem; margin-bottom:10px; font-family:'Orbitron';">${total} ج</h1><button onclick="window.confirmOrder()" class="btn-luxury" style="font-size:1.6rem; padding:18px;">تأكيد ✅</button></div></div></div>`;
+                const busy = busyOrders.find(o => o.table === t.name);
+                let tableClass = '';
+                let tableLabel = 'متاحة ✅';
+                if (busy) {
+                    if (busy.status === 'ready') {
+                        tableClass = 'ready';
+                        tableLabel = 'جاهز ✅';
+                    } else if (busy.status === 'billing') {
+                        tableClass = 'billing';
+                        tableLabel = 'طلب حساب🔔';
+                    } else {
+                        tableClass = 'busy';
+                        tableLabel = 'مطلوبة 🍽️';
+                    }
+                }
+                return `<div onclick="${busy ? `window.settleOrder('${busy.id}')` : `window.state.selectedTable='${t.name}'; window.render();`}" class="table-btn ${window.state.selectedTable === t.name ? 'active' : ''} ${tableClass}"><span>${t.name}</span><br><small style="font-size:0.6rem; margin-top:4px; font-weight:900;">${tableLabel}</small></div>`;
+            }).join('') + '</div></div>' : ''}<div class="cart-items hide-scroll">${window.state.cart.map((i, idx) => `<div style="display:flex; flex-direction:column; background:rgba(0,0,0,0.25); padding:6px 10px; border-radius:12px; margin-bottom:4px; border:1px solid rgba(255,255,255,0.05); gap:4px;"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-size:0.85rem; font-weight:700; color:#fff;">${i.name}</span><button onclick="window.updateCartQty(${idx}, -${i.qty})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.8rem;" title="حذف"><i class="fa-solid fa-trash-can"></i></button></div><div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;"><div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); padding:1px 4px; border-radius:6px;"><button onclick="window.updateCartQty(${idx}, -1)" style="background:none; border:none; color:#94a3b8; cursor:pointer; width:18px; height:18px; font-weight:bold; display:flex; align-items:center; justify-content:center; font-size:0.8rem;">-</button><span style="color:var(--primary); font-weight:900; font-size:0.8rem; min-width:12px; text-align:center;">${i.qty}</span><button onclick="window.updateCartQty(${idx}, 1)" style="background:none; border:none; color:#94a3b8; cursor:pointer; width:18px; height:18px; font-weight:bold; display:flex; align-items:center; justify-content:center; font-size:0.8rem;">+</button></div><div style="text-align:left; font-size:0.75rem; opacity:0.9;"><span style="color:#94a3b8; font-size:0.7rem;">(${i.price} ج)</span><strong style="color:var(--primary); font-family:'Orbitron'; font-size:0.85rem; margin-right:4px;">${i.price * i.qty} ج</strong></div></div></div>`).join('')}</div><input id="pos-notes" placeholder="ملاحظات للمطبخ (بدون بصل، زيادة رز...)" class="input-luxury" style="margin-bottom:8px; font-size:0.9rem;" value="${window.state.posNotes || ''}" onchange="window.state.posNotes=this.value"><div style="border-top:2px solid var(--primary); padding-top:12px; text-align:center;"><h1 style="color:var(--primary); font-size:2.8rem; margin-bottom:10px; font-family:'Orbitron';">${total} ج</h1><button onclick="window.confirmOrder()" class="btn-luxury" style="font-size:1.6rem; padding:18px;">تأكيد ✅</button></div></div></div>`;
         }
 
         function renderAdminHome(c) {
             const inventory = window.state.db.main_inventory || [];
             const lowStockCount = inventory.filter(i => i.qty <= (i.minQty || 0)).length;
             const expenses = window.state.db.exp || [];
-            const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+            const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
             const todayExp = expenses.filter(e => e.time >= todayStart.getTime()).reduce((sum, e) => sum + e.amount, 0);
 
             c.innerHTML = `
@@ -2156,12 +2245,12 @@
                 </div>
                 <div onclick="window.switchPage('shift_ops')" class="stat-card" style="border-right: 4px solid #0ea5e9; background: rgba(0,0,0,0.2); cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(14,165,233,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.2)'">
                     <h3>حالة الوردية</h3>
-                    <p style="color:#0ea5e9; font-size:1.1rem; margin-top:5px;">${window.state.db.shift ? '🟢 نشطة | مبيعات: ' + ((window.state.db.orders||[]).filter(o=>o.shiftId===window.state.db.shift?.id).reduce((s,o)=>s+(o.total||0),0)) + ' ج' : '💤 مغلقة'}</p>
+                    <p style="color:#0ea5e9; font-size:1.1rem; margin-top:5px;">${window.state.db.shift ? '🟢 نشطة | مبيعات: ' + ((window.state.db.orders || []).filter(o => o.shiftId === window.state.db.shift?.id).reduce((s, o) => s + (o.total || 0), 0)) + ' ج' : '💤 مغلقة'}</p>
                     <div class="stat-icon"><i class="fa-solid fa-satellite-dish"></i></div>
                 </div>
                 <div onclick="window.switchPage('shift_ops')" class="stat-card" style="border-right: 4px solid var(--primary); background: rgba(0,0,0,0.2); cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(245,158,11,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.2)'">
                     <h3>الطلبات النشطة الآن</h3>
-                    <p style="color:var(--primary); font-size:1.3rem;">${(window.state.db.orders||[]).filter(o=>o.status!=='completed'&&o.status!=='cancelled'&&o.status!=='delivered').length} طلب 🔥</p>
+                    <p style="color:var(--primary); font-size:1.3rem;">${(window.state.db.orders || []).filter(o => o.status !== 'completed' && o.status !== 'cancelled' && o.status !== 'delivered').length} طلب 🔥</p>
                     <div class="stat-icon"><i class="fa-solid fa-fire"></i></div>
                 </div>
             </div>
@@ -2331,7 +2420,7 @@
 
             const activeOrdersList = orders.filter(o => o.status === 'preparing' || o.status === 'ready' || o.status === 'billing' || o.status === 'served');
             const attendanceIn = Object.keys(checkedInIds).filter(id => checkedInIds[id] === 'in');
-            
+
             const detailedSectionsHtml = `
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; margin-top:30px;">
                 <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:18px; padding:20px;">
@@ -2340,10 +2429,10 @@
                         ${activeOrdersList.length > 0 ? activeOrdersList.map(o => `
                             <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; border-right:3px solid ${o.status === 'ready' ? '#10b981' : o.status === 'preparing' ? '#f59e0b' : '#3b82f6'};">
                                 <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
-                                    <strong>${o.table || (o.type==='takeaway'?'تيك اواي':'دليفري')}</strong>
+                                    <strong>${o.table || (o.type === 'takeaway' ? 'تيك اواي' : 'دليفري')}</strong>
                                     <span style="color:#0ea5e9;">${o.total} ج</span>
                                 </div>
-                                <div style="font-size:0.8rem; opacity:0.7; margin-top:5px;">${o.items.map(i=>i.name).join('، ')}</div>
+                                <div style="font-size:0.8rem; opacity:0.7; margin-top:5px;">${o.items.map(i => i.name).join('، ')}</div>
                             </div>
                         `).join('') : '<p style="text-align:center; opacity:0.5; font-size:0.9rem;">لا توجد طلبات نشطة حالياً</p>'}
                     </div>
@@ -2353,19 +2442,19 @@
                     <h4 style="margin-top:0; margin-bottom:15px; color:#ec4899; font-family:'Cairo'; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;"><i class="fa-solid fa-users"></i> الموظفون بالوردية (${workingEmployees})</h4>
                     <div style="display:flex; flex-direction:column; gap:10px; max-height:250px; overflow-y:auto;" class="hide-scroll">
                         ${attendanceIn.length > 0 ? attendanceIn.map(empId => {
-                            const emp = (window.state.db.employees || []).find(x => String(x.id) === String(empId));
-                            const attRecord = attendance.slice().reverse().find(a => String(a.empId) === String(empId) && a.type === 'in');
-                            return `
+                const emp = (window.state.db.employees || []).find(x => String(x.id) === String(empId));
+                const attRecord = attendance.slice().reverse().find(a => String(a.empId) === String(empId) && a.type === 'in');
+                return `
                             <div style="background:rgba(0,0,0,0.2); padding:10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
                                 <div>
                                     <div style="font-weight:bold;">${emp ? emp.name : 'مجهول'}</div>
                                     <div style="font-size:0.75rem; opacity:0.6;">${emp ? emp.role : '-'}</div>
                                 </div>
                                 <div style="font-size:0.75rem; opacity:0.5;">
-                                    ${attRecord ? new Date(attRecord.time).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) : ''}
+                                    ${attRecord ? new Date(attRecord.time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : ''}
                                 </div>
                             </div>`;
-                        }).join('') : '<p style="text-align:center; opacity:0.5; font-size:0.9rem;">لا يوجد موظفين مسجلين حضور</p>'}
+            }).join('') : '<p style="text-align:center; opacity:0.5; font-size:0.9rem;">لا يوجد موظفين مسجلين حضور</p>'}
                     </div>
                 </div>
 
@@ -2381,7 +2470,7 @@
                                 </div>
                                 <div style="text-align:left; min-width:100px;">
                                     <div style="font-weight:900; color:#f97316; font-size:1.05rem;">${w.qty} ${w.unit}</div>
-                                    <div style="font-size:0.7rem; opacity:0.5;">${new Date(w.time).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})} - ${w.by}</div>
+                                    <div style="font-size:0.7rem; opacity:0.5;">${new Date(w.time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })} - ${w.by}</div>
                                 </div>
                             </div>
                         `).join('') : '<p style="text-align:center; opacity:0.5; font-size:0.9rem;"><i class="fa-solid fa-circle-check" style="color:#10b981; margin-left:5px;"></i>لا يوجد هادر مسجل خلال هذه الوردية ✨</p>'}
@@ -2451,7 +2540,7 @@
             const lowMainInv = (window.state.db.main_inventory || []).filter(i => i.qty <= (i.minQty || 0));
             const lowMenuInv = (window.state.db.menu || []).filter(m => m.stock < 10);
             const hasAlerts = lowMainInv.length > 0 || lowMenuInv.length > 0;
-            
+
             let alertsHtml = '';
             if (hasAlerts) {
                 alertsHtml = `
@@ -2591,7 +2680,7 @@
             // Alerts Calculation
             const now = Date.now();
             const delayedOrders = orders.filter(o => o.status === 'preparing' && (now - o.time) > 15 * 60 * 1000);
-            const prepOrders = orders.filter(o => o.status === 'preparing').sort((a,b)=>a.time-b.time);
+            const prepOrders = orders.filter(o => o.status === 'preparing').sort((a, b) => a.time - b.time);
             const activeSallaOrders = orders.filter(o => o.type === 'salla' && o.status !== 'completed' && o.status !== 'canceled');
             const lowStockItems = (window.state.db.menu || []).filter(m => !m.unlimited && m.stock < 10);
 
@@ -2664,19 +2753,19 @@
             </div>
             <div style="display:flex; gap:15px; overflow-x:auto; padding-bottom:10px;" class="hide-scroll">
                 ${prepOrders.map(o => {
-                    const elapsed = Math.floor((Date.now() - o.time) / 60000);
-                    const isLate = elapsed >= 15;
-                    return `<div class="order-card" style="min-width:250px; border-right-color:${isLate?'var(--danger)':'#f59e0b'};">
+                const elapsed = Math.floor((Date.now() - o.time) / 60000);
+                const isLate = elapsed >= 15;
+                return `<div class="order-card" style="min-width:250px; border-right-color:${isLate ? 'var(--danger)' : '#f59e0b'};">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <h4 style="margin:0; font-family:'Orbitron'; font-size:1.1rem;">#${o.id} - ${o.table}</h4>
-                            <span style="font-size:0.8rem; background:${isLate?'var(--danger)':'rgba(255,255,255,0.1)'}; color:${isLate?'#fff':'var(--text)'}; padding:2px 8px; border-radius:5px;"><i class="fa-regular fa-clock"></i> <span class="timer-text" data-start="${o.time}">${elapsed}:00</span></span>
+                            <span style="font-size:0.8rem; background:${isLate ? 'var(--danger)' : 'rgba(255,255,255,0.1)'}; color:${isLate ? '#fff' : 'var(--text)'}; padding:2px 8px; border-radius:5px;"><i class="fa-regular fa-clock"></i> <span class="timer-text" data-start="${o.time}">${elapsed}:00</span></span>
                         </div>
                         <ul style="list-style:none; padding:0; margin:0; font-size:0.9rem;">
-                            ${o.items.map(i=>`<li style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>${i.name}</span><span style="font-weight:bold; color:var(--primary);">x${i.qty}</span></li>`).join('')}
+                            ${o.items.map(i => `<li style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>${i.name}</span><span style="font-weight:bold; color:var(--primary);">x${i.qty}</span></li>`).join('')}
                         </ul>
                         ${o.notes ? `<p style="margin-top:8px; font-size:0.8rem; color:#f59e0b; background:rgba(245,158,11,0.1); padding:4px; border-radius:4px;">${o.notes}</p>` : ''}
                     </div>`;
-                }).join('') || '<p style="text-align:center; opacity:0.5; width:100%;">لا توجد أوردرات نشطة بالمطبخ حالياً</p>'}
+            }).join('') || '<p style="text-align:center; opacity:0.5; width:100%;">لا توجد أوردرات نشطة بالمطبخ حالياً</p>'}
             </div>
         </div>
 
@@ -2687,22 +2776,22 @@
             </div>
             <div style="display:flex; gap:15px; overflow-x:auto; padding-bottom:10px;" class="hide-scroll">
                 ${activeSallaOrders.map(o => {
-                    const statusColor = o.status === 'preparing' ? '#f59e0b' : o.status === 'ready' ? 'var(--success)' : o.status === 'served' ? 'var(--primary)' : o.status === 'billing' ? 'var(--danger)' : '#fff';
-                    const statusText = o.status === 'preparing' ? 'جاري التجهيز' : o.status === 'ready' ? 'جاهز للاستلام' : o.status === 'served' ? 'يأكل الآن' : o.status === 'billing' ? 'طلب الحساب' : o.status;
-                    return `<div class="order-card" style="min-width:250px; border-right-color:${statusColor};">
+                const statusColor = o.status === 'preparing' ? '#f59e0b' : o.status === 'ready' ? 'var(--success)' : o.status === 'served' ? 'var(--primary)' : o.status === 'billing' ? 'var(--danger)' : '#fff';
+                const statusText = o.status === 'preparing' ? 'جاري التجهيز' : o.status === 'ready' ? 'جاهز للاستلام' : o.status === 'served' ? 'يأكل الآن' : o.status === 'billing' ? 'طلب الحساب' : o.status;
+                return `<div class="order-card" style="min-width:250px; border-right-color:${statusColor};">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <h4 style="margin:0; font-family:'Orbitron'; font-size:1.1rem; color:${statusColor};">${o.table} <small style="opacity:0.6; color:#fff;">#${o.id}</small></h4>
                             <span style="font-size:0.75rem; background:rgba(0,0,0,0.4); border:1px solid ${statusColor}; color:${statusColor}; padding:2px 8px; border-radius:5px;">${statusText}</span>
                         </div>
                         <ul style="list-style:none; padding:0; margin:0; font-size:0.9rem; margin-bottom:10px;">
-                            ${o.items.map(i=>`<li style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>${i.name}</span><span style="font-weight:bold; color:var(--primary);">x${i.qty}</span></li>`).join('')}
+                            ${o.items.map(i => `<li style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>${i.name}</span><span style="font-weight:bold; color:var(--primary);">x${i.qty}</span></li>`).join('')}
                         </ul>
                         <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed rgba(255,255,255,0.1); padding-top:8px;">
                             <span style="font-size:0.8rem; opacity:0.7;"><i class="fa-solid fa-user"></i> ${o.waiter || 'غير محدد'}</span>
                             <span style="font-weight:900; color:var(--primary);">${o.total} ج</span>
                         </div>
                     </div>`;
-                }).join('') || '<p style="text-align:center; opacity:0.5; width:100%;">لا توجد طاولات مشغولة بالصالة حالياً</p>'}
+            }).join('') || '<p style="text-align:center; opacity:0.5; width:100%;">لا توجد طاولات مشغولة بالصالة حالياً</p>'}
             </div>
         </div>
 
@@ -2906,7 +2995,7 @@
                     return;
                 }
                 item.qty -= qty;
-                
+
                 // Track this as a withdrawal (you can also log it to a specific withdrawals table if you like)
                 if (!window.state.db.withdrawals) window.state.db.withdrawals = [];
                 window.state.db.withdrawals.push({
@@ -3078,10 +3167,10 @@
             </div>
         </div>
         <div class="kitchen-mobile-tabs">
-            <button onclick="window.state.kitchenTab='summary'; window.render();" class="kitchen-tab-btn ${window.state.kitchenTab==='summary'?'active':''}">المجمّع</button>
-            <button onclick="window.state.kitchenTab='preparing'; window.render();" class="kitchen-tab-btn ${window.state.kitchenTab==='preparing'?'active':''}">تحت التجهيز</button>
-            <button onclick="window.state.kitchenTab='ready_dinein'; window.render();" class="kitchen-tab-btn ${window.state.kitchenTab==='ready_dinein'?'active':''}">صالة</button>
-            <button onclick="window.state.kitchenTab='ready_external'; window.render();" class="kitchen-tab-btn ${window.state.kitchenTab==='ready_external'?'active':''}">سفري</button>
+            <button onclick="window.state.kitchenTab='summary'; window.render();" class="kitchen-tab-btn ${window.state.kitchenTab === 'summary' ? 'active' : ''}">المجمّع</button>
+            <button onclick="window.state.kitchenTab='preparing'; window.render();" class="kitchen-tab-btn ${window.state.kitchenTab === 'preparing' ? 'active' : ''}">تحت التجهيز</button>
+            <button onclick="window.state.kitchenTab='ready_dinein'; window.render();" class="kitchen-tab-btn ${window.state.kitchenTab === 'ready_dinein' ? 'active' : ''}">صالة</button>
+            <button onclick="window.state.kitchenTab='ready_external'; window.render();" class="kitchen-tab-btn ${window.state.kitchenTab === 'ready_external' ? 'active' : ''}">سفري</button>
         </div>
         <div class="kitchen-layout-grid show-${window.state.kitchenTab}">
             <div class="cart-side hide-scroll" style="overflow-y:auto; border-color:var(--primary); background:rgba(0,0,0,0.3); padding:10px;">
@@ -3092,14 +3181,14 @@
             <div class="cart-side hide-scroll" style="overflow-y:auto; border-color:var(--danger); padding:10px;">
                 <h3 style="position: sticky; top: -10px; background: rgba(15,23,42,0.95); z-index: 10; margin:-10px -10px 15px -10px; padding:15px 10px; border-bottom:1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); color:var(--danger); text-align:center; font-family:'Orbitron';">تحت التجهيز 🔥 (${prep.length})</h3>
                 <div style="display:flex; flex-direction:column; gap:10px;">${prep.map(o => {
-                    const elapsed = Math.floor((Date.now() - o.time) / 60000);
-                    const isDelayed = elapsed >= 15;
-                    const cardBorderColor = isDelayed ? '#ef4444' : '#f59e0b';
-                    const cardShadow = isDelayed ? '0 0 15px rgba(239,68,68,0.6)' : '0 0 10px rgba(245,158,11,0.2)';
-                    const pulseAnim = isDelayed ? 'animation: pulse-red 2s infinite;' : '';
-                    const tableBadgeColor = isDelayed ? '#ef4444' : '#f59e0b';
-                    return `<div class="order-card" style="width:100%; border:2px solid ${cardBorderColor}; box-shadow:${cardShadow}; ${pulseAnim} padding:12px; border-radius:12px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><div style="background:${tableBadgeColor}; color:#fff; font-weight:900; font-size:1.3rem; border-radius:8px; padding:4px 12px; text-shadow:0 1px 2px rgba(0,0,0,0.5);">${o.table}</div><div class="order-timer-premium" style="font-size:1.3rem; background:rgba(0,0,0,0.5); padding:4px 10px; border-radius:8px;"><div class="timer-dot" style="background:${cardBorderColor}; width:8px; height:8px;"></div><span class="timer-text" data-start="${o.time}" style="color:${isDelayed?'#ef4444':'#fff'}; font-weight:900;">00:00</span></div></div><div style="display:flex; justify-content:space-between; margin-bottom:10px; opacity:0.7; font-size:0.8rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;"><span>#${o.id}</span><span>${o.type === 'takeaway' ? 'تيك اواي' : o.type === 'delivery' ? 'دليفري' : 'صالة'}</span></div>${o.notes ? `<div style="background:rgba(251,191,36,0.15); border:1px dashed var(--primary); border-radius:8px; padding:8px; margin:8px 0; text-align:center; font-weight:900; font-size:1rem; color:var(--primary);"><i class="fa-solid fa-triangle-exclamation"></i> ${o.notes}</div>` : ''}<div style="flex:1; margin:10px 0; display:flex; flex-direction:column; gap:8px;">${o.items.map(i => `<div onclick="this.style.textDecoration=this.style.textDecoration==='line-through'?'none':'line-through'; this.style.opacity=this.style.opacity==='0.4'?'1':'0.4';" style="font-size:1.1rem; font-weight:900; border-bottom:1px dashed rgba(255,255,255,0.05); padding:6px 0; cursor:pointer; transition:0.3s; user-select:none; display:flex; justify-content:space-between;"><span>${i.name}</span> <span style="color:${cardBorderColor}; background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:6px;">x${i.qty}</span></div>`).join('')}</div>${window.state.role === 'kitchen' ? `<button onclick="window.kitchenAction('${o.id}','ready')" class="btn-luxury" style="height:50px; font-size:1.2rem; background:var(--success); color:#fff; border:none; padding:0; width:100%; margin-top:10px; border-radius:10px;"><i class="fa-solid fa-bell-concierge"></i> إرسال للاستلام 📤</button>` : `<div style="text-align:center; color:#f59e0b; font-weight:900; font-size:1.1rem; background:rgba(245,158,11,0.1); padding:10px; border-radius:10px; border:1px dashed #f59e0b; margin-top:10px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري التجهيز بالمطبخ...</div>${(window.state.role === 'cashier' || window.state.role === 'manager' || window.state.role === 'admin') ? `<button onclick="window.cancelOrder('${o.id}')" class="btn-luxury danger" style="margin-top:8px; height:42px; font-size:1.1rem; border-radius:8px; border:none; width:100%; display:flex; align-items:center; justify-content:center; gap:5px;"><i class="fa-solid fa-ban"></i> إلغاء الطلب ❌</button>` : ''}`}</div>`;
-                }).join('')}</div>
+                const elapsed = Math.floor((Date.now() - o.time) / 60000);
+                const isDelayed = elapsed >= 15;
+                const cardBorderColor = isDelayed ? '#ef4444' : '#f59e0b';
+                const cardShadow = isDelayed ? '0 0 15px rgba(239,68,68,0.6)' : '0 0 10px rgba(245,158,11,0.2)';
+                const pulseAnim = isDelayed ? 'animation: pulse-red 2s infinite;' : '';
+                const tableBadgeColor = isDelayed ? '#ef4444' : '#f59e0b';
+                return `<div class="order-card" style="width:100%; border:2px solid ${cardBorderColor}; box-shadow:${cardShadow}; ${pulseAnim} padding:12px; border-radius:12px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><div style="background:${tableBadgeColor}; color:#fff; font-weight:900; font-size:1.3rem; border-radius:8px; padding:4px 12px; text-shadow:0 1px 2px rgba(0,0,0,0.5);">${o.table}</div><div class="order-timer-premium" style="font-size:1.3rem; background:rgba(0,0,0,0.5); padding:4px 10px; border-radius:8px;"><div class="timer-dot" style="background:${cardBorderColor}; width:8px; height:8px;"></div><span class="timer-text" data-start="${o.time}" style="color:${isDelayed ? '#ef4444' : '#fff'}; font-weight:900;">00:00</span></div></div><div style="display:flex; justify-content:space-between; margin-bottom:10px; opacity:0.7; font-size:0.8rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;"><span>#${o.id}</span><span>${o.type === 'takeaway' ? 'تيك اواي' : o.type === 'delivery' ? 'دليفري' : 'صالة'}</span></div>${o.notes ? `<div style="background:rgba(251,191,36,0.15); border:1px dashed var(--primary); border-radius:8px; padding:8px; margin:8px 0; text-align:center; font-weight:900; font-size:1rem; color:var(--primary);"><i class="fa-solid fa-triangle-exclamation"></i> ${o.notes}</div>` : ''}<div style="flex:1; margin:10px 0; display:flex; flex-direction:column; gap:8px;">${o.items.map(i => `<div onclick="this.style.textDecoration=this.style.textDecoration==='line-through'?'none':'line-through'; this.style.opacity=this.style.opacity==='0.4'?'1':'0.4';" style="font-size:1.1rem; font-weight:900; border-bottom:1px dashed rgba(255,255,255,0.05); padding:6px 0; cursor:pointer; transition:0.3s; user-select:none; display:flex; justify-content:space-between;"><span>${i.name}</span> <span style="color:${cardBorderColor}; background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:6px;">x${i.qty}</span></div>`).join('')}</div>${window.state.role === 'kitchen' ? `<button onclick="window.kitchenAction('${o.id}','ready')" class="btn-luxury" style="height:50px; font-size:1.2rem; background:var(--success); color:#fff; border:none; padding:0; width:100%; margin-top:10px; border-radius:10px;"><i class="fa-solid fa-bell-concierge"></i> إرسال للاستلام 📤</button>` : `<div style="text-align:center; color:#f59e0b; font-weight:900; font-size:1.1rem; background:rgba(245,158,11,0.1); padding:10px; border-radius:10px; border:1px dashed #f59e0b; margin-top:10px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري التجهيز بالمطبخ...</div>${(window.state.role === 'cashier' || window.state.role === 'manager' || window.state.role === 'admin') ? `<button onclick="window.cancelOrder('${o.id}')" class="btn-luxury danger" style="margin-top:8px; height:42px; font-size:1.1rem; border-radius:8px; border:none; width:100%; display:flex; align-items:center; justify-content:center; gap:5px;"><i class="fa-solid fa-ban"></i> إلغاء الطلب ❌</button>` : ''}`}</div>`;
+            }).join('')}</div>
             </div>
             
             <div class="cart-side hide-scroll" style="overflow-y:auto; border-color:var(--success); padding:10px;">
@@ -3177,9 +3266,9 @@
             const isMgmt = (window.state.role === 'admin' || window.state.role === 'manager');
             const invOptions = (window.state.db.main_inventory || []).map(i => `<option value="${i.name}">${i.name} (${i.unit})</option>`).join('');
             const shiftStart = window.state.db.shift ? window.state.db.shift.start : 0;
-            
-            const displayedExpenses = isMgmt 
-                ? (window.state.db.exp || []) 
+
+            const displayedExpenses = isMgmt
+                ? (window.state.db.exp || [])
                 : (window.state.db.exp || []).filter(e => e.time >= shiftStart && e.isShiftExpense);
 
             const totalTodayVal = displayedExpenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
@@ -3329,7 +3418,7 @@
                                 <label style="font-size:0.75rem; opacity:0.7;"><i class="fa-solid fa-calendar-days" style="margin-left:4px;"></i>السنة</label>
                                 <select id="filter-exp-year" onchange="window.filterExpensesList()" class="input-luxury" style="margin:0; font-size:0.85rem; padding:8px 12px; background:rgba(0,0,0,0.5);">
                                     <option value="all">كل السنوات</option>
-                                    ${(function(){ const cy = new Date().getFullYear(); let opts=''; for(let y=cy; y>=2024; y--) opts += '<option value="'+y+'">'+y+'</option>'; return opts; })()}
+                                    ${(function () { const cy = new Date().getFullYear(); let opts = ''; for (let y = cy; y >= 2024; y--) opts += '<option value="' + y + '">' + y + '</option>'; return opts; })()}
                                 </select>
                             </div>
                         </div>
@@ -3338,7 +3427,7 @@
                                 <label style="font-size:0.75rem; opacity:0.7;"><i class="fa-solid fa-calendar-day" style="margin-left:4px;"></i>اليوم (اختياري)</label>
                                 <select id="filter-exp-day" onchange="window.filterExpensesList()" class="input-luxury" style="margin:0; font-size:0.85rem; padding:8px 12px; background:rgba(0,0,0,0.5);">
                                     <option value="all">كل الأيام</option>
-                                    ${(function(){ let opts=''; for(let d=1; d<=31; d++) opts += '<option value="'+d+'">'+d+'</option>'; return opts; })()}
+                                    ${(function () { let opts = ''; for (let d = 1; d <= 31; d++) opts += '<option value="' + d + '">' + d + '</option>'; return opts; })()}
                                 </select>
                             </div>
                             <div></div>
@@ -3365,13 +3454,13 @@
                                 ${displayedExpenses.map(e => `<tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
                                     <td>${new Date(e.time).toLocaleDateString('ar-EG')}<br><small style="opacity:0.6">${new Date(e.time).toLocaleTimeString('ar-EG')}</small></td>
                                     <td>
-                                        ${e.type === 'inventory' ? '<span class="badge" style="background:var(--success);">خامات مخزن</span><br><small>' + e.invItem + '</small>' : 
-                                          (e.type === 'salaries' ? '<span class="badge" style="background:var(--primary);">مرتبات</span>' :
-                                          (e.type === 'emergency' ? '<span class="badge" style="background:var(--danger);">طوارئ</span>' :
-                                          '<span class="badge" style="background:rgba(255,255,255,0.2);">مصروف عام</span>'))}
+                                        ${e.type === 'inventory' ? '<span class="badge" style="background:var(--success);">خامات مخزن</span><br><small>' + e.invItem + '</small>' :
+                    (e.type === 'salaries' ? '<span class="badge" style="background:var(--primary);">مرتبات</span>' :
+                        (e.type === 'emergency' ? '<span class="badge" style="background:var(--danger);">طوارئ</span>' :
+                            '<span class="badge" style="background:rgba(255,255,255,0.2);">مصروف عام</span>'))}
                                         ${e.name ? '<br><small style="opacity:0.8; color:var(--primary);"><i class="fa-solid fa-user"></i> ' + e.name + '</small>' : ''}
                                     </td>
-                                    <td>${e.details || '-'}${e.type==='inventory' ? `<br><small style="color:var(--success);">الكمية: ${e.qty}</small>` : ''}</td>
+                                    <td>${e.details || '-'}${e.type === 'inventory' ? `<br><small style="color:var(--success);">الكمية: ${e.qty}</small>` : ''}</td>
                                     <td style="color:var(--danger); font-weight:bold; font-size:1.1rem;">${e.amount} ج</td>
                                 </tr>`).join('') || '<tr><td colspan="4" style="padding:3rem; text-align:center; opacity:0.3;">لا توجد مصروفات مسجلة</td></tr>'}
                             </tbody>
@@ -3664,14 +3753,14 @@
                 if (!window.state.waiterCat) window.state.waiterCat = 'الكل';
                 if (!window.state.waiterMenuTab) window.state.waiterMenuTab = 'items';
                 const total = (window.state.waiterCart || []).reduce((s, i) => s + (i.price * i.qty), 0);
-                
+
                 const cartCount = (window.state.waiterCart || []).reduce((s, i) => s + i.qty, 0);
                 const cartBadge = cartCount > 0 ? `<div class="cart-badge-count">${cartCount}</div>` : '';
 
                 contentHtml = `
             <div class="pos-mobile-tabs">
-                <button onclick="window.state.waiterMenuTab='items'; window.render();" class="pos-tab-btn ${window.state.waiterMenuTab==='items'?'active':''}">القائمة</button>
-                <button onclick="window.state.waiterMenuTab='cart'; window.render();" class="pos-tab-btn ${window.state.waiterMenuTab==='cart'?'active':''}">السلة ${cartBadge}</button>
+                <button onclick="window.state.waiterMenuTab='items'; window.render();" class="pos-tab-btn ${window.state.waiterMenuTab === 'items' ? 'active' : ''}">القائمة</button>
+                <button onclick="window.state.waiterMenuTab='cart'; window.render();" class="pos-tab-btn ${window.state.waiterMenuTab === 'cart' ? 'active' : ''}">السلة ${cartBadge}</button>
             </div>
             <div class="pos-layout show-${window.state.waiterMenuTab}"><div class="items-side">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -3805,7 +3894,7 @@
             const a = document.getElementById('ex-amount').value;
             const typeElem = document.getElementById('ex-type');
             const type = typeElem ? typeElem.value : 'general';
-            
+
             const isMgmt = (window.state.role === 'admin' || window.state.role === 'manager');
             if (!isMgmt && !window.state.db.shift) {
                 window.showToast("⚠️ يجب بدء الوردية أولاً لتسجيل المصروفات!");
@@ -3814,16 +3903,16 @@
 
             let invItemName = '';
             let invQty = 0;
-            
+
             if (type === 'inventory') {
                 const itemSelect = document.getElementById('ex-inv-item').value;
                 invQty = Number(document.getElementById('ex-inv-qty').value);
-                
+
                 if (!itemSelect || !invQty) {
                     window.showToast("⚠️ يرجى اختيار الخامة والكمية المشتراة!");
                     return;
                 }
-                
+
                 if (itemSelect === 'new') {
                     const newName = document.getElementById('ex-new-name').value.trim();
                     const newUnit = document.getElementById('ex-new-unit').value.trim();
@@ -3842,7 +3931,7 @@
                     }
                 }
             }
-            
+
             if (a) {
                 if (!window.state.db.exp) window.state.db.exp = [];
                 window.state.db.exp.unshift({
@@ -3890,7 +3979,7 @@
             if (fe) {
                 document.getElementById('ex-name').value = fe.name || '';
                 document.getElementById('ex-details').value = fe.details || '';
-                
+
                 const amtInput = document.getElementById('ex-amount');
                 if (amtInput) {
                     amtInput.focus();
@@ -3989,8 +4078,8 @@
             const isMgmt = (window.state.role === 'admin' || window.state.role === 'manager');
             const shiftStart = window.state.db.shift ? window.state.db.shift.start : 0;
 
-            const baseList = isMgmt 
-                ? (window.state.db.exp || []) 
+            const baseList = isMgmt
+                ? (window.state.db.exp || [])
                 : (window.state.db.exp || []).filter(e => e.time >= shiftStart && e.isShiftExpense);
 
             const filtered = baseList.filter(e => {
@@ -4017,13 +4106,13 @@
                     <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
                         <td>${new Date(e.time).toLocaleDateString('ar-EG')}<br><small style="opacity:0.6">${new Date(e.time).toLocaleTimeString('ar-EG')}</small></td>
                         <td>
-                            ${e.type === 'inventory' ? '<span class="badge" style="background:var(--success);">خامات مخزن</span><br><small>' + e.invItem + '</small>' : 
-                              (e.type === 'salaries' ? '<span class="badge" style="background:var(--primary);">مرتبات</span>' :
-                              (e.type === 'emergency' ? '<span class="badge" style="background:var(--danger);">طوارئ</span>' :
-                              '<span class="badge" style="background:rgba(255,255,255,0.2);">مصروف عام</span>'))}
+                            ${e.type === 'inventory' ? '<span class="badge" style="background:var(--success);">خامات مخزن</span><br><small>' + e.invItem + '</small>' :
+                        (e.type === 'salaries' ? '<span class="badge" style="background:var(--primary);">مرتبات</span>' :
+                            (e.type === 'emergency' ? '<span class="badge" style="background:var(--danger);">طوارئ</span>' :
+                                '<span class="badge" style="background:rgba(255,255,255,0.2);">مصروف عام</span>'))}
                             ${e.name ? '<br><small style="opacity:0.8; color:var(--primary);"><i class="fa-solid fa-user"></i> ' + e.name + '</small>' : ''}
                         </td>
-                        <td>${e.details || '-'}${e.type==='inventory' ? `<br><small style="color:var(--success);">الكمية: ${e.qty}</small>` : ''}</td>
+                        <td>${e.details || '-'}${e.type === 'inventory' ? `<br><small style="color:var(--success);">الكمية: ${e.qty}</small>` : ''}</td>
                         <td style="color:var(--danger); font-weight:bold; font-size:1.1rem;">${e.amount} ج</td>
                     </tr>
                 `).join('') || '<tr><td colspan="4" style="padding:3rem; text-align:center; opacity:0.3;">لا توجد مصروفات تطابق التصفية</td></tr>';
@@ -4067,12 +4156,12 @@
                 const unit = document.getElementById('admin-inv-edit-unit').value;
                 const qty = document.getElementById('admin-inv-edit-qty').value;
                 const minQty = document.getElementById('admin-inv-edit-min').value;
-                
+
                 if (!name || !unit) {
                     window.showToast("يرجى إدخال اسم الخامة ووحدة القياس! ⚠️");
                     return;
                 }
-                
+
                 item.name = name;
                 item.unit = unit;
                 item.qty = Number(qty);
@@ -4098,7 +4187,7 @@
             const unit = document.getElementById('admin-inv-new-unit').value;
             const qty = document.getElementById('admin-inv-new-qty').value;
             const minQty = document.getElementById('admin-inv-new-min').value;
-            
+
             if (!name || !unit) {
                 window.showToast("يرجى إدخال اسم الخامة ووحدة القياس! ⚠️");
                 return;
@@ -4122,15 +4211,15 @@
             const title = document.getElementById('drilldown-title');
             const content = document.getElementById('drilldown-content');
             const orders = window.state.db.orders || [];
-            
+
             if (action === 'orders') {
                 title.innerHTML = '<i class="fa-solid fa-receipt"></i> جميع طلبات الوردية';
-                content.innerHTML = orders.filter(o => o.status !== 'canceled').map(o => `<div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>#${o.id} - ${o.table || (o.type==='takeaway'?'تيك اواي':'دليفري')}</strong><br><span style="font-size:0.8rem; opacity:0.7">${new Date(o.time).toLocaleTimeString('ar-EG')}</span></div><strong style="color:var(--primary);">${o.total} ج</strong></div>`).join('') || '<p style="text-align:center;">لا توجد طلبات</p>';
+                content.innerHTML = orders.filter(o => o.status !== 'canceled').map(o => `<div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>#${o.id} - ${o.table || (o.type === 'takeaway' ? 'تيك اواي' : 'دليفري')}</strong><br><span style="font-size:0.8rem; opacity:0.7">${new Date(o.time).toLocaleTimeString('ar-EG')}</span></div><strong style="color:var(--primary);">${o.total} ج</strong></div>`).join('') || '<p style="text-align:center;">لا توجد طلبات</p>';
             }
             else if (action === 'canceled') {
                 title.innerHTML = '<i class="fa-solid fa-ban"></i> الطلبات الملغاة بالشيفت';
                 const canceled = orders.filter(o => o.status === 'canceled');
-                content.innerHTML = canceled.map(o => `<div style="background:rgba(255,255,255,0.05); border-right:3px solid var(--danger); padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>#${o.id} - ${o.table || (o.type==='takeaway'?'تيك اواي':'دليفري')}</strong><br><span style="font-size:0.8rem; opacity:0.7">${o.items.map(i=>i.name).join('، ')}</span></div><strong style="color:var(--danger);">${o.total} ج (تم الاسترجاع)</strong></div>`).join('') || '<p style="text-align:center;">لا توجد طلبات ملغاة</p>';
+                content.innerHTML = canceled.map(o => `<div style="background:rgba(255,255,255,0.05); border-right:3px solid var(--danger); padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>#${o.id} - ${o.table || (o.type === 'takeaway' ? 'تيك اواي' : 'دليفري')}</strong><br><span style="font-size:0.8rem; opacity:0.7">${o.items.map(i => i.name).join('، ')}</span></div><strong style="color:var(--danger);">${o.total} ج (تم الاسترجاع)</strong></div>`).join('') || '<p style="text-align:center;">لا توجد طلبات ملغاة</p>';
             }
             else if (action === 'staff') {
                 title.innerHTML = '<i class="fa-solid fa-users"></i> موظفي الوردية';
@@ -4160,24 +4249,24 @@
             else if (action === 'active') {
                 title.innerHTML = '<i class="fa-solid fa-fire"></i> الطلبات النشطة حالياً';
                 const active = orders.filter(o => o.status === 'preparing' || o.status === 'ready' || o.status === 'billing' || o.status === 'served');
-                content.innerHTML = active.map(o => `<div style="background:rgba(255,255,255,0.05); border-right:3px solid ${o.status==='ready'?'#10b981':o.status==='preparing'?'#f59e0b':'#3b82f6'}; padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>#${o.id} - ${o.table || (o.type==='takeaway'?'تيك اواي':'دليفري')}</strong><br><span style="font-size:0.8rem; opacity:0.7">${o.items.map(i=>i.name).join('، ')}</span></div><strong style="color:var(--primary);">${o.total} ج</strong></div>`).join('') || '<p style="text-align:center;">لا توجد طلبات نشطة</p>';
+                content.innerHTML = active.map(o => `<div style="background:rgba(255,255,255,0.05); border-right:3px solid ${o.status === 'ready' ? '#10b981' : o.status === 'preparing' ? '#f59e0b' : '#3b82f6'}; padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>#${o.id} - ${o.table || (o.type === 'takeaway' ? 'تيك اواي' : 'دليفري')}</strong><br><span style="font-size:0.8rem; opacity:0.7">${o.items.map(i => i.name).join('، ')}</span></div><strong style="color:var(--primary);">${o.total} ج</strong></div>`).join('') || '<p style="text-align:center;">لا توجد طلبات نشطة</p>';
             }
             else if (action === 'preparing') {
                 title.innerHTML = '<i class="fa-solid fa-fire"></i> طلبات تحت التجهيز الآن';
                 const prep = orders.filter(o => o.status === 'preparing');
-                content.innerHTML = prep.map(o => `<div style="background:rgba(255,255,255,0.05); border-right:3px solid #f59e0b; padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>#${o.id} - ${o.table || (o.type==='takeaway'?'تيك اواي':'دليفري')}</strong><br><span style="font-size:0.8rem; opacity:0.7">${o.items.map(i=>i.name).join('، ')}</span></div><strong style="color:var(--primary);">${o.total} ج</strong></div>`).join('') || '<p style="text-align:center;">لا توجد طلبات تحت التجهيز</p>';
+                content.innerHTML = prep.map(o => `<div style="background:rgba(255,255,255,0.05); border-right:3px solid #f59e0b; padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>#${o.id} - ${o.table || (o.type === 'takeaway' ? 'تيك اواي' : 'دليفري')}</strong><br><span style="font-size:0.8rem; opacity:0.7">${o.items.map(i => i.name).join('، ')}</span></div><strong style="color:var(--primary);">${o.total} ج</strong></div>`).join('') || '<p style="text-align:center;">لا توجد طلبات تحت التجهيز</p>';
             }
             else if (action === 'ready') {
                 title.innerHTML = '<i class="fa-solid fa-bell-concierge"></i> طلبات جاهزة للاستلام';
                 const ready = orders.filter(o => o.status === 'ready');
-                content.innerHTML = ready.map(o => `<div style="background:rgba(255,255,255,0.05); border-right:3px solid #10b981; padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>#${o.id} - ${o.table || (o.type==='takeaway'?'تيك اواي':'دليفري')}</strong><br><span style="font-size:0.8rem; opacity:0.7">${o.items.map(i=>i.name).join('، ')}</span></div><strong style="color:var(--primary);">${o.total} ج</strong></div>`).join('') || '<p style="text-align:center;">لا توجد طلبات جاهزة</p>';
+                content.innerHTML = ready.map(o => `<div style="background:rgba(255,255,255,0.05); border-right:3px solid #10b981; padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>#${o.id} - ${o.table || (o.type === 'takeaway' ? 'تيك اواي' : 'دليفري')}</strong><br><span style="font-size:0.8rem; opacity:0.7">${o.items.map(i => i.name).join('، ')}</span></div><strong style="color:var(--primary);">${o.total} ج</strong></div>`).join('') || '<p style="text-align:center;">لا توجد طلبات جاهزة</p>';
             }
             else if (action === 'delayed') {
                 title.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> طلبات متأخرة في المطبخ (> 15 دقيقة)';
                 const delayed = orders.filter(o => o.status === 'preparing' && (Date.now() - o.time) > 15 * 60 * 1000);
                 content.innerHTML = delayed.map(o => {
                     const elapsed = Math.floor((Date.now() - o.time) / 60000);
-                    return `<div style="background:rgba(255,255,255,0.05); border-right:3px solid #ef4444; padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>#${o.id} - ${o.table || (o.type==='takeaway'?'تيك اواي':'دليفري')} (منذ ${elapsed} دقيقة)</strong><br><span style="font-size:0.8rem; opacity:0.7">${o.items.map(i=>i.name).join('، ')}</span></div><strong style="color:var(--primary);">${o.total} ج</strong></div>`;
+                    return `<div style="background:rgba(255,255,255,0.05); border-right:3px solid #ef4444; padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between;"><div><strong>#${o.id} - ${o.table || (o.type === 'takeaway' ? 'تيك اواي' : 'دليفري')} (منذ ${elapsed} دقيقة)</strong><br><span style="font-size:0.8rem; opacity:0.7">${o.items.map(i => i.name).join('، ')}</span></div><strong style="color:var(--primary);">${o.total} ج</strong></div>`;
                 }).join('') || '<p style="text-align:center;">لا توجد طلبات متأخرة 🎉</p>';
             }
             else if (action === 'sales' || action === 'cash' || action === 'avg' || action === 'customers') {
@@ -4186,7 +4275,7 @@
                 const cashSales = paidOrders.filter(o => !o.paymentMethod || o.paymentMethod === 'cash').reduce((s, o) => s + o.total - (o.discount || 0), 0);
                 const visaSales = paidOrders.filter(o => o.paymentMethod === 'visa').reduce((s, o) => s + o.total - (o.discount || 0), 0);
                 const walletSales = paidOrders.filter(o => o.paymentMethod === 'wallet').reduce((s, o) => s + o.total - (o.discount || 0), 0);
-                
+
                 content.innerHTML = `
                 <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:10px;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
@@ -4209,7 +4298,7 @@
                 title.innerHTML = '<i class="fa-solid fa-circle-info"></i> التفاصيل';
                 content.innerHTML = '<p style="text-align:center; opacity:0.7; padding:20px;">البيانات التفصيلية معروضة بالأعلى في الإجماليات أو لا توجد بيانات مسجلة.</p>';
             }
-            
+
             document.getElementById('drilldown-modal').style.display = 'flex';
         };
         window.addTable = () => { const n = document.getElementById('new-tab-name').value; if (n) { window.state.db.tables.push({ id: Date.now(), name: n, source: 'all' }); window.save(); document.getElementById('new-tab-name').value = ''; window.showToast("تم إضافة الطاولة ✅"); } };
@@ -4279,21 +4368,21 @@
                         return Object.values(arr).filter(x => x !== null && x !== undefined);
                     };
                     const newOrders = ensureArray(data.orders);
-                    
+
                     // Kitchen alerts (keep exact existing logic)
                     if (window.state.role === 'kitchen') {
                         const newPrep = newOrders.filter(o => o.status === 'preparing');
                         const oldPrep = lastOrdersData.filter(o => o.status === 'preparing');
                         if (newPrep.length > oldPrep.length) window.playSound('kitchen-alert');
                     }
-                    
+
                     // Unified Ready Order alerts for Cashier, Manager, and Waiter
                     if (window.state.role === 'cashier' || window.state.role === 'manager' || window.state.role === 'waiter') {
                         if (!isInitialOrdersLoad) {
                             const newlyReady = newOrders.filter(o => o.status === 'ready' && !lastOrdersData.some(old => old.id === o.id && old.status === 'ready'));
                             if (newlyReady.length > 0) {
                                 window.playSound('ready-alert');
-                                
+
                                 let toastText = '';
                                 if (newlyReady.length === 1) {
                                     const o = newlyReady[0];
@@ -4319,7 +4408,7 @@
                             }
                         }
                     }
-                    
+
                     // Billing Alert for Cashier and Manager
                     if (window.state.role === 'cashier' || window.state.role === 'manager') {
                         const newBilling = newOrders.filter(o => o.status === 'billing');
@@ -4329,7 +4418,7 @@
                             window.showToast('💰 الويتر طلب الحساب! تحقق من الطاولة');
                         }
                     }
-                    
+
                     lastOrdersData = newOrders;
                     isInitialOrdersLoad = false;
                     window.state.db = data || {};
