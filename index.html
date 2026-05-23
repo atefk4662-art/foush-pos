@@ -762,52 +762,98 @@
 
             /* POS Mobile Tabs */
             .pos-mobile-tabs {
-                display: none !important;
+                display: flex !important;
+                gap: 8px !important;
+                margin-bottom: 12px !important;
+                width: 100% !important;
+            }
+
+            .pos-tab-btn {
+                flex: 1;
+                padding: 10px !important;
+                background: #1e293b !important;
+                border: 1px solid rgba(255,255,255,0.05) !important;
+                color: #fff !important;
+                border-radius: 12px !important;
+                font-weight: 700 !important;
+                font-size: 0.9rem !important;
+                cursor: pointer;
+                transition: 0.2s;
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+            }
+
+            .pos-tab-btn.active {
+                background: var(--primary) !important;
+                color: #000 !important;
+                border-color: var(--primary) !important;
             }
 
             .cart-badge-count {
-                display: none !important;
+                background: var(--danger) !important;
+                color: #fff !important;
+                border-radius: 50% !important;
+                padding: 2px 6px !important;
+                font-size: 0.75rem !important;
+                font-weight: bold !important;
+                display: inline-block !important;
+                margin-right: 4px !important;
             }
 
-            /* POS Mobile Layout Side-by-Side */
+            /* POS Mobile Layout (Tabbed) */
             .pos-layout {
-                grid-template-columns: calc(100% - 135px) 130px !important;
-                height: 100% !important;
-                gap: 5px !important;
+                grid-template-columns: 1fr !important;
+                height: calc(100% - 50px) !important;
+                gap: 0 !important;
                 width: 100% !important;
                 overflow-x: hidden !important;
             }
 
             #page-pos {
-                overflow-y: auto !important;
-                overflow-x: hidden !important;
+                height: 100% !important;
+                overflow: hidden !important;
                 width: 100% !important;
             }
 
             .items-side {
-                height: auto !important;
+                height: 100% !important;
                 min-height: 0 !important;
                 min-width: 0 !important;
                 overflow-x: hidden !important;
+                display: flex !important;
+                flex-direction: column !important;
             }
 
             .items-grid {
-                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important;
-                gap: 5px !important;
+                grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)) !important;
+                gap: 6px !important;
+                flex: 1 !important;
+                overflow-y: auto !important;
             }
 
-            .pos-layout.show-items .cart-side,
+            .pos-layout.show-items .items-side {
+                display: flex !important;
+                width: 100% !important;
+            }
+
+            .pos-layout.show-items .cart-side {
+                display: none !important;
+            }
+
+            .pos-layout.show-cart .items-side {
+                display: none !important;
+            }
+
             .pos-layout.show-cart .cart-side {
                 display: flex !important;
                 width: 100% !important;
-                padding: 6px !important;
-                min-height: auto !important;
-                height: auto !important;
-            }
-
-            .pos-layout.show-items .items-side,
-            .pos-layout.show-cart .items-side {
-                display: flex !important;
+                padding: 8px !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                overflow-y: auto !important;
             }
 
             .cart-side h3 { font-size: 1rem !important; }
@@ -943,6 +989,316 @@
                 overflow-x: hidden !important;
                 -webkit-overflow-scrolling: touch;
             }
+
+            /* ======================================== */
+            /* COMPREHENSIVE MOBILE INNER-PAGE FIXES    */
+            /* ======================================== */
+
+            /* --- Global overflow prevention --- */
+            *, *::before, *::after {
+                max-width: 100%;
+            }
+            img, video, svg, canvas {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+
+            /* --- Expenses page: stack form + table vertically --- */
+            .expenses-layout-grid {
+                grid-template-columns: 1fr !important;
+                height: auto !important;
+                overflow-y: visible !important;
+                gap: 12px !important;
+            }
+            .expenses-layout-grid > .cart-side {
+                max-height: none !important;
+                height: auto !important;
+            }
+            /* Filter grids inside expenses */
+            .expenses-layout-grid [style*="grid-template-columns: 1fr 1fr 1fr"],
+            .expenses-layout-grid [style*="grid-template-columns:1fr 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
+            }
+            .expenses-layout-grid [style*="grid-template-columns: 1fr 1fr 120px"],
+            .expenses-layout-grid [style*="grid-template-columns:1fr 1fr 120px"] {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+            }
+            /* Expense category cards */
+            .expenses-layout-grid [style*="grid-template-columns:1fr 1fr"] {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 6px !important;
+            }
+
+            /* --- Dashboard page --- */
+            .dashboard-columns {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+            /* Nested dashboard analytics (charts area) */
+            .dashboard-columns .dashboard-columns {
+                grid-template-columns: 1fr !important;
+            }
+            /* Dashboard wide grids: 1.4fr 1fr and similar */
+            [style*="grid-template-columns: 1.4fr 1fr"],
+            [style*="grid-template-columns:1.4fr 1fr"] {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+            /* Dashboard inner grid columns override */
+            [style*="grid-template-columns: 1fr 1.2fr"],
+            [style*="grid-template-columns:1fr 1.2fr"] {
+                grid-template-columns: 1fr !important;
+            }
+            /* Horizontal scrollable order/salla cards */
+            [style*="display:flex; gap:15px; overflow-x:auto"] {
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x mandatory;
+                padding-bottom: 8px !important;
+            }
+            [style*="display:flex; gap:15px; overflow-x:auto"] > * {
+                min-width: 240px !important;
+                scroll-snap-align: start;
+                flex-shrink: 0 !important;
+            }
+
+            /* --- Tables management page --- */
+            [style*="display:flex; flex-wrap:wrap; gap:12px"] {
+                display: grid !important;
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+                gap: 10px !important;
+            }
+            [style*="display:flex; flex-wrap:wrap; gap:12px"] > .order-card {
+                width: 100% !important;
+            }
+
+            /* --- Reports page inline grids --- */
+            [style*="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))"] {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+
+            /* --- Manager / Admin Home welcome banners --- */
+            [style*="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap"] {
+                flex-direction: column !important;
+                text-align: center !important;
+                gap: 10px !important;
+            }
+            [style*="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap"] > div {
+                text-align: center !important;
+            }
+            /* Banner emoji icon */
+            [style*="font-size:3.5rem"] {
+                font-size: 2rem !important;
+            }
+            /* Banner title text */
+            [style*="font-size:1.8rem"] {
+                font-size: 1.2rem !important;
+            }
+            /* Quick access grid cards: keep icon+text side by side but cards stack */
+            .quick-access-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+            .quick-access-grid > div {
+                padding: 14px !important;
+            }
+            .quick-access-grid [style*="width:50px; height:50px"] {
+                width: 40px !important;
+                height: 40px !important;
+                font-size: 1.2rem !important;
+            }
+
+            /* --- Shift Ops KPI cards --- */
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+            .stats-grid > div {
+                padding: 14px 10px !important;
+            }
+            .stats-grid h3 {
+                font-size: 1.2rem !important;
+            }
+            .stats-grid p {
+                font-size: 0.72rem !important;
+            }
+            /* Shift ops detailed sections grid */
+            [style*="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))"] {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+
+            /* --- Shift Ops header breadcrumb bar --- */
+            [style*="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; background:rgba(255,255,255,0.02)"] {
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+            }
+            [style*="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; background:rgba(255,255,255,0.02)"] .btn-luxury {
+                font-size: 0.75rem !important;
+                padding: 4px 10px !important;
+            }
+
+            /* Shift ops live header banner */
+            [style*="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px"] {
+                flex-direction: column !important;
+                text-align: center !important;
+                padding: 14px !important;
+            }
+            [style*="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px"] > div {
+                text-align: center !important;
+            }
+            [style*="font-size:1.25rem"] {
+                font-size: 1rem !important;
+            }
+
+            /* --- Kitchen swipe-able columns --- */
+            .kitchen-layout-grid {
+                display: flex !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x mandatory;
+                gap: 0 !important;
+                padding-bottom: 10px !important;
+            }
+            .kitchen-layout-grid > div {
+                min-width: 85vw !important;
+                flex-shrink: 0 !important;
+                scroll-snap-align: start;
+                padding: 0 6px !important;
+            }
+
+            /* --- Inventory / Admin Inventory tables --- */
+            .foush-table {
+                display: block !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+                white-space: nowrap;
+            }
+            .foush-table th,
+            .foush-table td {
+                padding: 6px 8px !important;
+                font-size: 0.75rem !important;
+                white-space: nowrap !important;
+            }
+
+            /* --- Reports shift history table --- */
+            [style*="overflow-x:auto"] {
+                -webkit-overflow-scrolling: touch !important;
+            }
+
+            /* --- Inventory alert grids --- */
+            [style*="grid-template-columns: 1fr 1fr"][style*="gap:15px"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* --- Confirm order total on POS --- */
+            .cart-side h1 {
+                font-size: 2rem !important;
+            }
+            .cart-side [style*="font-size:1.6rem"] {
+                font-size: 1.2rem !important;
+                padding: 14px !important;
+            }
+
+            /* --- Header items (flex wrap for small) --- */
+            header {
+                gap: 6px !important;
+                flex-wrap: wrap !important;
+                height: auto !important;
+                min-height: var(--header-h) !important;
+                padding: 6px 10px !important;
+            }
+
+            /* --- Input fields touch-optimized --- */
+            .input-luxury {
+                font-size: 16px !important; /* prevents iOS zoom */
+                padding: 10px 12px !important;
+            }
+
+            /* --- POS stock alert banner --- */
+            [style*="display:flex; justify-content:space-between; align-items:center"][style*="background:rgba(239,68,68,0.1)"] {
+                flex-direction: column !important;
+                text-align: center !important;
+                gap: 8px !important;
+            }
+
+            /* --- Employees page --- */
+            .waiter-tracking-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+
+            /* --- Waiter tables grid --- */
+            .waiter-tables-grid {
+                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important;
+                gap: 8px !important;
+            }
+
+            /* --- Reports page header --- */
+            [style*="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap"] {
+                flex-direction: column !important;
+                gap: 10px !important;
+                text-align: center !important;
+            }
+
+            /* --- Manager home alerts grid (1fr 1fr) --- */
+            [style*="display:grid; grid-template-columns: 1fr 1fr; gap:15px"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* --- Stat card values on small screens --- */
+            .stat-card h2 {
+                font-size: 1.3rem !important;
+            }
+            .stat-card p {
+                font-size: 0.8rem !important;
+            }
+
+            /* --- Admin home quick access grid --- */
+            [style*="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))"][style*="gap:15px"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* --- Expenses page header bar --- */
+            [style*="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px"] {
+                flex-direction: column !important;
+                gap: 8px !important;
+                text-align: center !important;
+            }
+            [style*="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px"] > div {
+                flex-wrap: wrap !important;
+                justify-content: center !important;
+            }
+
+            /* --- Shift summary (closed) card --- */
+            [style*="max-width:600px"] {
+                max-width: 100% !important;
+                padding: 15px !important;
+            }
+            [style*="display:flex; justify-content:space-around"] {
+                flex-wrap: wrap !important;
+                gap: 12px !important;
+                justify-content: center !important;
+            }
+            [style*="font-size:1.3rem"][style*="display:flex; justify-content:space-between"] {
+                font-size: 1rem !important;
+                flex-direction: column !important;
+                text-align: center !important;
+                gap: 5px !important;
+            }
+
+            /* --- Print button on dashboard --- */
+            [style*="margin-bottom:20px; display:flex; justify-content:flex-end"] {
+                justify-content: center !important;
+            }
+            [style*="margin-bottom:20px; display:flex; justify-content:flex-end"] .btn-luxury {
+                font-size: 0.85rem !important;
+                padding: 8px 14px !important;
+            }
         }
 
         /* Tablets Fluid & Adaptive Screen Optimization */
@@ -1017,6 +1373,100 @@
                 font-size: 0.95rem !important;
             }
 
+            /* Collapse sidebar fully on very small phones */
+            :root {
+                --sidebar-w: 48px !important;
+            }
+            .sidebar {
+                width: 48px !important;
+                padding: 8px 2px !important;
+            }
+            .sidebar-link {
+                padding: 8px 2px !important;
+                border-radius: 6px !important;
+            }
+            .sidebar-link i {
+                font-size: 1rem !important;
+            }
+
+            /* KPI cards go single column on very small phones */
+            .stats-grid {
+                grid-template-columns: 1fr !important;
+                gap: 6px !important;
+            }
+
+            /* POS category buttons smaller */
+            .pos-layout [style*="display:flex; gap:8px; margin-bottom:8px; overflow-x:auto"] button {
+                padding: 6px 12px !important;
+                font-size: 0.75rem !important;
+            }
+
+            /* POS item cards even smaller grid */
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)) !important;
+                gap: 4px !important;
+            }
+
+            .pos-card {
+                padding: 8px !important;
+                border-radius: 10px !important;
+            }
+            .pos-card h3 {
+                font-size: 0.75rem !important;
+            }
+            .pos-card p {
+                font-size: 0.7rem !important;
+            }
+
+            /* Dashboard stat cards more compact */
+            .stat-card {
+                padding: 8px !important;
+            }
+            .stat-card h2 {
+                font-size: 1.1rem !important;
+            }
+            .stat-card i {
+                font-size: 1.3rem !important;
+                margin-bottom: 5px !important;
+            }
+
+            /* Reports stats */
+            [style*="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Shift ops smaller icon boxes */
+            .stats-grid [style*="width:42px; height:42px"] {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 0.9rem !important;
+            }
+            .stats-grid h3 {
+                font-size: 1rem !important;
+            }
+
+            /* Table grid */
+            .table-grid {
+                grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)) !important;
+                gap: 4px !important;
+            }
+            .table-btn {
+                font-size: 0.65rem !important;
+                padding: 5px !important;
+            }
+
+            /* Cart side total */
+            .cart-side h1 {
+                font-size: 1.6rem !important;
+            }
+
+            /* Header even more compact */
+            header h2 {
+                font-size: 0.9rem !important;
+            }
+            #clock {
+                font-size: 1rem !important;
+            }
         }
 
         @media print {
