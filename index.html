@@ -1867,11 +1867,17 @@
     /* ========== PAGE CONTAINER SCROLL FIX ========== */
     /* On mobile, let the page content flow naturally instead of being constrained */
     #page-kitchen.active,
-    #page-shift_ops.active {
+    #page-shift_ops.active,
+    #page-reports.active {
         flex: none !important;
         overflow-y: visible !important;
         height: auto !important;
-        min-height: auto !important;
+        min-height: 100% !important;
+    }
+    
+    /* ========== REPORTS PAGE ========== */
+    .dashboard-columns {
+        grid-template-columns: 1fr !important;
     }
 
     /* ========== EXPENSES PAGE ========== */
@@ -2798,18 +2804,18 @@
                 cashier: [{ id: 'pos', label: 'الكاشير', icon: 'cash-register' }, { id: 'kitchen', label: 'المتابعة', icon: 'desktop' }, { id: 'inventory', label: 'المخزن', icon: 'box' }, { id: 'expenses', label: 'المصروفات', icon: 'money-bill' }, { id: 'tables', label: 'الطاولات', icon: 'chair' }],
                 manager: [
                     { id: 'manager_home', label: 'الرئيسية', icon: 'crown' },
+                    { id: 'reports', label: 'تقارير', icon: 'file-invoice-dollar' },
                     { id: 'admin_inventory', label: 'المخزن الرئيسي', icon: 'box-open' },
                     { id: 'expenses', label: 'المصروفات', icon: 'money-bill' },
                     { id: 'dashboard', label: 'التحليلات', icon: 'chart-line' },
-                    { id: 'reports', label: 'تقارير', icon: 'file-invoice-dollar' },
                     { id: 'shift_ops', label: 'الوردية حية', icon: 'satellite-dish' },
                     { id: 'employees', label: 'الموظفين', icon: 'users' }
                 ],
                 admin: [
                     { id: 'admin_home', label: 'لوحة الإدارة', icon: 'user-tie' },
+                    { id: 'reports', label: 'تقارير', icon: 'file-invoice-dollar' },
                     { id: 'admin_inventory', label: 'المخزن الرئيسي', icon: 'box-open' },
                     { id: 'expenses', label: 'المصروفات', icon: 'money-bill' },
-                    { id: 'reports', label: 'تقارير', icon: 'file-invoice-dollar' },
                     { id: 'shift_ops', label: 'متابعة الوردية', icon: 'satellite-dish' },
                     { id: 'employees', label: 'الموظفين', icon: 'users' }
                 ]
@@ -4462,20 +4468,20 @@
                 cashier: [{ id: 'pos', label: 'الكاشير', icon: 'cash-register' }, { id: 'kitchen', label: 'المتابعة', icon: 'desktop' }, { id: 'inventory', label: 'المخزن', icon: 'box' }, { id: 'expenses', label: 'المصروفات', icon: 'money-bill' }, { id: 'tables', label: 'الطاولات', icon: 'chair' }],
                 manager: [
                     { id: 'manager_home', label: 'الرئيسية', icon: 'crown' },
+                    { id: 'reports', label: 'تقارير', icon: 'file-invoice-dollar' },
                     { id: 'inventory', label: 'مخزن أصناف البيع', icon: 'burger' },
                     { id: 'admin_inventory', label: 'المخزن الرئيسي', icon: 'box-open' },
                     { id: 'expenses', label: 'المصروفات', icon: 'money-bill' },
                     { id: 'dashboard', label: 'التحليلات', icon: 'chart-line' },
-                    { id: 'reports', label: 'تقارير', icon: 'file-invoice-dollar' },
                     { id: 'shift_ops', label: 'الوردية حية', icon: 'satellite-dish' },
                     { id: 'employees', label: 'الموظفين', icon: 'users' }
                 ],
                 admin: [
                     { id: 'admin_home', label: 'الرئيسية', icon: 'user-tie' },
+                    { id: 'reports', label: 'تقارير', icon: 'file-invoice-dollar' },
                     { id: 'inventory', label: 'مخزن أصناف البيع', icon: 'burger' },
                     { id: 'admin_inventory', label: 'المخزن الرئيسي', icon: 'box-open' },
                     { id: 'expenses', label: 'المصروفات', icon: 'money-bill' },
-                    { id: 'reports', label: 'تقارير', icon: 'file-invoice-dollar' },
                     { id: 'shift_ops', label: 'متابعة الوردية', icon: 'satellite-dish' },
                     { id: 'employees', label: 'الموظفين', icon: 'users' }
                 ]
