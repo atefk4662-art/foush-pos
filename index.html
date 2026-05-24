@@ -1863,7 +1863,43 @@
     }
 }
 
-    </style>
+    @media (max-width: 900px) {
+    /* Hard override for expenses grid */
+    div.expenses-layout-grid {
+        grid-template-columns: 1fr !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+    }
+    div.expenses-layout-grid > div.cart-side {
+        width: 100% !important;
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    /* Hard override for Cashier Stats Grid */
+    #page-pos div[style*="minmax(180px"] {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Hard override for Cashier active orders buttons */
+    #page-pos div[style*="flex:1; min-width:100px"] {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        margin-bottom: 5px !important;
+    }
+    
+    /* Also target tracking page just in case */
+    #page-shift_ops div[style*="minmax(180px"] {
+        grid-template-columns: 1fr !important;
+    }
+    #page-shift_ops div[style*="flex:1; min-width:100px"] {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+    }
+}
+</style>
 </head>
 
 <body>
