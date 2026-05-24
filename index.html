@@ -1864,7 +1864,7 @@
 }
 
     @media (max-width: 900px) {
-    /* Hard override for expenses grid */
+    /* ========== EXPENSES PAGE ========== */
     div.expenses-layout-grid {
         grid-template-columns: 1fr !important;
         display: flex !important;
@@ -1877,26 +1877,138 @@
         height: auto !important;
         overflow: visible !important;
     }
-    
-    /* Hard override for Cashier Stats Grid */
+
+    /* ========== KITCHEN PAGE (Cashier Stats Grid) ========== */
+    /* The cashier stats use inline: grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) */
+    #page-kitchen > div[style*="minmax(180px"],
+    #page-kitchen > div[style*="repeat(auto-fit"] {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        padding: 12px !important;
+    }
+    #page-kitchen > div[style*="minmax(180px"] > div {
+        border-right: none !important;
+        padding-right: 0 !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        padding-bottom: 10px !important;
+    }
+    #page-kitchen > div[style*="minmax(180px"] > div:last-child {
+        border-bottom: none !important;
+        padding-bottom: 0 !important;
+    }
+    #page-kitchen > div[style*="minmax(180px"] span[style*="font-size:1.8rem"] {
+        font-size: 1.4rem !important;
+    }
+
+    /* ========== KITCHEN PAGE (Status Badges Row) ========== */
+    /* The badges row uses flex:1; min-width:100px on each badge */
+    #page-kitchen > div[style*="margin-bottom:15px"][style*="display:flex"] {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    #page-kitchen > div[style*="margin-bottom:15px"][style*="display:flex"] > div[style*="display:flex"][style*="gap:10px"] {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+    }
+    #page-kitchen > div[style*="margin-bottom:15px"][style*="display:flex"] > div[style*="display:flex"][style*="gap:10px"] > div {
+        min-width: 0 !important;
+        padding: 6px 8px !important;
+        flex: unset !important;
+    }
+    #page-kitchen > div[style*="margin-bottom:15px"][style*="display:flex"] > div[style*="display:flex"][style*="gap:10px"] > div > div:first-child {
+        font-size: 0.65rem !important;
+    }
+    #page-kitchen > div[style*="margin-bottom:15px"][style*="display:flex"] > div[style*="display:flex"][style*="gap:10px"] > div > div:last-child {
+        font-size: 1rem !important;
+    }
+    /* Canceled orders button in kitchen */
+    #page-kitchen > div[style*="margin-bottom:15px"] > div[style*="display:flex"][style*="gap:8px"][style*="align-items:center"] {
+        width: 100% !important;
+    }
+    #page-kitchen > div[style*="margin-bottom:15px"] .btn-luxury.danger {
+        width: 100% !important;
+        font-size: 0.85rem !important;
+        padding: 8px 12px !important;
+    }
+
+    /* ========== KITCHEN LAYOUT GRID (columns) ========== */
+    .kitchen-layout-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        overflow-x: visible !important;
+        height: auto !important;
+        gap: 12px !important;
+    }
+    .kitchen-layout-grid > div {
+        min-width: 0 !important;
+        width: 100% !important;
+        flex-shrink: 1 !important;
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    .kitchen-mobile-tabs {
+        display: flex !important;
+    }
+    .kitchen-layout-grid > div {
+        display: none !important;
+    }
+    .kitchen-layout-grid.show-summary > div:nth-child(1),
+    .kitchen-layout-grid.show-preparing > div:nth-child(2),
+    .kitchen-layout-grid.show-ready_dinein > div:nth-child(3),
+    .kitchen-layout-grid.show-ready_external > div:nth-child(4) {
+        display: block !important;
+    }
+
+    /* ========== SHIFT OPS PAGE (KPI Cards) ========== */
+    #page-shift_ops .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+    #page-shift_ops .stats-grid > div {
+        padding: 14px 10px !important;
+    }
+    #page-shift_ops .stats-grid > div h3 {
+        font-size: 1.2rem !important;
+    }
+    #page-shift_ops .stats-grid > div p {
+        font-size: 0.7rem !important;
+    }
+    #page-shift_ops .stats-grid > div div[style*="width:42px"] {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 1rem !important;
+    }
+    /* Shift ops detailed sections */
+    #page-shift_ops [style*="minmax(300px"] {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    /* Shift ops live header banner */
+    #page-shift_ops [style*="display:flex"][style*="justify-content:space-between"][style*="flex-wrap:wrap"][style*="gap:12px"] {
+        flex-direction: column !important;
+        text-align: center !important;
+        padding: 14px !important;
+    }
+    #page-shift_ops [style*="font-size:1.25rem"] {
+        font-size: 1rem !important;
+    }
+
+    /* ========== POS CASHIER STATS ========== */
     #page-pos div[style*="minmax(180px"] {
         grid-template-columns: 1fr !important;
     }
-    
-    /* Hard override for Cashier active orders buttons */
-    #page-pos div[style*="flex:1; min-width:100px"] {
-        flex: 1 1 100% !important;
-        width: 100% !important;
-        margin-bottom: 5px !important;
-    }
-    
-    /* Also target tracking page just in case */
-    #page-shift_ops div[style*="minmax(180px"] {
+}
+
+@media (max-width: 480px) {
+    /* Extra small: KPI cards go single column */
+    #page-shift_ops .stats-grid {
         grid-template-columns: 1fr !important;
     }
-    #page-shift_ops div[style*="flex:1; min-width:100px"] {
-        flex: 1 1 100% !important;
-        width: 100% !important;
+    /* Kitchen badges 2 columns on very small */
+    #page-kitchen > div[style*="margin-bottom:15px"][style*="display:flex"] > div[style*="display:flex"][style*="gap:10px"] {
+        grid-template-columns: repeat(2, 1fr) !important;
     }
 }
 </style>
