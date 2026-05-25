@@ -893,31 +893,42 @@
             }
 
             .kitchen-layout-grid {
-                flex: 1 !important;
-                min-height: 0 !important;
-                overflow-x: auto !important;
-                overflow-y: hidden !important;
-                display: flex !important;
-                gap: 15px !important;
-                scroll-snap-type: x mandatory !important;
-                -webkit-overflow-scrolling: touch !important;
+                flex: none !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px !important;
+                height: auto !important;
+                overflow: visible !important;
             }
 
             .kitchen-layout-grid > div {
                 display: flex !important;
                 flex-direction: column !important;
-                min-width: 85vw !important; /* Make columns almost full width on mobile */
-                height: 100% !important;
+                min-width: 0 !important;
+                width: 100% !important;
+                height: 380px !important; /* Fixed height so they scroll internally */
                 flex-shrink: 0;
-                overflow-y: auto !important; /* Allow scrolling within the column */
-                padding-bottom: 20px !important;
-                scroll-snap-align: center !important;
+                overflow-y: auto !important;
+                padding-bottom: 10px !important;
             }
 
             /* New Grid Overrides */
             .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+                grid-template-columns: 1fr 1fr !important;
                 gap: 8px !important;
+            }
+
+            /* Robust Mobile Scrolling */
+            .main-content {
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            .page-container {
+                overflow-y: visible !important;
+                height: auto !important;
+                min-height: 100% !important;
+                flex: none !important;
+            }
                 margin-bottom: 10px !important;
             }
 
@@ -2424,7 +2435,7 @@
             <div id="billing-badge"
                 style="display:none; background:#a855f7; color:#fff; font-weight:900; padding:5px 12px; border-radius:20px; font-size:0.9rem; animation:pulse-purple 1.5s infinite; cursor:pointer;"
                 onclick="window.switchPage('pos')">💰 <span id="billing-count">0</span> طلب حساب!</div>
-            <button id="clear-storage-btn" onclick="localStorage.clear(); location.reload();" class="btn-luxury"
+            <button id="clear-storage-btn" onclick="if(prompt('تحذير! هذا الخيار سيمسح جميع البيانات من النظام! أدخل الرقم السري (12345) للتأكيد:') === '12345') { localStorage.clear(); location.reload(); }" class="btn-luxury"
                 style="width:auto; background:var(--bg); color:var(--primary); border:1px solid var(--primary); padding:5px 10px; font-size:0.7rem;">مسح
                 التخزين 🧹</button>
             <h2
@@ -2584,6 +2595,8 @@
             window.render();
         };
 
+        window.isFirebaseLoaded = false;
+
         window.save = () => {
             try {
                 if (!window.state.db.employees) window.state.db.employees = [];
@@ -2610,7 +2623,12 @@
                 localStorage.setItem('f_main_inventory', JSON.stringify(window.state.db.main_inventory));
                 localStorage.setItem('f_frequent_expenses', JSON.stringify(window.state.db.frequent_expenses));
                 localStorage.setItem('f_waste_log', JSON.stringify(window.state.db.waste_log));
-                if (database) { const safeDb = JSON.parse(JSON.stringify(window.state.db)); database.ref('foush').set(safeDb).catch(e => console.error("Firebase save error:", e)); }
+                
+                // Only push to Firebase if we have successfully loaded data from it first, to prevent wiping the cloud with empty local state.
+                if (database && window.isFirebaseLoaded) { 
+                    const safeDb = JSON.parse(JSON.stringify(window.state.db)); 
+                    database.ref('foush').set(safeDb).catch(e => console.error("Firebase save error:", e)); 
+                }
                 window.render();
             } catch (e) { console.error("Critical Save Error", e); window.render(); }
         };
@@ -5171,6 +5189,7 @@
         let isInitialOrdersLoad = true;
         if (database) {
             database.ref('foush').on('value', (s) => {
+                window.isFirebaseLoaded = true;
                 const data = s.val(); if (data) {
                     const ensureArray = (arr) => {
                         if (!arr) return [];
