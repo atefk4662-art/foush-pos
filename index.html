@@ -2,11 +2,15 @@
 <html lang="ar" dir="rtl">
 
 <head>
+    <link rel="stylesheet" href="pwa-install.css">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="icon" type="image/x-icon" href="logo.ico">
+    <link rel="shortcut icon" href="logo.ico">
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>فؤش ابن سيد للطواجن | FOUSH POS v11.83</title>
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json?v=2">
     <meta name="theme-color" content="#0a0f0d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -924,13 +928,12 @@
                 -webkit-overflow-scrolling: touch !important;
             }
             .page-container {
-                overflow-y: visible !important;
-                height: auto !important;
-                min-height: 100% !important;
-                flex: none !important;
-            }
-                margin-bottom: 10px !important;
-            }
+            overflow-y: visible !important;
+            height: auto !important;
+            min-height: 100% !important;
+            flex: none !important;
+            margin-bottom: 10px !important;
+        }
 
             .quick-access-grid {
                 grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
@@ -2193,6 +2196,36 @@
         </div>
     </div>
 
+    <!-- NEW: Report Executive Drilldown Modal -->
+    <div id="report-drilldown-modal" class="overlay" style="display:none; z-index:99999;">
+        <div class="modal-body" style="width:700px; max-width:95vw; max-height:90vh; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+                <h2 id="report-drilldown-title" style="margin:0; color:var(--primary); font-family:'Cairo'; font-weight:900;">التحليل</h2>
+                
+                <!-- Local Modal Dropdown Filter -->
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="date" id="report-filter-custom-date" style="display:none; background:rgba(0,0,0,0.5); color:#fff; border:1px solid var(--primary); padding:8px; border-radius:8px; font-family:'Cairo';" onchange="window.updateReportModalFilter('custom')">
+                    <select id="report-filter-select" onchange="window.updateReportModalFilter(this.value)" class="input-luxury" style="margin:0; font-size:0.9rem; padding:8px 12px; background:rgba(0,0,0,0.5); color:#fff; border:1px solid rgba(255,255,255,0.2); width:auto;">
+                        <option value="all">كل البيانات التاريخية</option>
+                        <option value="today">اليوم</option>
+                        <option value="yesterday">الأمس</option>
+                        <option value="week">هذا الأسبوع</option>
+                        <option value="month">هذا الشهر</option>
+                        <option value="custom">يوم مخصص...</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="report-drilldown-content" style="flex:1; overflow-y:auto; padding-right:5px;" class="hide-scroll"></div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; gap:10px;">
+                <button onclick="window.exportShiftsToCSV()" id="report-modal-export-btn" class="btn-luxury" style="width:auto; padding:8px 20px; font-weight:900; font-size:0.9rem; display:none;"><i class="fa-solid fa-file-excel"></i> تصدير (Excel)</button>
+                <button onclick="document.getElementById('report-drilldown-modal').style.display='none'" class="btn-luxury danger" style="flex:1; font-weight:900;">إغلاق النافذة</button>
+            </div>
+        </div>
+    </div>
+
+
     <div id="inventory-modal" class="overlay" style="display:none;">
         <div class="modal-body" style="width:400px;">
             <h2 style="margin-bottom:20px;">إضافة صنف جديد</h2>
@@ -2483,12 +2516,82 @@
         const firebaseConfig = { apiKey: "AIzaSyCLUuixSAwBVGAIRqTbwC_QzwS-wknOEuc", authDomain: "tawajen-foush.firebaseapp.com", databaseURL: "https://tawajen-foush-default-rtdb.firebaseio.com", projectId: "tawajen-foush", storageBucket: "tawajen-foush.firebasestorage.app", messagingSenderId: "821143454397", appId: "1:821143454397:web:fab79978563ad46a1f2dd4", measurementId: "G-V04VKH29XW" };
         let database = null; try { if (typeof firebase !== 'undefined') { firebase.initializeApp(firebaseConfig); database = firebase.database(); } } catch (e) { }
 
+        // ─── Local Server Detection & Hybrid Sync ─────────────────────────
+        window.isLocalServer = false;
+        window.localServerVersion = 0;
+        window.localServerHash = '';
+        window.localSyncStatus = 'detecting'; // detecting, connected, disconnected
+        window._localPollTimer = null;
+        window._localBaseUrl = window.location.origin; // e.g., http://192.168.1.100:8000
+
+        // Detect if we're running on the local POS server
+        (async function detectLocalServer() {
+            try {
+                const res = await fetch('/api/ping', { method: 'GET', cache: 'no-cache', signal: AbortSignal.timeout(2000) });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.ok) {
+                        window.isLocalServer = true;
+                        window.localSyncStatus = 'connected';
+                        console.log('🏠 Local Server detected! Using local sync mode.');
+                        // Start local polling for real-time updates
+                        startLocalPolling();
+                    }
+                }
+            } catch (e) {
+                window.isLocalServer = false;
+                window.localSyncStatus = 'disconnected';
+                console.log('☁️  No local server found. Using Firebase cloud sync.');
+            }
+        })();
+
+        // Local server polling for real-time updates from other devices
+        function startLocalPolling() {
+            if (window._localPollTimer) clearInterval(window._localPollTimer);
+            let consecutiveErrors = 0;
+
+            window._localPollTimer = setInterval(async () => {
+                try {
+                    const res = await fetch('/api/version', { cache: 'no-cache', signal: AbortSignal.timeout(2000) });
+                    if (!res.ok) throw new Error('Version check failed');
+                    const info = await res.json();
+                    consecutiveErrors = 0;
+                    window.localSyncStatus = 'connected';
+
+                    // Only fetch full DB if version changed (another device saved)
+                    if (info.v > window.localServerVersion || info.h !== window.localServerHash) {
+                        const dbRes = await fetch('/api/db', { cache: 'no-cache', signal: AbortSignal.timeout(5000) });
+                        if (dbRes.ok) {
+                            const data = await dbRes.json();
+                            window.localServerVersion = info.v;
+                            window.localServerHash = info.h;
+                            // Process the update (same as Firebase listener)
+                            if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+                                window.handleDatabaseUpdate(data);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    consecutiveErrors++;
+                    if (consecutiveErrors >= 10) {
+                        window.localSyncStatus = 'disconnected';
+                        console.warn('⚠️ Local server connection lost. Falling back to Firebase.');
+                        clearInterval(window._localPollTimer);
+                        window.isLocalServer = false;
+                        // Re-enable Firebase listener if available
+                        if (database) enableFirebaseListener();
+                    }
+                }
+            }, 500); // Poll every 500ms (instant on LAN)
+        }
+
+
         const DEFAULT_MENU = [{ id: 1, name: 'طاجن لحم', price: 250, category: 'طواجن', stock: 100 }, { id: 2, name: 'أرز بالشعيرية', price: 40, category: 'أرز وفتة', stock: 100, unlimited: true }, { id: 3, name: 'شوربة طواجن', price: 60, category: 'شوربة', stock: 100 }];
         function safeGet(k, d) { try { const v = localStorage.getItem(k); return (v && v !== 'undefined') ? JSON.parse(v) : d; } catch (e) { return d; } }
 
         window.state = {
             role: sessionStorage.getItem('foush_role'), page: sessionStorage.getItem('foush_last_page') || 'pos',
-            db: { menu: safeGet('f_menu', DEFAULT_MENU), orders: safeGet('f_orders', []), exp: safeGet('f_exp', []), shift: safeGet('f_shift', null), tables: safeGet('f_tables', []), shifts_history: safeGet('f_history', []), stock_history: safeGet('f_stock_history', []), employees: safeGet('f_employees', []), attendance: safeGet('f_attendance', []), main_inventory: safeGet('f_main_inventory', []), frequent_expenses: safeGet('f_frequent_expenses', []), waste_log: safeGet('f_waste_log', []) },
+            db: { menu: safeGet('f_menu', DEFAULT_MENU), orders: safeGet('f_orders', []), historical_orders: safeGet('f_historical_orders', []), exp: safeGet('f_exp', []), shift: safeGet('f_shift', null), tables: safeGet('f_tables', []), shifts_history: safeGet('f_history', []), stock_history: safeGet('f_stock_history', []), employees: safeGet('f_employees', []), attendance: safeGet('f_attendance', []), main_inventory: safeGet('f_main_inventory', []), frequent_expenses: safeGet('f_frequent_expenses', []), waste_log: safeGet('f_waste_log', []) },
             cart: [], cat: 'الكل', invCat: 'الكل', type: 'takeaway', selectedTable: 'خارجي', tempOrder: null, selectedItemId: null, editingTableId: null, custName: '', custPhone: ''
         };
 
@@ -2606,6 +2709,7 @@
                 if (!window.state.db.exp) window.state.db.exp = [];
                 if (!window.state.db.tables) window.state.db.tables = [];
                 if (!window.state.db.shifts_history) window.state.db.shifts_history = [];
+                if (!window.state.db.historical_orders) window.state.db.historical_orders = [];
                 if (!window.state.db.stock_history) window.state.db.stock_history = [];
                 if (!window.state.db.main_inventory) window.state.db.main_inventory = [];
                 if (!window.state.db.frequent_expenses) window.state.db.frequent_expenses = [];
@@ -2613,6 +2717,7 @@
 
                 localStorage.setItem('f_menu', JSON.stringify(window.state.db.menu));
                 localStorage.setItem('f_orders', JSON.stringify(window.state.db.orders));
+                localStorage.setItem('f_historical_orders', JSON.stringify(window.state.db.historical_orders));
                 localStorage.setItem('f_exp', JSON.stringify(window.state.db.exp));
                 localStorage.setItem('f_shift', JSON.stringify(window.state.db.shift));
                 localStorage.setItem('f_tables', JSON.stringify(window.state.db.tables));
@@ -2624,9 +2729,29 @@
                 localStorage.setItem('f_frequent_expenses', JSON.stringify(window.state.db.frequent_expenses));
                 localStorage.setItem('f_waste_log', JSON.stringify(window.state.db.waste_log));
                 
-                // Only push to Firebase if we have successfully loaded data from it first, to prevent wiping the cloud with empty local state.
-                if (database && window.isFirebaseLoaded) { 
-                    const safeDb = JSON.parse(JSON.stringify(window.state.db)); 
+                // ─── Hybrid Save: Local Server (priority) or Firebase (fallback) ───
+                const safeDb = JSON.parse(JSON.stringify(window.state.db));
+
+                if (window.isLocalServer) {
+                    // Save to local server (fast, no internet needed)
+                    fetch('/api/db', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(safeDb)
+                    }).then(r => r.json()).then(info => {
+                        if (info.ok) {
+                            window.localServerVersion = info.v;
+                            window.localServerHash = info.h;
+                        }
+                    }).catch(e => {
+                        console.warn('Local save failed, falling back to Firebase:', e);
+                        // Fallback to Firebase if local server fails
+                        if (database && window.isFirebaseLoaded) {
+                            database.ref('foush').set(safeDb).catch(e2 => console.error("Firebase save error:", e2));
+                        }
+                    });
+                } else if (database && window.isFirebaseLoaded) {
+                    // Direct Firebase save (cloud mode - for remote manager access)
                     database.ref('foush').set(safeDb).catch(e => console.error("Firebase save error:", e)); 
                 }
                 window.render();
@@ -2734,7 +2859,9 @@
             }
 
             // Validate role matches
-            if (emp.role !== role && role !== 'manager' && role !== 'admin') {
+            const isManagementRequested = (role === 'manager' || role === 'admin');
+            const isEmployeeManagement = (emp.role === 'manager' || emp.role === 'admin');
+            if (emp.role !== role && !(isManagementRequested && isEmployeeManagement)) {
                 const roleLabels = { waiter: 'ويتر🤵', cashier: 'كاشير💰', kitchen: 'طباخ🔥', manager: 'المالك👑', admin: 'إدارة💼' };
                 error.textContent = `عفواً، هذا الكود خاص بـ ${roleLabels[emp.role] || emp.role} وليس ${roleLabels[role]}! ❌`;
                 window.playSound('error');
@@ -4320,128 +4447,873 @@
             window.showToast("📊 تم تصدير التقرير كملف CSV بنجاح!");
         };
 
+        window.state.reportModalType = null;
+        window.state.reportModalFilter = 'all';
+
+        window.updateReportModalFilter = (filter) => {
+            window.state.reportModalFilter = filter;
+            const customInput = document.getElementById('report-filter-custom-date');
+            
+            if (filter === 'custom' || customInput.value) {
+                customInput.style.display = 'inline-block';
+            } else {
+                customInput.style.display = 'none';
+                customInput.value = '';
+            }
+            
+            // If custom is selected but no date is picked yet, don't re-render yet.
+            if (filter === 'custom' && !customInput.value) return;
+
+            // Re-render the modal content with the new filter
+            window.openReportDrilldown(window.state.reportModalType, true);
+        };
+
+        window.openReportDrilldown = (type, keepFilter = false) => {
+            if (!keepFilter) {
+                window.state.reportModalFilter = 'all'; // Default when opening fresh
+                document.getElementById('report-filter-select').value = 'all';
+                window.updateReportModalFilter('all');
+            }
+            window.state.reportModalType = type;
+            
+            const title = document.getElementById('report-drilldown-title');
+            const content = document.getElementById('report-drilldown-content');
+            const exportBtn = document.getElementById('report-modal-export-btn');
+            
+            exportBtn.style.display = type === 'history' ? 'block' : 'none';
+
+            const rawHistory = window.state.db.shifts_history || [];
+            const rawOrders = window.state.db.historical_orders || [];
+            const rawExp = window.state.db.exp || [];
+            const now = Date.now();
+            let history = rawHistory;
+            let filteredOrders = rawOrders;
+            let filteredExp = rawExp;
+            
+            const customDateInput = document.getElementById('report-filter-custom-date').value;
+            
+            if (window.state.reportModalFilter === 'today') {
+                const todayStart = new Date().setHours(0,0,0,0);
+                history = rawHistory.filter(h => h.start >= todayStart);
+                filteredOrders = rawOrders.filter(o => o.time >= todayStart);
+                filteredExp = rawExp.filter(e => e.time >= todayStart);
+            } else if (window.state.reportModalFilter === 'yesterday') {
+                const yesterdayStart = new Date();
+                yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+                yesterdayStart.setHours(0,0,0,0);
+                const todayStart = new Date().setHours(0,0,0,0);
+                history = rawHistory.filter(h => h.start >= yesterdayStart && h.start < todayStart);
+                filteredOrders = rawOrders.filter(o => o.time >= yesterdayStart && o.time < todayStart);
+                filteredExp = rawExp.filter(e => e.time >= yesterdayStart && e.time < todayStart);
+            } else if (window.state.reportModalFilter === 'week') {
+                const weekStart = now - (7 * 24 * 60 * 60 * 1000);
+                history = rawHistory.filter(h => h.start >= weekStart);
+                filteredOrders = rawOrders.filter(o => o.time >= weekStart);
+                filteredExp = rawExp.filter(e => e.time >= weekStart);
+            } else if (window.state.reportModalFilter === 'month') {
+                const monthStart = now - (30 * 24 * 60 * 60 * 1000);
+                history = rawHistory.filter(h => h.start >= monthStart);
+                filteredOrders = rawOrders.filter(o => o.time >= monthStart);
+                filteredExp = rawExp.filter(e => e.time >= monthStart);
+            } else if (window.state.reportModalFilter === 'custom' && customDateInput) {
+                const cDate = new Date(customDateInput);
+                const startOfDay = cDate.setHours(0,0,0,0);
+                const endOfDay = cDate.setHours(23,59,59,999);
+                history = rawHistory.filter(h => h.start >= startOfDay && h.start <= endOfDay);
+                filteredOrders = rawOrders.filter(o => o.time >= startOfDay && o.time <= endOfDay);
+                filteredExp = rawExp.filter(e => e.time >= startOfDay && e.time <= endOfDay);
+            }
+
+            if (type === 'sales') {
+                title.innerHTML = '<i class="fa-solid fa-sack-dollar"></i> تحليل الإيرادات وطرق الدفع';
+                const totalSales = history.reduce((s, h) => s + (h.sales || 0), 0);
+                const totalCash = history.reduce((s, h) => s + (h.cashSales || 0), 0);
+                const totalVisa = history.reduce((s, h) => s + (h.visaSales || 0), 0);
+                const totalWallet = history.reduce((s, h) => s + (h.walletSales || 0), 0);
+                
+                const cashPct = totalSales > 0 ? Math.round((totalCash / totalSales) * 100) : 0;
+                const visaPct = totalSales > 0 ? Math.round((totalVisa / totalSales) * 100) : 0;
+                const walletPct = totalSales > 0 ? Math.round((totalWallet / totalSales) * 100) : 0;
+
+                const paidOrders = filteredOrders.filter(o => o.paid && o.status !== 'canceled');
+                const ordersHtml = paidOrders.length > 0 ? paidOrders.slice().reverse().map(o => `
+                    <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:900; color:var(--primary); font-size:0.9rem;">#${o.id} - ${new Date(o.time).toLocaleString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</div>
+                            <div style="font-size:0.75rem; opacity:0.6;">${o.items.map(i=>i.name).join('، ')}</div>
+                        </div>
+                        <div style="text-align:left;">
+                            <div style="font-weight:900; color:var(--success);">${o.total - (o.discount||0)} ج</div>
+                            <div style="font-size:0.7rem; opacity:0.8; background:rgba(0,0,0,0.3); padding:2px 5px; border-radius:4px;">${o.paymentMethod==='visa'?'فيزا 💳':o.paymentMethod==='wallet'?'محفظة 📱':'كاش 💵'}</div>
+                        </div>
+                    </div>
+                `).join('') : '<p style="text-align:center; opacity:0.5; font-size:0.8rem;">لا توجد أوردرات مسجلة في هذه الفترة</p>';
+
+                content.innerHTML = `
+                    <div style="background:rgba(255,255,255,0.02); padding:20px; border-radius:15px; border:1px solid rgba(255,255,255,0.05); margin-bottom:15px;">
+                        <h3 style="margin-top:0; color:var(--success); font-family:'Orbitron'; font-size:2rem; text-align:center;">${totalSales.toLocaleString()} ج.م</h3>
+                        <p style="text-align:center; opacity:0.6; margin:0;">إجمالي مبيعات الفترة المحددة</p>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:18px; margin-bottom:20px;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.9rem;">
+                                <span>كاش 💵 <span style="opacity:0.6; font-size:0.8rem;">(${totalCash.toLocaleString()} ج)</span></span>
+                                <span style="font-weight:900; color:#34d399;">${cashPct}%</span>
+                            </div>
+                            <div style="height:12px; background:#1e293b; border-radius:6px; overflow:hidden;">
+                                <div style="width:${cashPct}%; height:100%; background:linear-gradient(90deg, #10b981, #34d399); border-radius:6px;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.9rem;">
+                                <span>فيزا 💳 <span style="opacity:0.6; font-size:0.8rem;">(${totalVisa.toLocaleString()} ج)</span></span>
+                                <span style="font-weight:900; color:#60a5fa;">${visaPct}%</span>
+                            </div>
+                            <div style="height:12px; background:#1e293b; border-radius:6px; overflow:hidden;">
+                                <div style="width:${visaPct}%; height:100%; background:linear-gradient(90deg, #3b82f6, #60a5fa); border-radius:6px;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.9rem;">
+                                <span>محافظ 📱 <span style="opacity:0.6; font-size:0.8rem;">(${totalWallet.toLocaleString()} ج)</span></span>
+                                <span style="font-weight:900; color:var(--primary);">${walletPct}%</span>
+                            </div>
+                            <div style="height:12px; background:#1e293b; border-radius:6px; overflow:hidden;">
+                                <div style="width:${walletPct}%; height:100%; background:linear-gradient(90deg, var(--primary), #fbbf24); border-radius:6px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 style="color:var(--primary); font-family:'Cairo'; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;"><i class="fa-solid fa-list-ol"></i> تفاصيل الأوردرات</h4>
+                    <div style="max-height:300px; overflow-y:auto; padding-right:5px;" class="hide-scroll">
+                        ${ordersHtml}
+                    </div>
+                `;
+            } else if (type === 'expenses') {
+                title.innerHTML = '<i class="fa-solid fa-receipt"></i> تحليل المصروفات التفصيلي';
+                const totalExp = history.reduce((s, h) => s + (h.expenses || 0), 0);
+                
+                const expHtml = filteredExp.length > 0 ? filteredExp.slice().reverse().map(e => `
+                    <div style="background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.1); padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:900; color:#fff; font-size:0.9rem;">${e.name || 'مصروف عام'}</div>
+                            <div style="font-size:0.75rem; opacity:0.6;">${e.details || 'بدون تفاصيل'} - ${new Date(e.time).toLocaleString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</div>
+                        </div>
+                        <div style="font-weight:900; color:var(--danger);">${(e.amount||0).toLocaleString()} ج</div>
+                    </div>
+                `).join('') : '<p style="text-align:center; opacity:0.5; font-size:0.8rem;">لا توجد مصروفات مسجلة في هذه الفترة</p>';
+
+                content.innerHTML = `
+                    <div style="background:rgba(239,68,68,0.05); padding:20px; border-radius:15px; border:1px solid rgba(239,68,68,0.1); margin-bottom:15px; text-align:center;">
+                        <h3 style="margin-top:0; color:var(--danger); font-family:'Orbitron'; font-size:2rem;">${totalExp.toLocaleString()} ج.م</h3>
+                        <p style="opacity:0.6; margin:0;">إجمالي النفقات المخصومة من الورديات</p>
+                    </div>
+                    
+                    <h4 style="color:var(--danger); font-family:'Cairo'; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:10px;"><i class="fa-solid fa-list-ol"></i> بنود المصروفات</h4>
+                    <div style="max-height:300px; overflow-y:auto; padding-right:5px;" class="hide-scroll">
+                        ${expHtml}
+                    </div>
+                `;
+            } else if (type === 'profit') {
+                title.innerHTML = '<i class="fa-solid fa-vault"></i> تحليل الأرباح وصافي الدخل';
+                const totalSales = history.reduce((s, h) => s + (h.sales || 0), 0);
+                const totalExp = history.reduce((s, h) => s + (h.expenses || 0), 0);
+                const totalNet = history.reduce((s, h) => s + (h.net || 0), 0);
+                const profitMargin = totalSales > 0 ? Math.round((totalNet / totalSales) * 100) : 0;
+                let marginColor = profitMargin >= 20 ? 'var(--success)' : profitMargin >= 10 ? 'var(--primary)' : 'var(--danger)';
+
+                content.innerHTML = `
+                    <div style="background:rgba(251,191,36,0.1); padding:20px; border-radius:15px; border:1px solid rgba(251,191,36,0.2); margin-bottom:15px; text-align:center;">
+                        <h3 style="margin-top:0; color:var(--primary); font-family:'Orbitron'; font-size:2rem;">${totalNet.toLocaleString()} ج.م</h3>
+                        <p style="opacity:0.8; font-weight:900; color:var(--primary); margin:0;">الصافي الفعلي للأرباح</p>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; background:rgba(0,0,0,0.2); padding:15px; border-radius:10px; margin-bottom:10px;">
+                        <span>إجمالي الإيرادات:</span>
+                        <strong style="color:var(--success);">${totalSales.toLocaleString()} ج</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; background:rgba(0,0,0,0.2); padding:15px; border-radius:10px; margin-bottom:10px;">
+                        <span>إجمالي المصروفات (-):</span>
+                        <strong style="color:var(--danger);">${totalExp.toLocaleString()} ج</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); padding:15px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+                        <span>هامش الربح التشغيلي:</span>
+                        <div style="font-size:1.5rem; font-weight:900; color:${marginColor};">${profitMargin}%</div>
+                    </div>
+                `;
+            } else if (type === 'history') {
+                title.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i> سجل الوردية المفصل (البيانات الخام)';
+                content.innerHTML = `
+                <div style="overflow-x:auto;">
+                    <table class="foush-table">
+                        <thead>
+                            <tr>
+                                <th>الإغلاق</th>
+                                <th>المدة</th>
+                                <th>المبيعات</th>
+                                <th>المصروفات</th>
+                                <th>الصافي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${history.slice().reverse().map(h => {
+                                const durationHrs = Math.max(0.1, (h.end - h.start) / 3600000).toFixed(1);
+                                return `
+                            <tr>
+                                <td style="white-space:nowrap;">${new Date(h.end).toLocaleString('ar-EG', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}</td>
+                                <td style="opacity:0.8;">${durationHrs} س</td>
+                                <td style="color:var(--success); font-weight:900;">${(h.sales||0).toLocaleString()}</td>
+                                <td style="color:var(--danger); font-weight:900;">${(h.expenses||0).toLocaleString()}</td>
+                                <td style="color:var(--primary); font-weight:900; background:rgba(251,191,36,0.05);">${(h.net||0).toLocaleString()}</td>
+                            </tr>`}).join('') || `<tr><td colspan="5" style="text-align:center; opacity:0.5; padding:20px;">لا توجد بيانات مسجلة للفترة المحددة</td></tr>`}
+                        </tbody>
+                    </table>
+                </div>`;
+            }
+
+            document.getElementById('report-drilldown-modal').style.display = 'flex';
+        };
+
         function renderReports(c) {
-            const history = window.state.db.shifts_history || [];
-            const totalSales = history.reduce((s, h) => s + (h.sales || 0), 0);
-            const totalExp = history.reduce((s, h) => s + (h.expenses || 0), 0);
-            const totalNet = history.reduce((s, h) => s + (h.net || 0), 0);
+            // Safe initialization of local states
+            if (!window.state.activeReportsTab) {
+                window.state.activeReportsTab = 'financials';
+            }
+            if (!window.state.reportsFilters) {
+                window.state.reportsFilters = {};
+            }
+            const activeTab = window.state.activeReportsTab;
+            if (!window.state.reportsFilters[activeTab]) {
+                window.state.reportsFilters[activeTab] = 'all';
+            }
+            if (!window.state.reportsCustomDates) {
+                window.state.reportsCustomDates = {};
+            }
 
-            const totalCash = history.reduce((s, h) => s + (h.cashSales || 0), 0);
-            const totalVisa = history.reduce((s, h) => s + (h.visaSales || 0), 0);
-            const totalWallet = history.reduce((s, h) => s + (h.walletSales || 0), 0);
+            const rawHistory = window.state.db.shifts_history || [];
+            const rawOrders = window.state.db.historical_orders || [];
+            const rawExp = window.state.db.exp || [];
+            const rawWaste = window.state.db.waste_log || [];
+            const rawMenu = window.state.db.menu || [];
+            const rawMainInv = window.state.db.main_inventory || [];
 
-            const totalCount = history.length;
+            // All-Time aggregates for Executive Overview
+            const allTimeSales = rawHistory.reduce((s, h) => s + (h.sales || 0), 0);
+            const allTimeExp = rawHistory.reduce((s, h) => s + (h.expenses || 0), 0);
+            const allTimeNet = rawHistory.reduce((s, h) => s + (h.net || 0), 0);
+            const allTimeShiftsCount = rawHistory.length;
+            const allTimeAvgRevenue = allTimeShiftsCount > 0 ? Math.round(allTimeSales / allTimeShiftsCount) : 0;
 
-            // CSS bar chart percentages
-            const cashPct = totalSales > 0 ? Math.round((totalCash / totalSales) * 100) : 0;
-            const visaPct = totalSales > 0 ? Math.round((totalVisa / totalSales) * 100) : 0;
-            const walletPct = totalSales > 0 ? Math.round((totalWallet / totalSales) * 100) : 0;
+            // Current tab filter value
+            const currentFilter = window.state.reportsFilters[activeTab];
+            const customDate = window.state.reportsCustomDates[activeTab] || '';
 
+            // Get filtered data for the current tab
+            const now = Date.now();
+            let history = rawHistory;
+            let orders = rawOrders;
+            let exp = rawExp;
+            let waste = rawWaste;
+
+            if (currentFilter === 'today') {
+                const todayStart = new Date().setHours(0,0,0,0);
+                history = rawHistory.filter(h => h.end >= todayStart);
+                orders = rawOrders.filter(o => o.time >= todayStart);
+                exp = rawExp.filter(e => e.time >= todayStart);
+                waste = rawWaste.filter(w => w.time >= todayStart);
+            } else if (currentFilter === 'yesterday') {
+                const yesterdayStart = new Date();
+                yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+                yesterdayStart.setHours(0,0,0,0);
+                const todayStart = new Date().setHours(0,0,0,0);
+                const yesterdayEnd = todayStart - 1;
+                history = rawHistory.filter(h => h.end >= yesterdayStart.getTime() && h.end <= yesterdayEnd);
+                orders = rawOrders.filter(o => o.time >= yesterdayStart.getTime() && o.time <= yesterdayEnd);
+                exp = rawExp.filter(e => e.time >= yesterdayStart.getTime() && e.time <= yesterdayEnd);
+                waste = rawWaste.filter(w => w.time >= yesterdayStart.getTime() && w.time <= yesterdayEnd);
+            } else if (currentFilter === 'week') {
+                const weekStart = now - (7 * 24 * 60 * 60 * 1000);
+                history = rawHistory.filter(h => h.end >= weekStart);
+                orders = rawOrders.filter(o => o.time >= weekStart);
+                exp = rawExp.filter(e => e.time >= weekStart);
+                waste = rawWaste.filter(w => w.time >= weekStart);
+            } else if (currentFilter === 'month') {
+                const monthStart = now - (30 * 24 * 60 * 60 * 1000);
+                history = rawHistory.filter(h => h.end >= monthStart);
+                orders = rawOrders.filter(o => o.time >= monthStart);
+                exp = rawExp.filter(e => e.time >= monthStart);
+                waste = rawWaste.filter(w => w.time >= monthStart);
+            } else if (currentFilter === 'custom' && customDate) {
+                const cDate = new Date(customDate);
+                const startOfDay = new Date(cDate).setHours(0,0,0,0);
+                const endOfDay = new Date(cDate).setHours(23,59,59,999);
+                history = rawHistory.filter(h => h.end >= startOfDay && h.end <= endOfDay);
+                orders = rawOrders.filter(o => o.time >= startOfDay && o.time <= endOfDay);
+                exp = rawExp.filter(e => e.time >= startOfDay && e.time <= endOfDay);
+                waste = rawWaste.filter(w => w.time >= startOfDay && w.time <= endOfDay);
+            }
+
+            // Calculations for filtered period
+            const periodSales = history.reduce((s, h) => s + (h.sales || 0), 0);
+            const periodExp = exp.reduce((s, e) => s + (e.amount || 0), 0);
+            const periodNet = periodSales - periodExp;
+            const periodShiftsCount = history.length;
+
+            // Generate HTML for the active tab content
+            let tabContentHtml = '';
+
+            if (activeTab === 'financials') {
+                // Net Profit Margin
+                const margin = periodSales > 0 ? Math.round((periodNet / periodSales) * 100) : 0;
+                let marginColor = 'var(--success)';
+                if (margin < 10) marginColor = 'var(--danger)';
+                else if (margin < 20) marginColor = 'var(--primary)';
+
+                const cashSum = history.reduce((s, h) => s + (h.cashSales || 0), 0);
+                const visaSum = history.reduce((s, h) => s + (h.visaSales || 0), 0);
+                const walletSum = history.reduce((s, h) => s + (h.walletSales || 0), 0);
+
+                const totalPayments = cashSum + visaSum + walletSum;
+                const cashPct = totalPayments > 0 ? Math.round((cashSum / totalPayments) * 100) : 0;
+                const visaPct = totalPayments > 0 ? Math.round((visaSum / totalPayments) * 100) : 0;
+                const walletPct = totalPayments > 0 ? Math.round((walletSum / totalPayments) * 100) : 0;
+
+                // Visual comparisons
+                const maxVal = Math.max(periodSales, periodExp, 1);
+                const salesHeight = Math.round((periodSales / maxVal) * 140);
+                const expHeight = Math.round((periodExp / maxVal) * 140);
+
+                tabContentHtml = `
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; width:100%;">
+                        <!-- Left Panel: Summary & Comparison Chart -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:20px; border-radius:18px; display:flex; flex-direction:column; gap:20px;">
+                            <h4 style="margin:0; color:var(--primary); font-family:'Cairo'; font-weight:700;"><i class="fa-solid fa-scale-balanced" style="margin-left:6px;"></i> المقارنة المالية للفترة</h4>
+                            
+                            <div style="display:flex; justify-content:space-around; align-items:flex-end; height:180px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.15); border-radius:12px; position:relative;">
+                                <div style="display:flex; flex-direction:column; align-items:center; width:80px; z-index:2;">
+                                    <span style="font-size:0.8rem; font-weight:bold; color:var(--success); margin-bottom:5px;">${periodSales.toLocaleString()} ج</span>
+                                    <div style="width:35px; height:${salesHeight}px; min-height:5px; background:linear-gradient(180deg, var(--success), rgba(16,185,129,0.2)); border-radius:6px 6px 0 0; transition:height 0.5s ease-out; box-shadow:0 0 15px rgba(16,185,129,0.3);"></div>
+                                    <span style="font-size:0.8rem; opacity:0.7; margin-top:8px; font-weight:700;">الإيرادات</span>
+                                </div>
+                                <div style="display:flex; flex-direction:column; align-items:center; width:80px; z-index:2;">
+                                    <span style="font-size:0.8rem; font-weight:bold; color:var(--danger); margin-bottom:5px;">${periodExp.toLocaleString()} ج</span>
+                                    <div style="width:35px; height:${expHeight}px; min-height:5px; background:linear-gradient(180deg, var(--danger), rgba(239,68,68,0.2)); border-radius:6px 6px 0 0; transition:height 0.5s ease-out; box-shadow:0 0 15px rgba(239,68,68,0.3);"></div>
+                                    <span style="font-size:0.8rem; opacity:0.7; margin-top:8px; font-weight:700;">المصروفات</span>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                                <div>
+                                    <span style="font-size:0.85rem; opacity:0.6; display:block;">هامش الربح للفترة</span>
+                                    <span style="font-size:1.8rem; font-weight:900; color:${marginColor}; font-family:'Orbitron';">${margin}%</span>
+                                </div>
+                                <div style="text-align:left;">
+                                    <span style="font-size:0.85rem; opacity:0.6; display:block;">صافي الربح للفترة</span>
+                                    <span style="font-size:1.5rem; font-weight:900; color:var(--primary); font-family:'Orbitron';">${periodNet.toLocaleString()} ج</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Payment breakdown & performance -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:20px; border-radius:18px; display:flex; flex-direction:column; gap:18px;">
+                            <h4 style="margin:0; color:var(--primary); font-family:'Cairo'; font-weight:700;"><i class="fa-solid fa-credit-card" style="margin-left:6px;"></i> طرق سداد المبيعات</h4>
+                            
+                            <div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.85rem;">
+                                    <span>نقدًا (كاش) 💵</span>
+                                    <span style="font-weight:bold; color:var(--success);">${cashSum.toLocaleString()} ج (${cashPct}%)</span>
+                                </div>
+                                <div style="height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;">
+                                    <div style="width:${cashPct}%; height:100%; background:var(--success); border-radius:4px;"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.85rem;">
+                                    <span>فيزا / كارت 💳</span>
+                                    <span style="font-weight:bold; color:#3b82f6;">${visaSum.toLocaleString()} ج (${visaPct}%)</span>
+                                </div>
+                                <div style="height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;">
+                                    <div style="width:${visaPct}%; height:100%; background:#3b82f6; border-radius:4px;"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.85rem;">
+                                    <span>محافظ إلكترونية 📱</span>
+                                    <span style="font-weight:bold; color:var(--primary);">${walletSum.toLocaleString()} ج (${walletPct}%)</span>
+                                </div>
+                                <div style="height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;">
+                                    <div style="width:${walletPct}%; height:100%; background:var(--primary); border-radius:4px;"></div>
+                                </div>
+                            </div>
+
+                            <hr style="border:1px solid rgba(255,255,255,0.05); margin:5px 0;">
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                                <div style="background:rgba(0,0,0,0.15); padding:10px; border-radius:10px; text-align:center;">
+                                    <span style="font-size:0.75rem; opacity:0.6; display:block;">متوسط الإيراد للوردية</span>
+                                    <span style="font-size:1.1rem; font-weight:bold; color:#fff;">${periodShiftsCount > 0 ? Math.round(periodSales / periodShiftsCount).toLocaleString() : 0} ج</span>
+                                </div>
+                                <div style="background:rgba(0,0,0,0.15); padding:10px; border-radius:10px; text-align:center;">
+                                    <span style="font-size:0.75rem; opacity:0.6; display:block;">متوسط المصروف للوردية</span>
+                                    <span style="font-size:1.1rem; font-weight:bold; color:#fff;">${periodShiftsCount > 0 ? Math.round(periodExp / periodShiftsCount).toLocaleString() : 0} ج</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (activeTab === 'sales') {
+                const paidOrders = orders.filter(o => o.paid && o.status !== 'canceled');
+                
+                // Group by item name
+                const itemSales = {};
+                let totalItemsQty = 0;
+                let totalPeriodOrders = paidOrders.length;
+                
+                paidOrders.forEach(o => {
+                    (o.items || []).forEach(item => {
+                        if (!itemSales[item.name]) {
+                            itemSales[item.name] = { qty: 0, revenue: 0, category: item.category || 'عام' };
+                        }
+                        itemSales[item.name].qty += (item.qty || 0);
+                        itemSales[item.name].revenue += (item.qty * item.price);
+                        totalItemsQty += (item.qty || 0);
+                    });
+                });
+
+                const sortedItems = Object.keys(itemSales).map(name => ({
+                    name,
+                    qty: itemSales[name].qty,
+                    revenue: itemSales[name].revenue,
+                    category: itemSales[name].category
+                })).sort((a, b) => b.qty - a.qty);
+
+                const maxQty = sortedItems.length > 0 ? sortedItems[0].qty : 1;
+
+                // Group by category
+                const catSales = {};
+                let totalCategoryRevenue = 0;
+                sortedItems.forEach(item => {
+                    if (!catSales[item.category]) catSales[item.category] = 0;
+                    catSales[item.category] += item.revenue;
+                    totalCategoryRevenue += item.revenue;
+                });
+                
+                const sortedCategories = Object.keys(catSales).map(cat => ({
+                    name: cat,
+                    revenue: catSales[cat],
+                    pct: totalCategoryRevenue > 0 ? Math.round((catSales[cat] / totalCategoryRevenue) * 100) : 0
+                })).sort((a, b) => b.revenue - a.revenue);
+
+                const itemsListHtml = sortedItems.slice(0, 6).map(item => {
+                    const pct = Math.round((item.qty / maxQty) * 100);
+                    return `
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
+                                <span style="font-weight:bold;">${item.name} <span style="opacity:0.5; font-size:0.75rem;">(${item.category})</span></span>
+                                <span>${item.qty} قطعة | <strong style="color:var(--success);">${item.revenue.toLocaleString()} ج</strong></span>
+                            </div>
+                            <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+                                <div style="width:${pct}%; height:100%; background:linear-gradient(90deg, var(--primary), var(--success)); border-radius:3px;"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('') || '<p style="text-align:center; opacity:0.5; font-size:0.85rem; padding:20px;">لا توجد مبيعات مسجلة بالأصناف في هذه الفترة</p>';
+
+                const categoryListHtml = sortedCategories.map(cat => `
+                    <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:10px 15px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); margin-bottom:8px;">
+                        <span style="font-weight:bold;">${cat.name}</span>
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <span style="opacity:0.6; font-size:0.85rem;">${cat.revenue.toLocaleString()} ج</span>
+                            <span class="badge badge-ready" style="font-size:0.8rem; padding:3px 10px; border-radius:20px; font-weight:900;">${cat.pct}%</span>
+                        </div>
+                    </div>
+                `).join('') || '<p style="text-align:center; opacity:0.5; font-size:0.85rem; padding:20px;">لا توجد بيانات للأقسام</p>';
+
+                tabContentHtml = `
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; width:100%;">
+                        <!-- Left Panel: Top selling items -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:20px; border-radius:18px; display:flex; flex-direction:column; gap:15px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h4 style="margin:0; color:var(--primary); font-family:'Cairo'; font-weight:700;"><i class="fa-solid fa-fire" style="margin-left:6px;"></i> الأصناف الأكثر طلبًا</h4>
+                                <span style="font-size:0.75rem; opacity:0.5;">مرتبة بالكمية المباعة</span>
+                            </div>
+                            <div style="max-height:300px; overflow-y:auto; padding-right:5px;" class="hide-scroll">
+                                ${itemsListHtml}
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Sales by category and stats summary -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:20px; border-radius:18px; display:flex; flex-direction:column; gap:18px;">
+                            <h4 style="margin:0; color:var(--primary); font-family:'Cairo'; font-weight:700;"><i class="fa-solid fa-chart-pie" style="margin-left:6px;"></i> مبيعات الأقسام الرئيسية</h4>
+                            <div style="max-height:220px; overflow-y:auto; padding-right:5px;" class="hide-scroll">
+                                ${categoryListHtml}
+                            </div>
+                            <hr style="border:1px solid rgba(255,255,255,0.05); margin:0;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                                <div style="background:rgba(0,0,0,0.15); padding:10px; border-radius:10px; text-align:center;">
+                                    <span style="font-size:0.75rem; opacity:0.6; display:block;">عدد الفواتير المنفذة</span>
+                                    <span style="font-size:1.1rem; font-weight:bold; color:var(--success);">${totalPeriodOrders}} فواتير</span>
+                                </div>
+                                <div style="background:rgba(0,0,0,0.15); padding:10px; border-radius:10px; text-align:center;">
+                                    <span style="font-size:0.75rem; opacity:0.6; display:block;">متوسط قيمة الفاتورة</span>
+                                    <span style="font-size:1.1rem; font-weight:bold; color:var(--success);">${totalPeriodOrders > 0 ? Math.round(periodSales / totalPeriodOrders) : 0} ج</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (activeTab === 'inventory') {
+                const lowStockItems = rawMenu.filter(m => m.stock < 10).concat(rawMainInv.filter(i => i.qty < 10));
+                
+                const stockAlertHtml = lowStockItems.length > 0 ? lowStockItems.map(item => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.1); padding:8px 12px; border-radius:10px; margin-bottom:6px;">
+                        <span style="font-weight:bold; font-size:0.85rem;">${item.name}</span>
+                        <span class="badge badge-preparing" style="font-size:0.75rem; padding:2px 8px;">الرصيد: ${item.stock !== undefined ? item.stock : item.qty} ${item.unit || 'قطعة'}</span>
+                    </div>
+                `).join('') : '<p style="text-align:center; opacity:0.5; font-size:0.8rem; padding:10px; color:var(--success);">جميع مستويات المخزون آمنة وطبيعية ✅</p>';
+
+                // Waste log grouped by item
+                const wasteGrouped = {};
+                waste.forEach(w => {
+                    if (!wasteGrouped[w.itemName]) {
+                        wasteGrouped[w.itemName] = { qty: 0, unit: w.unit || 'قطعة', reason: w.reason || 'هادر عام', count: 0 };
+                    }
+                    wasteGrouped[w.itemName].qty += Number(w.qty || 0);
+                    wasteGrouped[w.itemName].count += 1;
+                });
+
+                const wasteListHtml = Object.keys(wasteGrouped).map(name => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:6px;">
+                        <div>
+                            <span style="font-weight:bold; font-size:0.85rem; display:block;">${name}</span>
+                            <span style="font-size:0.75rem; opacity:0.5;">السبب الشائع: ${wasteGrouped[name].reason}</span>
+                        </div>
+                        <span style="font-weight:bold; color:var(--danger); font-size:0.9rem;">${wasteGrouped[name].qty} ${wasteGrouped[name].unit}</span>
+                    </div>
+                `).join('') || '<p style="text-align:center; opacity:0.5; font-size:0.8rem; padding:20px;">لا يوجد هالك مسجل للفترة المحددة</p>';
+
+                // Speed calculation
+                const paidOrders = orders.filter(o => o.paid && o.status !== 'canceled');
+                const itemSalesCounts = {};
+                paidOrders.forEach(o => {
+                    (o.items || []).forEach(item => {
+                        if (!itemSalesCounts[item.name]) itemSalesCounts[item.name] = 0;
+                        itemSalesCounts[item.name] += (item.qty || 0);
+                    });
+                });
+
+                const speedData = rawMenu.map(m => ({
+                    name: m.name,
+                    salesCount: itemSalesCounts[m.name] || 0
+                })).sort((a, b) => b.salesCount - a.salesCount);
+
+                const fastMoving = speedData.slice(0, 3).filter(x => x.salesCount > 0);
+                const slowMoving = speedData.slice(-3).reverse();
+
+                const fastMovingHtml = fastMoving.map(x => `
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;">
+                        <span>${x.name}</span>
+                        <strong style="color:var(--success); font-family:'Orbitron';">+${x.salesCount} طلب</strong>
+                    </div>
+                `).join('') || '<p style="opacity:0.5; font-size:0.75rem;">لا توجد مبيعات</p>';
+
+                const slowMovingHtml = slowMoving.map(x => `
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:5px;">
+                        <span>${x.name}</span>
+                        <strong style="color:var(--danger); font-family:'Orbitron';">${x.salesCount}} طلب</strong>
+                    </div>
+                `).join('') || '<p style="opacity:0.5; font-size:0.75rem;">لا توجد بيانات</p>';
+
+                tabContentHtml = `
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; width:100%;">
+                        <!-- Left Panel: Inventory alert & Item velocity -->
+                        <div style="display:flex; flex-direction:column; gap:20px;">
+                            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:20px; border-radius:18px;">
+                                <h4 style="margin:0 0 12px 0; color:var(--primary); font-family:'Cairo'; font-weight:700;"><i class="fa-solid fa-triangle-exclamation" style="margin-left:6px;"></i> النواقص وتنبيهات المخزن</h4>
+                                <div style="max-height:150px; overflow-y:auto;" class="hide-scroll">
+                                    ${stockAlertHtml}
+                                </div>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:20px; border-radius:18px;">
+                                <h4 style="margin:0 0 12px 0; color:var(--primary); font-family:'Cairo'; font-weight:700;"><i class="fa-solid fa-gauge-high" style="margin-left:6px;"></i> حركة بيع الأصناف بالمطعم</h4>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                                    <div>
+                                        <h5 style="margin:0 0 8px 0; color:var(--success); font-size:0.8rem;">🔥 الأكثر طلبًا</h5>
+                                        ${fastMovingHtml}
+                                    </div>
+                                    <div>
+                                        <h5 style="margin:0 0 8px 0; color:var(--danger); font-size:0.8rem;">❄️ الأبطأ طلبًا</h5>
+                                        ${slowMovingHtml}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Spoilage / Waste logs -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:20px; border-radius:18px; display:flex; flex-direction:column; gap:15px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h4 style="margin:0; color:var(--danger); font-family:'Cairo'; font-weight:700;"><i class="fa-solid fa-trash-can" style="margin-left:6px;"></i> تحليل الهالك والمتلفات</h4>
+                                <span style="font-weight:bold; color:var(--danger); font-size:0.85rem;">الإجمالي: ${waste.length} عمليات</span>
+                            </div>
+                            <div style="max-height:260px; overflow-y:auto; padding-right:5px;" class="hide-scroll">
+                                ${wasteListHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (activeTab === 'expenses') {
+                const categoryTotals = { general: 0, inventory: 0, salaries: 0, emergency: 0 };
+                exp.forEach(e => {
+                    const t = e.type || 'general';
+                    if (categoryTotals[t] !== undefined) {
+                        categoryTotals[t] += Number(e.amount || 0);
+                    } else {
+                        categoryTotals.general += Number(e.amount || 0);
+                    }
+                });
+
+                const totalExpPeriod = Object.values(categoryTotals).reduce((s, a) => s + a, 0);
+
+                const getCategoryPct = (amount) => {
+                    return totalExpPeriod > 0 ? Math.round((amount / totalExpPeriod) * 100) : 0;
+                };
+
+                const catLabels = {
+                    general: { label: 'مصروفات عامة 💵', color: 'var(--primary)' },
+                    inventory: { label: 'شراء خامات ومستلزمات 📦', color: '#10b981' },
+                    salaries: { label: 'مرتبات وسلف موظفين 👥', color: '#a78bfa' },
+                    emergency: { label: 'طوارئ ونثرية ⚠️', color: '#ef4444' }
+                };
+
+                const expenseCategoriesHtml = Object.keys(catLabels).map(type => {
+                    const amount = categoryTotals[type];
+                    const pct = getCategoryPct(amount);
+                    const info = catLabels[type];
+                    return `
+                        <div style="margin-bottom:14px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
+                                <span style="font-weight:bold;">${info.label}</span>
+                                <span>${amount.toLocaleString()} ج (${pct}%)</span>
+                            </div>
+                            <div style="height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;">
+                                <div style="width:${pct}%; height:100%; background:${info.color}; border-radius:4px;"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                const expensesListHtml = exp.slice(0, 10).map(e => `
+                    <div style="background:rgba(239,68,68,0.03); border:1px solid rgba(239,68,68,0.08); padding:10px 15px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span style="font-weight:bold; font-size:0.9rem; display:block;">${e.name || 'مصروف'}</span>
+                            <span style="font-size:0.75rem; opacity:0.5;">
+                                ${e.details || 'بدون تفاصيل'} | 
+                                ${new Date(e.time).toLocaleString('ar-EG', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}
+                            </span>
+                        </div>
+                        <strong style="color:var(--danger); font-size:1.1rem; font-family:'Orbitron';">${(e.amount||0).toLocaleString()} ج</strong>
+                    </div>
+                `).join('') || '<p style="text-align:center; opacity:0.5; font-size:0.8rem; padding:30px;">لا توجد مصروفات مسجلة للفترة المحددة</p>';
+
+                tabContentHtml = `
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; width:100%;">
+                        <!-- Left Panel: Expenses categories distribution -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:20px; border-radius:18px; display:flex; flex-direction:column; gap:15px;">
+                            <h4 style="margin:0; color:var(--danger); font-family:'Cairo'; font-weight:700;"><i class="fa-solid fa-chart-pie" style="margin-left:6px;"></i> توزيع بنود المصروفات</h4>
+                            <div style="background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.1); padding:15px; border-radius:12px; text-align:center; margin-bottom:10px;">
+                                <span style="font-size:0.85rem; opacity:0.6; display:block; margin-bottom:4px;">إجمالي المصروفات للفترة</span>
+                                <strong style="font-size:2rem; color:var(--danger); font-family:'Orbitron';">${totalExpPeriod.toLocaleString()} ج</strong>
+                            </div>
+                            <div>
+                                ${expenseCategoriesHtml}
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Expenses list -->
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:20px; border-radius:18px; display:flex; flex-direction:column; gap:12px;">
+                            <h4 style="margin:0 0 5px 0; color:var(--danger); font-family:'Cairo'; font-weight:700;"><i class="fa-solid fa-receipt" style="margin-left:6px;"></i> أحدث العمليات المسجلة</h4>
+                            <div style="max-height:300px; overflow-y:auto; padding-right:5px;" class="hide-scroll">
+                                ${expensesListHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (activeTab === 'logs') {
+                const tableRowsHtml = history.slice().reverse().map(h => {
+                    const durationHrs = Math.max(0.1, (h.end - h.start) / 3600000).toFixed(1);
+                    return `
+                        <tr>
+                            <td style="white-space:nowrap; padding:10px 8px;">${new Date(h.end).toLocaleString('ar-EG', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}</td>
+                            <td style="opacity:0.8; padding:10px 8px;">${durationHrs} س</td>
+                            <td style="color:var(--success); font-weight:900; padding:10px 8px;">${(h.sales||0).toLocaleString()} ج</td>
+                            <td style="color:var(--danger); font-weight:900; padding:10px 8px;">${(h.expenses||0).toLocaleString()}} ج</td>
+                            <td style="color:var(--primary); font-weight:900; padding:10px 8px;">${(h.net||0).toLocaleString()} ج</td>
+                            <td style="opacity:0.7; padding:10px 8px;">${h.wasteCount || 0}</td>
+                        </tr>
+                    `;
+                }).join('') || '<tr><td colspan="6" style="text-align:center; opacity:0.5; padding:20px;">لا توجد ورديات مسجلة للفترة المحددة</td></tr>';
+
+                tabContentHtml = `
+                    <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:20px; border-radius:18px; width:100%;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                            <h4 style="margin:0; color:var(--primary); font-family:'Cairo'; font-weight:700;"><i class="fa-solid fa-list-ol" style="margin-left:6px;"></i> سجل إغلاق الورديات الخام</h4>
+                            <button onclick="window.exportShiftsLogToCSV()" class="btn-luxury" style="width:auto; margin:0; padding:8px 18px; font-size:0.85rem; background:rgba(251,191,36,0.1); border:1px solid var(--primary); color:var(--primary);">
+                                <i class="fa-solid fa-file-csv" style="margin-left:5px;"></i> تصدير البيانات كملف Excel (CSV)
+                            </button>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="foush-table">
+                                <thead>
+                                    <tr>
+                                        <th style="padding:10px 8px;">تاريخ الإغلاق</th>
+                                        <th style="padding:10px 8px;">مدة الوردية</th>
+                                        <th style="padding:10px 8px;">الإيراد</th>
+                                        <th style="padding:10px 8px;">المصروفات</th>
+                                        <th style="padding:10px 8px;">الصافي</th>
+                                        <th style="padding:10px 8px;">الهالك</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRowsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Export to CSV helper
+            window.exportShiftsLogToCSV = () => {
+                let csv = 'Closed Date,Duration (hrs),Sales (EGP),Expenses (EGP),Net Profit (EGP),Waste Count\r\n';
+                history.forEach(h => {
+                    const durationHrs = Math.max(0.1, (h.end - h.start) / 3600000).toFixed(1);
+                    const closedStr = new Date(h.end).toLocaleString('en-US');
+                    csv += `"${closedStr},${durationHrs},${h.sales || 0},${h.expenses || 0},${h.net || 0},${h.wasteCount || 0}\r\n`;
+                });
+
+                const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.setAttribute('download', `shifts_report_${currentFilter}_${customDate || 'all'}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.showToast("📊 تم تصدير سجل الورديات بنجاح!");
+            };
+
+            // Main rendering HTML structure
             c.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
-            <h3 style="margin:0; font-family:'Cairo'; font-weight:900;">سجل الوردية والتقارير 📋</h3>
-            <button onclick="window.exportShiftsToCSV()" class="btn-luxury" style="width:auto; padding:8px 20px; font-weight:900;"><i class="fa-solid fa-file-excel"></i> تصدير ملف Excel (CSV)</button>
-        </div>
-        
-        <!-- Premium Lifetime Stats Grid -->
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:20px;">
-            <div class="stat-card" style="border-color:var(--success); background:rgba(16,185,129,0.05); text-align:center; padding:15px;">
-                <h2 style="font-family:'Cairo'; font-weight:900; font-size:1.8rem; margin:0 0 5px 0;">${totalSales} ج</h2>
-                <p style="font-size:0.8rem; opacity:0.8; margin:0;">إجمالي المبيعات التاريخية</p>
-            </div>
-            <div class="stat-card" style="border-color:var(--danger); background:rgba(239,68,68,0.05); text-align:center; padding:15px;">
-                <h2 style="font-family:'Cairo'; font-weight:900; font-size:1.8rem; margin:0 0 5px 0;">${totalExp} ج</h2>
-                <p style="font-size:0.8rem; opacity:0.8; margin:0;">إجمالي المصروفات التاريخية</p>
-            </div>
-            <div class="stat-card" style="border-color:var(--primary); background:rgba(251,191,36,0.08); text-align:center; padding:15px;">
-                <h2 style="font-family:'Cairo'; font-weight:900; font-size:1.8rem; color:var(--primary); margin:0 0 5px 0;">${totalNet} ج</h2>
-                <p style="font-size:0.8rem; font-weight:900; color:var(--primary); margin:0;">صافي الأرباح التاريخية</p>
-            </div>
-            <div class="stat-card" style="border-color:#3b82f6; background:rgba(59,130,246,0.05); text-align:center; padding:15px;">
-                <h2 style="font-family:'Cairo'; font-weight:900; font-size:1.8rem; margin:0 0 5px 0;">${totalCount}</h2>
-                <p style="font-size:0.8rem; opacity:0.8; margin:0;">عدد الورديات المغلقة</p>
-            </div>
-        </div>
-        
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px;" class="dashboard-columns">
-            <!-- Payment Methods Distribution Chart -->
-            <div class="cart-side" style="padding:15px; border-color:var(--primary); background:rgba(0,0,0,0.2);">
-                <h4 style="color:var(--primary); margin-bottom:15px; font-weight:900; font-size:1rem; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;"><i class="fa-solid fa-chart-pie"></i> تحليل طرق الدفع التاريخية</h4>
-                <div style="display:flex; flex-direction:column; gap:15px;">
-                    <div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.85rem;">
-                            <span>كاش 💵 (${totalCash} ج)</span>
-                            <span style="font-weight:900; color:#34d399;">${cashPct}%</span>
+                <!-- Reports Header -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding:0 5px; flex-wrap:wrap; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:40px; height:40px; background:linear-gradient(135deg, rgba(251,191,36,0.15), rgba(251,191,36,0.05)); color:var(--primary); border-radius:12px; display:flex; justify-content:center; align-items:center; font-size:1.25rem; border:1px solid rgba(251,191,36,0.25);">
+                            <i class="fa-solid fa-chart-line"></i>
                         </div>
-                        <div style="height:10px; background:#1e293b; border-radius:5px; overflow:hidden;">
-                            <div style="width:${cashPct}%; height:100%; background:linear-gradient(90deg, #10b981, #34d399); border-radius:5px;"></div>
+                        <div>
+                            <h2 style="margin:0; font-family:'Cairo'; font-weight:900; font-size:1.4rem;">مركز الإدارة والتقارير</h2>
+                            <p style="margin:0; font-size:0.75rem; opacity:0.5; margin-top:2px;">لوحة تفاعلية متقدمة لتحليل أداء العمل ونتائج التشغيل</p>
                         </div>
                     </div>
-                    <div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.85rem;">
-                            <span>فيزا 💳 (${totalVisa} ج)</span>
-                            <span style="font-weight:900; color:#60a5fa;">${visaPct}%</span>
+                    <button onclick="window.switchPage(window.state.role === 'admin' ? 'admin_home' : 'manager_home')" class="btn-luxury" style="width:auto; padding:8px 16px; font-size:0.85rem; margin:0; background:rgba(251,191,36,0.08); border:1px solid var(--primary); color:var(--primary);">
+                        <i class="fa-solid fa-arrow-right-to-bracket" style="transform:rotate(180deg); margin-left:5px;"></i> العودة للرئيسية
+                    </button>
+                </div>
+
+                <!-- Section 1: Executive Overview Dashboard (Top-level summary) -->
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:12px; margin-bottom:20px; width:100%;">
+                    <!-- Card 1: Total Revenue -->
+                    <div onclick="window.state.activeReportsTab = 'sales'; window.render();" class="stat-card" style="cursor:pointer; border-bottom: 3px solid var(--success); background:linear-gradient(145deg, rgba(16,185,129,0.04), rgba(0,0,0,0.2)); padding:15px; border-radius:14px; text-align:right; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='none';">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; opacity:0.7;">
+                            <span style="font-size:0.8rem; font-weight:bold; color:var(--success);">إجمالي الإيرادات</span>
+                            <i class="fa-solid fa-sack-dollar" style="color:var(--success); font-size:0.95rem;"></i>
                         </div>
-                        <div style="height:10px; background:#1e293b; border-radius:5px; overflow:hidden;">
-                            <div style="width:${visaPct}%; height:100%; background:linear-gradient(90deg, #3b82f6, #60a5fa); border-radius:5px;"></div>
-                        </div>
+                        <h3 style="font-family:'Orbitron'; font-weight:900; font-size:1.4rem; margin:0; color:#fff;">${allTimeSales.toLocaleString()} <span style="font-size:0.75rem; font-family:'Cairo'; font-weight:normal; opacity:0.6;">ج</span></h3>
                     </div>
-                    <div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.85rem;">
-                            <span>محفظة إلكترونية 📱 (${totalWallet} ج)</span>
-                            <span style="font-weight:900; color:var(--primary);">${walletPct}%</span>
+
+                    <!-- Card 2: Total Expenses -->
+                    <div onclick="window.state.activeReportsTab = 'expenses'; window.render();" class="stat-card" style="cursor:pointer; border-bottom: 3px solid var(--danger); background:linear-gradient(145deg, rgba(239,68,68,0.04), rgba(0,0,0,0.2)); padding:15px; border-radius:14px; text-align:right; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='none';">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; opacity:0.7;">
+                            <span style="font-size:0.8rem; font-weight:bold; color:var(--danger);">إجمالي المصروفات</span>
+                            <i class="fa-solid fa-receipt" style="color:var(--danger); font-size:0.95rem;"></i>
                         </div>
-                        <div style="height:10px; background:#1e293b; border-radius:5px; overflow:hidden;">
-                            <div style="width:${walletPct}%; height:100%; background:linear-gradient(90deg, var(--primary), #fbbf24); border-radius:5px;"></div>
+                        <h3 style="font-family:'Orbitron'; font-weight:900; font-size:1.4rem; margin:0; color:#fff;">${allTimeExp.toLocaleString()} <span style="font-size:0.75rem; font-family:'Cairo'; font-weight:normal; opacity:0.6;">ج</span></h3>
+                    </div>
+
+                    <!-- Card 3: Net Profit -->
+                    <div onclick="window.state.activeReportsTab = 'financials'; window.render();" class="stat-card" style="cursor:pointer; border-bottom: 3px solid var(--primary); background:linear-gradient(145deg, rgba(251,191,36,0.06), rgba(0,0,0,0.25)); padding:15px; border-radius:14px; text-align:right; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='none';">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; opacity:0.7;">
+                            <span style="font-size:0.8rem; font-weight:bold; color:var(--primary);">صافي الأرباح</span>
+                            <i class="fa-solid fa-vault" style="color:var(--primary); font-size:0.95rem;"></i>
                         </div>
+                        <h3 style="font-family:'Orbitron'; font-weight:900; font-size:1.4rem; margin:0; color:var(--primary);">${allTimeNet.toLocaleString()} <span style="font-size:0.75rem; font-family:'Cairo'; font-weight:normal; opacity:0.7;">ج</span></h3>
+                    </div>
+
+                    <!-- Card 4: Avg Shift Revenue -->
+                    <div onclick="window.state.activeReportsTab = 'logs'; window.render();" class="stat-card" style="cursor:pointer; border-bottom: 3px solid #3b82f6; background:linear-gradient(145deg, rgba(59,130,246,0.04), rgba(0,0,0,0.2)); padding:15px; border-radius:14px; text-align:right; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='none';">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; opacity:0.7;">
+                            <span style="font-size:0.8rem; font-weight:bold; color:#3b82f6;">متوسط الوردية</span>
+                            <i class="fa-solid fa-chart-bar" style="color:#3b82f6; font-size:0.95rem;"></i>
+                        </div>
+                        <h3 style="font-family:'Orbitron'; font-weight:900; font-size:1.4rem; margin:0; color:#fff;">${allTimeAvgRevenue.toLocaleString()} <span style="font-size:0.75rem; font-family:'Cairo'; font-weight:normal; opacity:0.6;">ج</span></h3>
+                    </div>
+
+                    <!-- Card 5: Closed Shifts -->
+                    <div onclick="window.state.activeReportsTab = 'logs'; window.render();" class="stat-card" style="cursor:pointer; border-bottom: 3px solid #ec4899; background:linear-gradient(145deg, rgba(236,72,153,0.04), rgba(0,0,0,0.2)); padding:15px; border-radius:14px; text-align:right; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='none';">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; opacity:0.7;">
+                            <span style="font-size:0.8rem; font-weight:bold; color:#ec4899;">الورديات المغلقة</span>
+                            <i class="fa-solid fa-clock-rotate-left" style="color:#ec4899; font-size:0.95rem;"></i>
+                        </div>
+                        <h3 style="font-family:'Cairo'; font-weight:900; font-size:1.4rem; margin:0; color:#fff;">${allTimeShiftsCount} <span style="font-size:0.75rem; font-weight:normal; opacity:0.6;">وردية</span></h3>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Quick Summary -->
-            <div class="cart-side" style="padding:15px; border-color:var(--success); background:rgba(0,0,0,0.2);">
-                <h4 style="color:var(--success); margin-bottom:15px; font-weight:900; font-size:1rem; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;"><i class="fa-solid fa-circle-info"></i> نظرة عامة على الأداء والمؤشرات</h4>
-                <p style="font-size:0.95rem; line-height:1.8; opacity:0.9; margin:0; text-align:right;">
-                    لقد قمت بإدارة وتوثيق **${totalCount}** وردية عمل بنجاح.
-                    <br><br>
-                    - متوسط المبيعات لكل وردية: <strong style="color:var(--success);">${totalCount > 0 ? Math.round(totalSales / totalCount) : 0} ج</strong>.
-                    <br>
-                    - متوسط المصروفات لكل وردية: <strong style="color:var(--danger);">${totalCount > 0 ? Math.round(totalExp / totalCount) : 0} ج</strong>.
-                    <br>
-                    - نسبة المصروفات الإجمالية من المبيعات: <strong style="color:var(--primary);">${totalSales > 0 ? Math.round((totalExp / totalSales) * 100) : 0}%</strong>.
-                </p>
-            </div>
-        </div>
-        
-        <!-- Shifts History Table -->
-        <div style="overflow-y:auto;" class="cart-side">
-            <h4 style="margin-bottom:15px; font-weight:900; color:var(--primary);"><i class="fa-solid fa-clock-rotate-left"></i> سجل تفاصيل الورديات المغلقة</h4>
-            <table class="foush-table">
-                <thead>
-                    <tr>
-                        <th>فتح الوردية</th>
-                        <th>إغلاق الوردية</th>
-                        <th>إجمالي المبيعات</th>
-                        <th>المصروفات</th>
-                        <th>صافي أرباح الوردية</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${history.slice().reverse().map(h => `
-                    <tr>
-                        <td>${new Date(h.start).toLocaleString('ar-EG')}</td>
-                        <td>${new Date(h.end).toLocaleString('ar-EG')}</td>
-                        <td style="color:var(--success); font-weight:900; font-size:0.95rem;">
-                            ${h.sales} ج
-                            <br>
-                            <small style="font-size:0.75rem; color:#94a3b8; font-weight:700;">(كاش:${h.cashSales || 0} / فيزا:${h.visaSales || 0} / محفظة:${h.walletSales || 0})</small>
-                        </td>
-                        <td style="color:var(--danger); font-weight:900; font-size:0.95rem;">${h.expenses} ج</td>
-                        <td style="background:rgba(251,191,36,0.15); color:var(--primary); font-weight:900; font-size:1.1rem; border-radius:5px;">${h.net} ج</td>
-                    </tr>`).join('') || `<tr><td colspan="5" style="text-align:center; opacity:0.5; padding:20px; font-size:1rem;">لا توجد ورديات مغلقة مسجلة حتى الآن</td></tr>`}
-                </tbody>
-            </table>
-        </div>`;
+
+                <!-- Section 2: Reporting Center (Tabbed Workspace) -->
+                <div style="background:rgba(30,41,59,0.3); border:1px solid rgba(255,255,255,0.05); border-radius:18px; padding:15px; min-height:0; display:flex; flex-direction:column; gap:15px; flex:1; width:100%;">
+                    
+                    <!-- Tab Selector Row & Local Filter Row -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px; flex-wrap:wrap; gap:12px; width:100%;">
+                        
+                        <!-- Tab Buttons -->
+                        <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:5px; -webkit-overflow-scrolling:touch; max-width:100%;" class="hide-scroll">
+                            <button onclick="window.state.activeReportsTab = 'financials'; window.render();" class="btn-luxury" style="width:auto; margin:0; padding:8px 16px; font-size:0.85rem; font-weight:700; flex-shrink:0; background:${activeTab === 'financials' ? 'var(--primary)' : 'rgba(255,255,255,0.03)'}; color:${activeTab === 'financials' ? '#000' : '#fff'}; border-color:reak{${activeTab === 'financials' ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}};">
+                                <i class="fa-solid fa-scale-balanced" style="margin-left:5px;"></i> التحليل المالي
+                            </button>
+                            <button onclick="window.state.activeReportsTab = 'sales'; window.render();" class="btn-luxury" style="width:auto; margin:0; padding:8px 16px; font-size:0.85rem; font-weight:700; flex-shrink:0; background:${activeTab === 'sales' ? 'var(--primary)' : 'rgba(255,255,255,0.03)'}; color:${activeTab === 'sales' ? '#000' : '#fff'}; border-color:${activeTab === 'sales' ? 'var(--primary)' : 'rgba(255,255,255,0.05)'};">
+                                <i class="fa-solid fa-chart-pie" style="margin-left:5px;"></i> تحليل المبيعات والأصناف
+                            </button>
+                            <button onclick="window.state.activeReportsTab = 'inventory'; window.render();" class="btn-luxury" style="width:auto; margin:0; padding:8px 16px; font-size:0.85rem; font-weight:700; flex-shrink:0; background:${activeTab === 'inventory' ? 'var(--primary)' : 'rgba(255,255,255,0.03)'}; color:${activeTab === 'inventory' ? '#000' : '#fff'}; border-color:${activeTab === 'inventory' ? 'var(--primary)' : 'rgba(255,255,255,0.05)'};">
+                                <i class="fa-solid fa-boxes-stacked" style="margin-left:5px;"></i> الجرد والهالك
+                            </button>
+                            <button onclick="window.state.activeReportsTab = 'expenses'; window.render();" class="btn-luxury" style="width:auto; margin:0; padding:8px 16px; font-size:0.85rem; font-weight:700; flex-shrink:0; background:${activeTab === 'expenses' ? 'var(--primary)' : 'rgba(255,255,255,0.03)'}; color:${activeTab === 'expenses' ? '#000' : '#fff'}; border-color:${activeTab === 'expenses' ? 'var(--primary)' : 'rgba(255,255,255,0.05)'};">
+                                <i class="fa-solid fa-money-bill-wave" style="margin-left:5px;"></i> تحليل المصروفات
+                            </button>
+                            <button onclick="window.state.activeReportsTab = 'logs'; window.render();" class="btn-luxury" style="width:auto; margin:0; padding:8px 16px; font-size:0.85rem; font-weight:700; flex-shrink:0; background:${activeTab === 'logs' ? 'var(--primary)' : 'rgba(255,255,255,0.03)'}; color:${activeTab === 'logs' ? '#000' : '#fff'}; border-color:${activeTab === 'logs' ? 'var(--primary)' : 'rgba(255,255,255,0.05)'};">
+                                <i class="fa-solid fa-list-ol" style="margin-left:5px;"></i> سجل الورديات
+                            </button>
+                        </div>
+
+                        <!-- Local Period Filter -->
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <label style="font-size:0.85rem; opacity:0.7; font-weight:bold; white-space:nowrap;"><i class="fa-solid fa-calendar-days" style="margin-left:4px;"></i> فترة التقرير:</label>
+                            <select onchange="window.state.reportsFilters['${activeTab}'] = this.value; window.render();" class="input-luxury" style="width:auto; padding:6px 12px; margin:0; font-size:0.85rem; font-weight:bold; background:rgba(0,0,0,0.4); border-color:rgba(255,255,255,0.1);">
+                                <option value="all" ${currentFilter === 'all' ? 'selected' : ''}>كل البيانات</option>
+                                <option value="today" ${currentFilter === 'today' ? 'selected' : ''}>اليوم</option>
+                                <option value="yesterday" ${currentFilter === 'yesterday' ? 'selected' : ''}>أمس</option>
+                                <option value="week" ${currentFilter === 'week' ? 'selected' : ''}>آخر 7 أيام</option>
+                                <option value="month" ${currentFilter === 'month' ? 'selected' : ''}>آخر 30 يوم</option>
+                                <option value="custom" ${currentFilter === 'custom' ? 'selected' : ''}>يوم محدد 📅</option>
+                            </select>
+                            <input type="date" value="${customDate} onchange="window.state.reportsCustomDates['${activeTab}'] = this.value; window.render();" style="display:${currentFilter === 'custom' ? 'inline-block' : 'none'}; width:auto; padding:6px; margin:0; font-size:0.85rem; font-family:'Cairo'; background:rgba(0,0,0,0.4); color:#fff; border:1px solid rgba(255,255,255,0.15); border-radius:8px;">
+                        </div>
+                    </div>
+
+                    <!-- Active Tab Content Area -->
+                    <div style="flex:1; min-height:0; display:flex; flex-direction:column; justify-content:flex-start; width:100%; margin-top:10px;">
+                        ${tabContentHtml}
+                    </div>
+                </div>
+            `;
         }
 
         function renderSidebar() {
@@ -5151,7 +6023,29 @@
             const html = `<div style="display:flex; flex-direction:column; gap:10px; font-weight:700;"><div style="display:flex; justify-content:space-between; font-size:1.1rem;"><span>إجمالي المبيعات:</span><span style="color:var(--success);">${sales} ج</span></div><div style="display:flex; justify-content:space-between; font-size:0.9rem; opacity:0.8; padding-right:15px;"><span>كاش:</span><span>${cashSales} ج</span></div><div style="display:flex; justify-content:space-between; font-size:0.9rem; opacity:0.8; padding-right:15px;"><span>فيزا:</span><span>${visaSales} ج</span></div><div style="display:flex; justify-content:space-between; font-size:0.9rem; opacity:0.8; padding-right:15px;"><span>محفظة:</span><span>${walletSales} ج</span></div><hr style="border:1px dashed #ccc; margin:5px 0;"><div style="display:flex; justify-content:space-between; font-size:1.1rem;"><span>إجمالي المصروفات:</span><span style="color:var(--danger);">${ex} ج</span></div>${wasteHtml}<hr style="border:1px dashed #ccc; margin:5px 0;"><div style="display:flex; justify-content:space-between; font-size:1.6rem; background:#f1f5f9; padding:10px; border-radius:10px;"><span>صافي الدرج (كاش):</span><span style="color:var(--panel);">${cashSales - ex} ج</span></div><p style="font-size:0.8rem; opacity:0.6; text-align:center; margin-top:5px;">بدأت الوردية في: ${new Date(window.state.db.shift.start).toLocaleString('ar-EG')}</p></div>`;
             document.getElementById('shift-summary-content').innerHTML = html; document.getElementById('shift-summary-modal').style.display = 'flex';
         };
-        window.confirmEndShift = () => { const orders = window.state.db.orders || []; const activeOrders = orders.filter(o => o.status !== 'canceled'); const sales = activeOrders.filter(o => o.paid).reduce((s, o) => s + o.total - (o.discount || 0), 0); const cashSales = activeOrders.filter(o => o.paid && (!o.paymentMethod || o.paymentMethod === 'cash')).reduce((s, o) => s + o.total - (o.discount || 0), 0); const visaSales = activeOrders.filter(o => o.paid && o.paymentMethod === 'visa').reduce((s, o) => s + o.total - (o.discount || 0), 0); const walletSales = activeOrders.filter(o => o.paid && o.paymentMethod === 'wallet').reduce((s, o) => s + o.total - (o.discount || 0), 0); const shiftStart = window.state.db.shift ? window.state.db.shift.start : 0; const ex = (window.state.db.exp || []).filter(e => e.isShiftExpense && e.time >= shiftStart).reduce((s, e) => s + e.amount, 0); const shiftWaste = (window.state.db.waste_log || []).filter(w => w.shiftStart === shiftStart); window.state.db.shifts_history.unshift({ start: window.state.db.shift.start, end: Date.now(), sales, cashSales, visaSales, walletSales, expenses: ex, net: cashSales - ex, wasteCount: shiftWaste.length, wasteDetails: shiftWaste.map(w => ({ name: w.itemName, qty: w.qty, unit: w.unit, reason: w.reason || '' })) }); window.state.db.shift = null; window.state.db.orders = []; window.save(); sessionStorage.removeItem('foush_role'); location.reload(); };
+        window.confirmEndShift = () => { 
+            const orders = window.state.db.orders || []; 
+            if (!window.state.db.historical_orders) window.state.db.historical_orders = [];
+            if (!window.state.db.shifts_history) window.state.db.shifts_history = [];
+            
+            const activeOrders = orders.filter(o => o.status !== 'canceled'); 
+            const sales = activeOrders.filter(o => o.paid).reduce((s, o) => s + o.total - (o.discount || 0), 0); 
+            const cashSales = activeOrders.filter(o => o.paid && (!o.paymentMethod || o.paymentMethod === 'cash')).reduce((s, o) => s + o.total - (o.discount || 0), 0); 
+            const visaSales = activeOrders.filter(o => o.paid && o.paymentMethod === 'visa').reduce((s, o) => s + o.total - (o.discount || 0), 0); 
+            const walletSales = activeOrders.filter(o => o.paid && o.paymentMethod === 'wallet').reduce((s, o) => s + o.total - (o.discount || 0), 0); 
+            const shiftStart = window.state.db.shift ? window.state.db.shift.start : 0; 
+            const ex = (window.state.db.exp || []).filter(e => e.isShiftExpense && e.time >= shiftStart).reduce((s, e) => s + e.amount, 0); 
+            const shiftWaste = (window.state.db.waste_log || []).filter(w => w.shiftStart === shiftStart); 
+            
+            window.state.db.shifts_history.unshift({ start: shiftStart, end: Date.now(), sales, cashSales, visaSales, walletSales, expenses: ex, net: cashSales - ex, wasteCount: shiftWaste.length, wasteDetails: shiftWaste.map(w => ({ name: w.itemName, qty: w.qty, unit: w.unit, reason: w.reason || '' })) }); 
+            window.state.db.historical_orders = window.state.db.historical_orders.concat(orders.map(o => ({...o, shiftStart}))); 
+            
+            window.state.db.shift = null; 
+            window.state.db.orders = []; 
+            window.save(); 
+            sessionStorage.removeItem('foush_role'); 
+            location.reload(); 
+        };
 
         window.boot = () => {
             if (!window.state.role) {
@@ -5187,103 +6081,129 @@
         window.boot();
         let lastOrdersData = [];
         let isInitialOrdersLoad = true;
-        if (database) {
+
+        // ─── Shared Database Update Handler ─────────────────────────────
+        // Used by BOTH local server polling AND Firebase listener
+        window.handleDatabaseUpdate = function(data) {
+            if (!data) return;
+            const ensureArray = (arr) => {
+                if (!arr) return [];
+                if (Array.isArray(arr)) return arr.filter(x => x !== null && x !== undefined);
+                return Object.values(arr).filter(x => x !== null && x !== undefined);
+            };
+            const newOrders = ensureArray(data.orders);
+
+            // Kitchen alerts
+            if (window.state.role === 'kitchen') {
+                const newPrep = newOrders.filter(o => o.status === 'preparing');
+                const oldPrep = lastOrdersData.filter(o => o.status === 'preparing');
+                if (newPrep.length > oldPrep.length) window.playSound('kitchen-alert');
+            }
+
+            // Unified Ready Order alerts for Cashier, Manager, and Waiter
+            if (window.state.role === 'cashier' || window.state.role === 'manager' || window.state.role === 'waiter') {
+                if (!isInitialOrdersLoad) {
+                    const newlyReady = newOrders.filter(o => o.status === 'ready' && !lastOrdersData.some(old => old.id === o.id && old.status === 'ready'));
+                    if (newlyReady.length > 0) {
+                        window.playSound('ready-alert');
+
+                        let toastText = '';
+                        if (newlyReady.length === 1) {
+                            const o = newlyReady[0];
+                            if (o.type === 'salla') {
+                                toastText = `🍽️ طلب طاولة (${o.table}) جاهز للتسليم!`;
+                            } else if (o.type === 'takeaway') {
+                                toastText = `📦 طلب تيك اواي (#${o.id}) جاهز للتسليم!`;
+                            } else if (o.type === 'delivery') {
+                                toastText = `🛵 طلب دليفري (#${o.id}) جاهز للتسليم!`;
+                            } else {
+                                toastText = `🍽️ طلب #${o.id} جاهز للتسليم!`;
+                            }
+                        } else {
+                            const descriptions = newlyReady.map(o => {
+                                if (o.type === 'salla') return `طاولة (${o.table})`;
+                                if (o.type === 'takeaway') return `تيك اواي (#${o.id})`;
+                                if (o.type === 'delivery') return `دليفري (#${o.id})`;
+                                return `#${o.id}`;
+                            });
+                            toastText = `🍽️ طلبات جاهزة للتسليم: ${descriptions.join('، ')}!`;
+                        }
+                        window.showToast(toastText);
+                    }
+                }
+            }
+
+            // Billing Alert for Cashier and Manager
+            if (window.state.role === 'cashier' || window.state.role === 'manager') {
+                const newBilling = newOrders.filter(o => o.status === 'billing');
+                const oldBilling = lastOrdersData.filter(o => o.status === 'billing');
+                if (newBilling.length > oldBilling.length) {
+                    window.playSound('bell'); window.playSound('bell');
+                    window.showToast('💰 الويتر طلب الحساب! تحقق من الطاولة');
+                }
+            }
+
+            lastOrdersData = newOrders;
+            isInitialOrdersLoad = false;
+            window.state.db = data || {};
+            window.state.db.employees = ensureArray(window.state.db.employees);
+            window.state.db.attendance = ensureArray(window.state.db.attendance);
+            window.state.db.menu = ensureArray(window.state.db.menu);
+            window.state.db.orders = ensureArray(window.state.db.orders);
+            window.state.db.exp = ensureArray(window.state.db.exp);
+            window.state.db.tables = ensureArray(window.state.db.tables);
+            window.state.db.shifts_history = ensureArray(window.state.db.shifts_history);
+            window.state.db.historical_orders = ensureArray(window.state.db.historical_orders);
+            window.state.db.stock_history = ensureArray(window.state.db.stock_history);
+            window.state.db.main_inventory = ensureArray(window.state.db.main_inventory);
+            window.state.db.frequent_expenses = ensureArray(window.state.db.frequent_expenses);
+            window.state.db.waste_log = ensureArray(window.state.db.waste_log);
+            // Update billing badge in header
+            const billingOrders = newOrders.filter(o => o.status === 'billing' && !o.paid);
+            const badge = document.getElementById('billing-badge');
+            const bCount = document.getElementById('billing-count');
+            if (badge && bCount) {
+                if (billingOrders.length > 0 && window.state.role === 'cashier') {
+                    bCount.textContent = billingOrders.length;
+                    badge.style.display = 'block';
+                } else { badge.style.display = 'none'; }
+            }
+            window.render();
+        };
+
+        // ─── Firebase Listener (used when NOT on local server) ──────────
+        function enableFirebaseListener() {
+            if (!database) return;
             database.ref('foush').on('value', (s) => {
                 window.isFirebaseLoaded = true;
-                const data = s.val(); if (data) {
-                    const ensureArray = (arr) => {
-                        if (!arr) return [];
-                        if (Array.isArray(arr)) return arr.filter(x => x !== null && x !== undefined);
-                        return Object.values(arr).filter(x => x !== null && x !== undefined);
-                    };
-                    const newOrders = ensureArray(data.orders);
-
-                    // Kitchen alerts (keep exact existing logic)
-                    if (window.state.role === 'kitchen') {
-                        const newPrep = newOrders.filter(o => o.status === 'preparing');
-                        const oldPrep = lastOrdersData.filter(o => o.status === 'preparing');
-                        if (newPrep.length > oldPrep.length) window.playSound('kitchen-alert');
-                    }
-
-                    // Unified Ready Order alerts for Cashier, Manager, and Waiter
-                    if (window.state.role === 'cashier' || window.state.role === 'manager' || window.state.role === 'waiter') {
-                        if (!isInitialOrdersLoad) {
-                            const newlyReady = newOrders.filter(o => o.status === 'ready' && !lastOrdersData.some(old => old.id === o.id && old.status === 'ready'));
-                            if (newlyReady.length > 0) {
-                                window.playSound('ready-alert');
-
-                                let toastText = '';
-                                if (newlyReady.length === 1) {
-                                    const o = newlyReady[0];
-                                    if (o.type === 'salla') {
-                                        toastText = `🍽️ طلب طاولة (${o.table}) جاهز للتسليم!`;
-                                    } else if (o.type === 'takeaway') {
-                                        toastText = `📦 طلب تيك اواي (#${o.id}) جاهز للتسليم!`;
-                                    } else if (o.type === 'delivery') {
-                                        toastText = `🛵 طلب دليفري (#${o.id}) جاهز للتسليم!`;
-                                    } else {
-                                        toastText = `🍽️ طلب #${o.id} جاهز للتسليم!`;
-                                    }
-                                } else {
-                                    const descriptions = newlyReady.map(o => {
-                                        if (o.type === 'salla') return `طاولة (${o.table})`;
-                                        if (o.type === 'takeaway') return `تيك اواي (#${o.id})`;
-                                        if (o.type === 'delivery') return `دليفري (#${o.id})`;
-                                        return `#${o.id}`;
-                                    });
-                                    toastText = `🍽️ طلبات جاهزة للتسليم: ${descriptions.join('، ')}!`;
-                                }
-                                window.showToast(toastText);
-                            }
-                        }
-                    }
-
-                    // Billing Alert for Cashier and Manager
-                    if (window.state.role === 'cashier' || window.state.role === 'manager') {
-                        const newBilling = newOrders.filter(o => o.status === 'billing');
-                        const oldBilling = lastOrdersData.filter(o => o.status === 'billing');
-                        if (newBilling.length > oldBilling.length) {
-                            window.playSound('bell'); window.playSound('bell');
-                            window.showToast('💰 الويتر طلب الحساب! تحقق من الطاولة');
-                        }
-                    }
-
-                    lastOrdersData = newOrders;
-                    isInitialOrdersLoad = false;
-                    window.state.db = data || {};
-                    window.state.db.employees = ensureArray(window.state.db.employees);
-                    window.state.db.attendance = ensureArray(window.state.db.attendance);
-                    window.state.db.menu = ensureArray(window.state.db.menu);
-                    window.state.db.orders = ensureArray(window.state.db.orders);
-                    window.state.db.exp = ensureArray(window.state.db.exp);
-                    window.state.db.tables = ensureArray(window.state.db.tables);
-                    window.state.db.shifts_history = ensureArray(window.state.db.shifts_history);
-                    window.state.db.stock_history = ensureArray(window.state.db.stock_history);
-                    window.state.db.main_inventory = ensureArray(window.state.db.main_inventory);
-                    window.state.db.frequent_expenses = ensureArray(window.state.db.frequent_expenses);
-                    window.state.db.waste_log = ensureArray(window.state.db.waste_log);
-                    // Update billing badge in header
-                    const billingOrders = newOrders.filter(o => o.status === 'billing' && !o.paid);
-                    const badge = document.getElementById('billing-badge');
-                    const bCount = document.getElementById('billing-count');
-                    if (badge && bCount) {
-                        if (billingOrders.length > 0 && window.state.role === 'cashier') {
-                            bCount.textContent = billingOrders.length;
-                            badge.style.display = 'block';
-                        } else { badge.style.display = 'none'; }
-                    }
-                    window.render();
-                }
+                const data = s.val();
+                if (data) window.handleDatabaseUpdate(data);
             });
         }
+
+        // Only start Firebase listener if NOT using local server
+        // (Local server handles Firebase sync in the background)
+        if (!window.isLocalServer && database) {
+            enableFirebaseListener();
+        }
+        // Fallback: if local server detection is still in progress,
+        // start Firebase listener and it will be replaced by local polling if detected
+        setTimeout(() => {
+            if (!window.isLocalServer && database) {
+                enableFirebaseListener();
+            }
+        }, 3000);
         setInterval(() => {
-            document.getElementById('clock').textContent = new Date().toLocaleTimeString('ar-EG');
-            if (window.state.db.shift) {
+            const clockEl = document.getElementById('clock');
+            if (clockEl) clockEl.textContent = new Date().toLocaleTimeString('ar-EG');
+            
+            const shiftClockEl = document.getElementById('shift-clock');
+            if (window.state.db.shift && shiftClockEl) {
                 const d = Date.now() - window.state.db.shift.start;
                 const h = Math.floor(d / 3600000);
                 const m = Math.floor((d % 3600000) / 60000);
                 const s = Math.floor((d % 60000) / 1000);
-                document.getElementById('shift-clock').textContent = `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                shiftClockEl.textContent = `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             }
             document.querySelectorAll('.timer-text').forEach(el => {
                 const start = parseInt(el.dataset.start);
@@ -5386,6 +6306,7 @@
 
 
     </script>
+    <script src="pwa-install.js"></script>
 </body>
 
 </html>
