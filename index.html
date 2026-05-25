@@ -893,19 +893,22 @@
             }
 
             .kitchen-layout-grid {
-                grid-template-columns: repeat(4, 1fr) !important;
-                height: 100% !important;
+                flex: 1 !important;
+                min-height: 0 !important;
                 overflow-x: auto !important;
                 overflow-y: hidden !important;
                 display: flex !important;
+                gap: 15px !important;
             }
 
             .kitchen-layout-grid > div {
                 display: flex !important;
                 flex-direction: column !important;
-                min-width: 280px !important;
+                min-width: 85vw !important; /* Make columns almost full width on mobile */
                 height: 100% !important;
                 flex-shrink: 0;
+                overflow-y: auto !important; /* Allow scrolling within the column */
+                padding-bottom: 20px !important;
             }
 
             /* New Grid Overrides */
@@ -1864,16 +1867,6 @@
 }
 
     @media (max-width: 900px) {
-    /* ========== PAGE CONTAINER SCROLL FIX ========== */
-    /* On mobile, let the page content flow naturally instead of being constrained */
-    #page-kitchen.active,
-    #page-shift_ops.active,
-    #page-reports.active {
-        flex: none !important;
-        overflow-y: visible !important;
-        height: auto !important;
-        min-height: 100% !important;
-    }
     
     /* ========== REPORTS PAGE ========== */
     .dashboard-columns {
