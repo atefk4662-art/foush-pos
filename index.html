@@ -6038,7 +6038,7 @@ function renderDashboardSales(c) {
                     <button onclick="window.switchPage(window.state.role === 'admin' ? 'admin_home' : (window.state.role === 'manager' ? 'manager_home' : 'pos'))" class="btn-luxury" style="width:auto; padding:6px 16px; font-size:0.85rem; margin:0;"><i class="fa-solid fa-arrow-right-to-bracket" style="transform:rotate(180deg);"></i> ${isMgmt ? 'العودة للرئيسية' : 'العودة للكاشير'}</button>
                 </div>
             </div>
-            <div style="display:flex; height:calc(100vh - 120px); gap:20px;">
+            <div class="expenses-flex-container" style="display:flex; height:calc(100vh - 120px); gap:20px;">
                 <div style="flex:1; background: linear-gradient(145deg, rgba(30,41,59,0.7), rgba(15,23,42,0.8)); border: 1px solid rgba(255,255,255,0.1); border-radius:15px; display:flex; flex-direction:column; gap:0; overflow-y:auto; max-height:100%; padding:0;">
                     
                     <!-- Step 1: Category Selection -->
@@ -6169,7 +6169,7 @@ function renderDashboardSales(c) {
                     </div>
                 </div>
 
-                <div style="width:380px; flex-shrink:0; overflow-y:auto; background:rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius:15px; display:flex; flex-direction:column; gap:0; max-height:100%; padding:0;">
+                <div class="expenses-history-panel" style="width:380px; flex-shrink:0; overflow-y:auto; background:rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius:15px; display:flex; flex-direction:column; gap:0; max-height:100%; padding:0;">
 
 
 
@@ -8387,7 +8387,7 @@ function renderDashboardSales(c) {
                 <h3>شؤون الموظفين 👥</h3>
                 <button onclick="window.switchPage(window.state.role === 'admin' ? 'admin_home' : 'manager_home')" class="btn-luxury" style="width:auto; padding:6px 16px; font-size:0.85rem;"><i class="fa-solid fa-arrow-right-to-bracket" style="transform:rotate(180deg);"></i> العودة للرئيسية</button>
             </div>
-            <div style="display:grid; grid-template-columns: 350px 1fr; gap:15px; height:calc(100% - 50px);">
+            <div class="employees-grid-container" style="display:grid; grid-template-columns: 350px 1fr; gap:15px; height:calc(100% - 50px);">
             <div class="cart-side" style="overflow-y:auto;">
                 <h4 style="margin-bottom:15px; color:var(--primary);"><i class="fa-solid fa-user-plus"></i> إضافة موظف جديد</h4>
                 <input id="emp-name" placeholder="اسم الموظف" class="input-luxury">

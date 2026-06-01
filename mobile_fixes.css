@@ -265,6 +265,29 @@
         white-space: nowrap !important;
     }
 
+
+    /* EMPLOYEES PAGE - Mobile Grid */
+    .employees-grid-container {
+        grid-template-columns: 1fr !important;
+        height: auto !important;
+    }
+    
+    /* EXPENSES PAGE - Mobile Stack */
+    .expenses-flex-container {
+        flex-direction: column !important;
+        height: auto !important;
+    }
+    .expenses-flex-container > div:first-child {
+        min-height: 550px !important;
+        flex: none !important;
+    }
+    .expenses-history-panel {
+        width: 100% !important;
+        max-height: 500px !important;
+        flex: none !important;
+    }
+
+
 @media (max-width: 600px) {
     /* ========== EXTRA SMALL PHONE SPECIFIC FIXES ========== */
 
