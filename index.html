@@ -3439,6 +3439,11 @@
             </button>
         </div>`;
 
+
+            window.state.expensesTab = window.state.expensesTab || 'add';
+            const expTabAdd = window.state.expensesTab === 'add' ? 'background:var(--primary); color:#000; font-weight:900; box-shadow:0 4px 15px rgba(251,191,36,0.3);' : 'background:rgba(255,255,255,0.05); color:#fff; font-weight:700;';
+            const expTabHist = window.state.expensesTab === 'history' ? 'background:var(--primary); color:#000; font-weight:900; box-shadow:0 4px 15px rgba(251,191,36,0.3);' : 'background:rgba(255,255,255,0.05); color:#fff; font-weight:700;';
+
             c.innerHTML = `${alertsHtml}${tabHtml}<div class="pos-layout ${window.state.posTab === 'cart' ? 'show-cart' : 'show-items'}"><div class="items-side"><div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap; flex-shrink:0;">${['الكل', 'طواجن', 'أرز وفتة', 'شوربة', 'سلطات', 'مشروبات'].map(cat => `<button onclick="window.state.cat='${cat}'; window.render();" class="btn-luxury" style="width:auto; padding:8px 20px; flex-shrink:0; background:${window.state.cat === cat ? 'var(--primary)' : '#1e293b'}; color:${window.state.cat === cat ? '#000' : '#fff'}">${cat}</button>`).join('')}</div><div class="items-grid hide-scroll">${window.state.db.menu.filter(m => window.state.cat === 'الكل' || m.category === window.state.cat).map(m => `<div class="pos-card ${(!m.unlimited && m.stock <= 0) ? 'out-of-stock' : ''} ${(!m.unlimited && m.stock < 10) ? 'low-stock' : ''}" onclick="window.addToCart(${m.id})"><h3>${m.name}</h3><p style="color:var(--primary); font-weight:900;">${m.price} ج</p>${!m.unlimited ? `<small style="opacity:0.7; font-weight:900; font-size:0.7rem;">متاح: ${m.stock}</small>` : ''}</div>`).join('')}</div></div><div class="cart-side"><div style="display:flex; gap:5px; margin-bottom:10px;">${['salla', 'takeaway', 'delivery'].map(t => `<button onclick="window.state.type='${t}'; window.render();" class="btn-luxury" style="background:${window.state.type === t ? 'var(--primary)' : '#0f172a'}; color:${window.state.type === t ? '#000' : '#fff'}; font-size:0.8rem;">${t === 'salla' ? 'صالة' : t === 'takeaway' ? 'تيك' : 'دلي'}</button>`).join('')}</div>${window.state.type === 'salla' ? '<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:10px;"><div class="table-grid">' + filteredTables.map(t => {
                 const busy = busyOrders.find(o => o.table === t.name);
                 let tableClass = '';
@@ -3662,6 +3667,7 @@
                         `).join('') : '<p style="text-align:center; opacity:0.5; font-size:0.9rem;"><i class="fa-solid fa-circle-check" style="color:#10b981; margin-left:5px;"></i>لا يوجد هادر مسجل خلال هذه الوردية ✨</p>'}
                     </div>
                 </div>
+                `}
             </div>
             `;
 
@@ -3854,6 +3860,7 @@
                         </tbody>
                     </table>
                 </div>
+                `}
             </div>
             `;
         }
@@ -5649,6 +5656,7 @@ function renderDashboardSales(c) {
                         `).join('')}
                     </div>
                 </div>
+                `}
             </div>
             `;
             document.body.insertAdjacentHTML('beforeend', modalHtml);
@@ -6033,14 +6041,16 @@ function renderDashboardSales(c) {
                 .map(k => expDetails[k]);
 
             c.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3>المصروفات 💸</h3>
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <button onclick="window.switchPage(window.state.role === 'admin' ? 'admin_home' : (window.state.role === 'manager' ? 'manager_home' : 'pos'))" class="btn-luxury" style="width:auto; padding:6px 16px; font-size:0.85rem; margin:0;"><i class="fa-solid fa-arrow-right-to-bracket" style="transform:rotate(180deg);"></i> ${isMgmt ? 'العودة للرئيسية' : 'العودة للكاشير'}</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                <div style="display:flex; gap:10px; overflow-x:auto; padding-bottom:5px;">
+                    <button onclick="window.state.expensesTab='add'; window.render();" class="btn-luxury" style="margin:0; padding:8px 16px; font-size:0.9rem; min-width:max-content; ${expTabAdd}">إضافة مصروف</button>
+                    <button onclick="window.state.expensesTab='history'; window.render();" class="btn-luxury" style="margin:0; padding:8px 16px; font-size:0.9rem; min-width:max-content; ${expTabHist}">سجل المصروفات</button>
                 </div>
+                <button onclick="window.switchPage(window.state.role === 'admin' ? 'admin_home' : (window.state.role === 'manager' ? 'manager_home' : 'pos'))" class="btn-luxury" style="width:auto; padding:6px 16px; font-size:0.85rem; margin:0;"><i class="fa-solid fa-arrow-right-to-bracket" style="transform:rotate(180deg);"></i> ${isMgmt ? 'العودة للرئيسية' : 'العودة للكاشير'}</button>
             </div>
-            <div class="expenses-flex-container" style="display:flex; height:calc(100vh - 120px); gap:20px;">
-                <div style="flex:1; background: linear-gradient(145deg, rgba(30,41,59,0.7), rgba(15,23,42,0.8)); border: 1px solid rgba(255,255,255,0.1); border-radius:15px; display:flex; flex-direction:column; gap:0; overflow-y:auto; max-height:100%; padding:0;">
+            <div class="expenses-flex-container" style="display:block; height:calc(100vh - 120px); overflow-y:auto;">
+                ${window.state.expensesTab === 'add' ? `
+                <div style="background: linear-gradient(145deg, rgba(30,41,59,0.7), rgba(15,23,42,0.8)); border: 1px solid rgba(255,255,255,0.1); border-radius:15px; display:flex; flex-direction:column; gap:0; padding:0; margin-bottom:20px;">
                     
                     <!-- Step 1: Category Selection -->
                     <div style="padding:18px 18px 12px 18px;">
@@ -6220,6 +6230,7 @@ function renderDashboardSales(c) {
                 </div>
 
                 </div>
+            `}
             </div>`;;
         }
         function renderTables(c) { c.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h3>إدارة الطاولات 🗺️</h3><div style="display:flex; gap:8px;"><input id="new-tab-name" placeholder="اسم الطاولة" class="input-luxury" style="width:150px; margin-bottom:0; padding:8px;"><button onclick="window.addTable()" class="btn-luxury" style="width:auto; padding:8px 20px;">إضافة</button></div></div><div style="display:flex; flex-wrap:wrap; gap:12px;">${(window.state.db.tables || []).map(t => `<div class="order-card" style="width:160px; text-align:center; padding:15px;"><i class="fa-solid fa-chair" style="font-size:1.5rem; color:var(--primary); margin-bottom:10px;"></i><h4>${t.name}</h4><div style="display:flex; gap:5px; margin-top:10px;"><button onclick="window.openTableEdit(${t.id})" class="btn-luxury" style="padding:5px; font-size:0.7rem;"><i class="fa-solid fa-pen"></i></button><button onclick="window.deleteTable(${t.id})" class="btn-luxury danger" style="padding:5px; font-size:0.7rem;"><i class="fa-solid fa-trash"></i></button></div></div>`).join('')}</div>`; }
@@ -8382,7 +8393,12 @@ function renderDashboardSales(c) {
             }
         }
 
+
         function renderEmployees(c) {
+            window.state.employeesTab = window.state.employeesTab || 'add';
+            const empTabAdd = window.state.employeesTab === 'add' ? 'background:var(--primary); color:#000; font-weight:900; box-shadow:0 4px 15px rgba(251,191,36,0.3);' : 'background:rgba(255,255,255,0.05); color:#fff; font-weight:700;';
+            const empTabHist = window.state.employeesTab === 'history' ? 'background:var(--primary); color:#000; font-weight:900; box-shadow:0 4px 15px rgba(251,191,36,0.3);' : 'background:rgba(255,255,255,0.05); color:#fff; font-weight:700;';
+
             c.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <h3>شؤون الموظفين 👥</h3>
@@ -8406,6 +8422,7 @@ function renderDashboardSales(c) {
                 
                 <button onclick="document.getElementById('emp-list-modal').style.display='flex'" class="btn-luxury" style="padding:12px; background:rgba(0,0,0,0.2); border-color:rgba(255,255,255,0.05); color:var(--primary);"><i class="fa-solid fa-users-viewfinder"></i> عرض قائمة الموظفين</button>
             </div>
+            ` : `
             <div class="cart-side" style="overflow-y:auto;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                     <h4 style="margin:0; color:var(--primary);"><i class="fa-solid fa-fingerprint"></i> سجل الحضور والانصراف (اليوم)</h4>
@@ -8448,6 +8465,8 @@ function renderDashboardSales(c) {
                             <div><h4 style="margin:0 0 5px 0; font-size:1.2rem; color:#fff;">${e.name}</h4><small style="opacity:0.7;">${e.role} | كود الدخول: ${e.pin}${e.zkId ? ` | رقم البصمة: ${e.zkId}` : ''}${e.salary ? ` | الراتب: ${e.salary} ج.م` : ''}</small></div>
                             <button onclick="window.deleteEmployee(${e.id}); window.render();" class="btn-luxury danger" style="width:auto; padding:8px 12px; font-size:0.9rem;"><i class="fa-solid fa-trash"></i> حذف</button>
                         </div>`).join('') || '<p style="text-align:center; opacity:0.5;">لا يوجد موظفين مسجلين</p>'}
+        `}
+
                     </div>
                 </div>
             </div>
