@@ -1,0 +1,373 @@
+{
+  "menu": [
+    {
+      "category": "طواجن",
+      "id": 101,
+      "name": "طاجن بامية كندوز بقري",
+      "price": 195,
+      "stock": 85
+    },
+    {
+      "category": "طواجن",
+      "id": 102,
+      "name": "طاجن بامية باللحمة الضاني",
+      "price": 210,
+      "stock": 80
+    },
+    {
+      "category": "طواجن",
+      "id": 103,
+      "name": "طاجن بامية بالعكاوي",
+      "price": 295,
+      "stock": 97
+    },
+    {
+      "category": "طواجن",
+      "id": 104,
+      "name": "طاجن بصل بالعكاوي",
+      "price": 295,
+      "stock": 99
+    },
+    {
+      "category": "طواجن",
+      "id": 105,
+      "name": "طاجن تورلي",
+      "price": 195,
+      "stock": 100
+    },
+    {
+      "category": "طواجن",
+      "id": 106,
+      "name": "طاجن لحمة بصل",
+      "price": 195,
+      "stock": 98
+    },
+    {
+      "category": "طواجن",
+      "id": 107,
+      "name": "طاجن كوارع بالملوخية",
+      "price": 165,
+      "stock": 99
+    },
+    {
+      "category": "طواجن",
+      "id": 108,
+      "name": "كباب حلة",
+      "price": 195,
+      "stock": 98
+    },
+    {
+      "category": "طواجن",
+      "id": 109,
+      "name": "ملوخية باللحمة",
+      "price": 135,
+      "stock": 98
+    },
+    {
+      "category": "طواجن",
+      "id": 110,
+      "name": "ملوخية سادة",
+      "price": 25,
+      "stock": 95
+    },
+    {
+      "category": "طواجن",
+      "id": 111,
+      "name": "طاجن لسان عصفور",
+      "price": 25,
+      "stock": 100
+    },
+    {
+      "category": "طواجن",
+      "id": 112,
+      "name": "طاجن فريك",
+      "price": 10,
+      "stock": 100
+    },
+    {
+      "category": "طواجن",
+      "id": 113,
+      "name": "كفتة شامي صينية فرن",
+      "price": 95,
+      "stock": 100
+    },
+    {
+      "category": "طواجن",
+      "id": 114,
+      "name": "لحمة محمرة كبير",
+      "price": 200,
+      "stock": 98
+    },
+    {
+      "category": "طواجن",
+      "id": 115,
+      "name": "لحمة محمرة صغير",
+      "price": 115,
+      "stock": 98
+    },
+    {
+      "category": "طواجن",
+      "id": 116,
+      "name": "لحمة مسلوقة كبير",
+      "price": 200,
+      "stock": 100
+    },
+    {
+      "category": "طواجن",
+      "id": 117,
+      "name": "لحمة مسلوقة صغير",
+      "price": 115,
+      "stock": 100
+    },
+    {
+      "category": "طواجن",
+      "id": 118,
+      "name": "مكس",
+      "price": 195,
+      "stock": 100
+    },
+    {
+      "category": "طواجن",
+      "id": 119,
+      "name": "مكس كبير",
+      "price": 355,
+      "stock": 100
+    },
+    {
+      "category": "طواجن",
+      "id": 120,
+      "name": "فرد حمام",
+      "price": 95,
+      "stock": 100
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 203,
+      "name": "ربع ورك فرخة كبير بالبطاطس صينية",
+      "price": 95,
+      "stock": 100
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 204,
+      "name": "ربع صدر فرخة كبير بالبطاطس صينية",
+      "price": 100,
+      "stock": 100
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 205,
+      "name": "سجق صاني محمر",
+      "price": 180,
+      "stock": 100
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 206,
+      "name": "سجق صاني قوطة وبصل",
+      "price": 180,
+      "stock": 100
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 207,
+      "name": "كبدة صاني (حار او وسط)",
+      "price": 200,
+      "stock": 100
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 208,
+      "name": "موزه ضاني محمرة",
+      "price": 355,
+      "stock": 100
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 209,
+      "name": "فتة كوارع",
+      "price": 185,
+      "stock": 100
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 210,
+      "name": "فتة لحمة",
+      "price": 165,
+      "stock": 100
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 211,
+      "name": "ربع بط",
+      "price": 95,
+      "stock": 100
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 212,
+      "name": "طبق محشي مشكل",
+      "price": 65,
+      "stock": 100
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 213,
+      "name": "حواوشي بلدي",
+      "price": 100,
+      "stock": 100
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 214,
+      "name": "بشاميل",
+      "price": 95,
+      "stock": 100
+    },
+    {
+      "category": "شوربة",
+      "id": 301,
+      "name": "شوربة كوارع مخلية",
+      "price": 135,
+      "stock": 99
+    },
+    {
+      "category": "شوربة",
+      "id": 302,
+      "name": "شوربة كوارع سادة",
+      "price": 25,
+      "stock": 100
+    },
+    {
+      "category": "شوربة",
+      "id": 303,
+      "name": "شوربة لسان عصفور",
+      "price": 25,
+      "stock": 99
+    },
+    {
+      "category": "شوربة",
+      "id": 304,
+      "name": "شوربة لحمة بلدي",
+      "price": 10,
+      "stock": 100
+    },
+    {
+      "category": "سلطات",
+      "id": 401,
+      "name": "سلطة خضراء",
+      "price": 10,
+      "stock": 100,
+      "unlimited": true
+    },
+    {
+      "category": "سلطات",
+      "id": 402,
+      "name": "طرشي",
+      "price": 10,
+      "stock": 100,
+      "unlimited": true
+    },
+    {
+      "category": "سلطات",
+      "id": 403,
+      "name": "طحينة",
+      "price": 15,
+      "stock": 100,
+      "unlimited": true
+    },
+    {
+      "category": "مشروبات",
+      "id": 501,
+      "name": "مياه صغيرة",
+      "price": 10,
+      "stock": 100,
+      "unlimited": true
+    },
+    {
+      "category": "مشروبات",
+      "id": 502,
+      "name": "بيبسي",
+      "price": 20,
+      "stock": 100,
+      "unlimited": true
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 1779731595896,
+      "name": "ارز",
+      "price": 50,
+      "stock": 100,
+      "unlimited": false
+    },
+    {
+      "category": "أرز وفتة",
+      "id": 1779733496712,
+      "name": "فته ساده ",
+      "price": 50,
+      "stock": 10,
+      "unlimited": false
+    }
+  ],
+  "employees": [
+    {
+      "id": 1779686238451,
+      "name": "محمد",
+      "pin": "1234",
+      "role": "cashier"
+    },
+    {
+      "id": 1779686386500,
+      "name": "احمد",
+      "pin": "0000",
+      "role": "kitchen"
+    }
+  ],
+  "main_inventory": [
+    {
+      "id": "1779685669480",
+      "minQty": 0,
+      "name": "ملوخيه ",
+      "qty": 16,
+      "unit": "كجم "
+    },
+    {
+      "id": "1779687603582",
+      "minQty": 5,
+      "name": "لحم",
+      "qty": 12,
+      "unit": "كجم"
+    },
+    {
+      "id": "1779689731390",
+      "minQty": 5,
+      "name": "زيت",
+      "qty": 11,
+      "unit": "لتر"
+    },
+    {
+      "category": "زيوت",
+      "id": "1779815607046",
+      "minQty": 0,
+      "name": "سمنه",
+      "qty": 5,
+      "unit": "kg"
+    },
+    {
+      "category": "cleaning",
+      "id": "1779819631178",
+      "minQty": 0,
+      "name": "صبون",
+      "qty": 8,
+      "unit": "piece"
+    },
+    {
+      "category": "packaging",
+      "id": "1780036722279",
+      "minQty": 10,
+      "name": "علب",
+      "qty": 5,
+      "unit": "عدد"
+    }
+  ]
+}

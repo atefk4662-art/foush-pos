@@ -1,0 +1,130 @@
+{
+  "attendance": {
+    "empId": 1779686238451,
+    "time": 1779686245579,
+    "type": "in"
+  },
+  "employees": {
+    "id": 1779686238451,
+    "name": "محمد",
+    "pin": "1234",
+    "role": "cashier"
+  },
+  "exp": {
+    "amount": 44,
+    "category": "مصروف عام",
+    "details": "ن9خحمكط",
+    "invItem": "",
+    "isShiftExpense": true,
+    "name": "ميسسس",
+    "qty": 0,
+    "time": 1780037735847,
+    "type": "general"
+  },
+  "historical_orders": {
+    "cashier": "سيد",
+    "discount": 0,
+    "id": 716255,
+    "items": [
+      {
+        "name": "طاجن دجاج",
+        "price": 200,
+        "qty": 1
+      },
+      {
+        "name": "طاجن لحم",
+        "price": 250,
+        "qty": 1
+      }
+    ],
+    "paid": true,
+    "paymentMethod": "visa",
+    "status": "completed",
+    "time": 1774746257123.997,
+    "total": 450
+  },
+  "main_inventory": {
+    "id": "1779685669480",
+    "minQty": 0,
+    "name": "ملوخيه ",
+    "qty": 16,
+    "unit": "كجم "
+  },
+  "menu": {
+    "category": "طواجن",
+    "id": 101,
+    "name": "طاجن بامية كندوز بقري",
+    "price": 195,
+    "stock": 85
+  },
+  "orders": {
+    "cashierAlerted": true,
+    "id": 1,
+    "items": [
+      {
+        "category": "طواجن",
+        "id": 104,
+        "name": "طاجن بصل بالعكاوي",
+        "price": 295,
+        "qty": 8,
+        "stock": 99
+      }
+    ],
+    "notes": "",
+    "paid": false,
+    "source": "all",
+    "status": "canceled",
+    "table": "فوش 1",
+    "time": 1780196909931,
+    "total": 2360,
+    "type": "salla"
+  },
+  "shift": {
+    "start": 1780046545182
+  },
+  "shifts_history": {
+    "cashSales": 0,
+    "end": 1780042244530,
+    "expenses": 0,
+    "net": 0,
+    "sales": 0,
+    "start": 1780042231664,
+    "visaSales": 0,
+    "walletSales": 0,
+    "wasteCount": 0
+  },
+  "stock_history": {
+    "action": "إضافة خامة جديدة",
+    "by": "الإدارة",
+    "item": "علب",
+    "time": 1780036722279
+  },
+  "tables": {
+    "id": 1779686337576,
+    "name": "فوش 1",
+    "source": "all"
+  },
+  "waste_log": {
+    "by": "أحمد",
+    "id": "1779876432460.3423",
+    "invType": "menu",
+    "itemId": 97,
+    "itemName": "طاجن دجاج",
+    "qty": 3,
+    "reason": "انتهاء صلاحية",
+    "shiftStart": 1774807632459,
+    "time": 1774812074546.79,
+    "unit": "طلب"
+  },
+  "withdrawals": {
+    "by": "kitchen",
+    "id": "1779819171811",
+    "itemId": "1779685669480",
+    "itemName": "ملوخيه ",
+    "qty": 1,
+    "shiftStart": 1779732485815,
+    "time": 1779819171811,
+    "unit": "كجم "
+  },
+  "frequent_expenses": []
+}
