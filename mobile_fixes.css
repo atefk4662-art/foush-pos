@@ -242,59 +242,47 @@
         min-width: 0 !important;
         /* word-break removed to prevent button text squishing */
     }
-}
-
-
+    } /* Closes button rule */
+        
     /* EMPLOYEES PAGE - Mobile Grid */
+    .employees-grid-container,
     #page-employees [style*="grid-template-columns: 350px 1fr"] {
         grid-template-columns: 1fr !important;
         height: auto !important;
-        
+    }
+    
     /* EXPENSES PAGE - Mobile Stack */
+    .expenses-flex-container,
     #page-expenses [style*="height:calc(100vh - 120px)"] {
         flex-direction: column !important;
         height: auto !important;
-        #page-expenses [style*="width:380px"] {
+    }
+    
+    .expenses-flex-container > div:first-child {
+        min-height: 550px !important;
+        flex: none !important;
+    }
+    
+    .expenses-history-panel,
+    #page-expenses [style*="width:380px"] {
         width: 100% !important;
         max-height: 450px !important;
-        
+        flex: none !important;
+    }
+    
     /* ANALYTICS TABS - Prevent Squishing */
     #page-dashboard [style*="overflow-x:auto"] button,
     #page-sales [style*="overflow-x:auto"] button {
         flex-shrink: 0 !important;
         white-space: nowrap !important;
     }
-
-
-    /* EMPLOYEES PAGE - Mobile Grid */
-    .employees-grid-container {
-        grid-template-columns: 1fr !important;
-        height: auto !important;
-    }
     
-    /* EXPENSES PAGE - Mobile Stack */
-    .expenses-flex-container {
-        flex-direction: column !important;
-        height: auto !important;
-    }
-    .expenses-flex-container > div:first-child {
-        min-height: 550px !important;
-        flex: none !important;
-    }
-    .expenses-history-panel {
-        width: 100% !important;
-        max-height: 500px !important;
-        flex: none !important;
-    }
-
-
-
     /* CONTROL CENTER PAGE - Mobile Grid */
     .control-center-grid {
         grid-template-columns: 1fr !important;
         height: auto !important;
     }
-
+} /* Closes @media (max-width: 900px) */
 
 @media (max-width: 600px) {
     /* ========== EXTRA SMALL PHONE SPECIFIC FIXES ========== */
