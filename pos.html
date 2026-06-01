@@ -3759,7 +3759,13 @@
 
             <!-- Top Filter Bar -->
             <div style="background:rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 14px; margin-bottom: 20px; display:flex; flex-direction:column; gap:12px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+                        <button onclick="window.state.shiftHistoryFilter.fromDate=''; window.state.shiftHistoryFilter.toDate=''; window.render();" class="btn-luxury ${(!filter.fromDate) ? 'active' : ''}" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">كل الوقت</button>
+                        <button onclick="const d=new Date(); const s=d.toISOString().split('T')[0]; window.state.shiftHistoryFilter.fromDate=s; window.state.shiftHistoryFilter.toDate=s; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">اليوم</button>
+                        <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.shiftHistoryFilter.fromDate=f.toISOString().split('T')[0]; window.state.shiftHistoryFilter.toDate=t.toISOString().split('T')[0]; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الأسبوع</button>
+                        <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.shiftHistoryFilter.fromDate=f.toISOString().split('T')[0]; window.state.shiftHistoryFilter.toDate=t.toISOString().split('T')[0]; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الشهر</button>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex:1;">
                         <input type="text" placeholder="البحث باسم الكاشير أو رقم الوردية..." value="${filter.search}" oninput="window.state.shiftHistoryFilter.search = this.value; window.render();" style="min-width:200px; max-width:300px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.85rem; padding:8px 12px; border-radius:6px; outline:none; font-family:'Cairo';">
                         
@@ -9546,7 +9552,7 @@ function renderDashboardSales(c) {
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
+                navigator.serviceWorker.register('./sw.js?v=2')
                     .then(reg => console.log('Service Worker registered successfully! ✅', reg.scope))
                     .catch(err => console.error('Service Worker registration failed! ❌', err));
             });

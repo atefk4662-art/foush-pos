@@ -9,7 +9,30 @@
     #page-inventory [style*="display:grid; grid-template-columns:repeat"] {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 8px !important;
+    
+    /* EMPLOYEES PAGE - Mobile Grid */
+    #page-employees [style*="grid-template-columns: 350px 1fr"] {
+        grid-template-columns: 1fr !important;
+        height: auto !important;
     }
+    
+    /* EXPENSES PAGE - Mobile Stack */
+    #page-expenses [style*="height:calc(100vh - 120px)"] {
+        flex-direction: column !important;
+        height: auto !important;
+    }
+    #page-expenses [style*="width:380px"] {
+        width: 100% !important;
+        max-height: 450px !important;
+    }
+    
+    /* ANALYTICS TABS - Prevent Squishing */
+    #page-dashboard [style*="overflow-x:auto"] button,
+    #page-sales [style*="overflow-x:auto"] button {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+    }
+}
     
     .inv-card {
         min-width: 0 !important;
@@ -21,7 +44,7 @@
     .inv-card h4 {
         font-size: 0.95rem !important;
         margin-bottom: 4px !important;
-        word-break: break-word !important;
+        /* word-break removed to prevent button text squishing */
     }
     
     .inv-card p {
@@ -188,7 +211,7 @@
     .order-card,
     .inv-card {
         min-width: 0 !important;
-        word-break: break-word !important;
+        /* word-break removed to prevent button text squishing */
         overflow-x: hidden !important;
     }
     
@@ -205,21 +228,42 @@
     /* General overflow prevention on all flex containers */
     .cart-side {
         overflow-x: hidden !important;
-        word-break: break-word !important;
+        /* word-break removed to prevent button text squishing */
     }
     
     .cart-side h3,
     .cart-side h4 {
-        word-break: break-word !important;
+        /* word-break removed to prevent button text squishing */
         max-width: 100% !important;
     }
 
     /* Button overflow prevention */
     button {
         min-width: 0 !important;
-        word-break: break-word !important;
+        /* word-break removed to prevent button text squishing */
     }
 }
+
+
+    /* EMPLOYEES PAGE - Mobile Grid */
+    #page-employees [style*="grid-template-columns: 350px 1fr"] {
+        grid-template-columns: 1fr !important;
+        height: auto !important;
+        
+    /* EXPENSES PAGE - Mobile Stack */
+    #page-expenses [style*="height:calc(100vh - 120px)"] {
+        flex-direction: column !important;
+        height: auto !important;
+        #page-expenses [style*="width:380px"] {
+        width: 100% !important;
+        max-height: 450px !important;
+        
+    /* ANALYTICS TABS - Prevent Squishing */
+    #page-dashboard [style*="overflow-x:auto"] button,
+    #page-sales [style*="overflow-x:auto"] button {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+    }
 
 @media (max-width: 600px) {
     /* ========== EXTRA SMALL PHONE SPECIFIC FIXES ========== */
