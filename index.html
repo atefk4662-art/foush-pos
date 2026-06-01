@@ -2415,6 +2415,38 @@
         </div>
     </div>
 
+    <!-- Edit Employee Modal -->
+    <div id="emp-edit-modal" class="overlay" style="display:none;">
+        <div class="modal-body" style="width:400px; background:#1e293b; border:1px solid var(--primary); box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+            <h3 style="margin-bottom:20px; color:var(--primary);"><i class="fa-solid fa-user-pen"></i> تعديل بيانات الموظف</h3>
+            
+            <label style="font-size:0.8rem; opacity:0.7;">اسم الموظف:</label>
+            <input id="edit-emp-name" class="input-luxury" style="margin-bottom:10px;">
+            
+            <label style="font-size:0.8rem; opacity:0.7;">الوظيفة:</label>
+            <select id="edit-emp-role" class="input-luxury" style="margin-bottom:10px;">
+                <option value="waiter">ويتر 🤵</option>
+                <option value="cashier">كاشير 💰</option>
+                <option value="kitchen">شيف / مطبخ 👨‍🍳</option>
+                <option value="manager">مدير فرع 👔</option>
+            </select>
+            
+            <label style="font-size:0.8rem; opacity:0.7;">كود الدخول (PIN):</label>
+            <input id="edit-emp-pin" type="text" class="input-luxury" style="margin-bottom:10px;">
+            
+            <label style="font-size:0.8rem; opacity:0.7;">رقم جهاز البصمة (ZKTeco):</label>
+            <input id="edit-emp-zk-id" type="number" class="input-luxury" style="margin-bottom:10px;">
+            
+            <label style="font-size:0.8rem; opacity:0.7;">الراتب الشهري:</label>
+            <input id="edit-emp-salary" type="number" class="input-luxury" style="margin-bottom:15px;">
+            
+            <div style="display:flex; gap:8px;">
+                <button onclick="window.saveEditEmployee()" class="btn-luxury" style="flex:1;">حفظ التعديلات ✅</button>
+                <button onclick="document.getElementById('emp-edit-modal').style.display='none'" class="btn-luxury danger">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
     <div id="admin-inventory-add-modal" class="overlay" style="display:none;">
         <div class="modal-body" style="width:450px;">
             <h2 style="margin-bottom:20px; color:var(--primary);"><i class="fa-solid fa-box-open"></i> إضافة خامة للمخزن
@@ -3051,17 +3083,8 @@
             window.state.page = defaultPage;
             sessionStorage.setItem('foush_last_page', defaultPage);
 
-            // Auto check-in attendance if not already clocked in
-            const att = window.state.db.attendance || [];
-            const lastRec = att.slice().reverse().find(a => a.empId === emp.id);
-            if (!lastRec || lastRec.type !== 'in') {
-                att.push({ empId: emp.id, type: 'in', time: Date.now() });
-                window.state.db.attendance = att;
-                window.save();
-            }
-
             error.style.color = 'var(--success)';
-            error.textContent = `مرحباً ${emp.name}، تم تسجيل حضورك والولوج بنجاح! 🟢`;
+            error.textContent = `مرحباً ${emp.name}، تم تسجيل الدخول بنجاح! 🟢`;
             window.playSound('success');
 
             setTimeout(() => {
@@ -3628,8 +3651,9 @@
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
                         <button onclick="window.state.shiftHistoryFilter.fromDate=''; window.state.shiftHistoryFilter.toDate=''; window.render();" class="btn-luxury ${(!filter.fromDate) ? 'active' : ''}" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">كل الوقت</button>
                         <button onclick="const d=new Date(); const s=d.toISOString().split('T')[0]; window.state.shiftHistoryFilter.fromDate=s; window.state.shiftHistoryFilter.toDate=s; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">اليوم</button>
-                        <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.shiftHistoryFilter.fromDate=f.toISOString().split('T')[0]; window.state.shiftHistoryFilter.toDate=t.toISOString().split('T')[0]; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الأسبوع</button>
-                        <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.shiftHistoryFilter.fromDate=f.toISOString().split('T')[0]; window.state.shiftHistoryFilter.toDate=t.toISOString().split('T')[0]; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الشهر</button>
+                        <button onclick="const d=new Date(); const f=new Date(); f.setDate(d.getDate()-7); window.state.shiftHistoryFilter.fromDate=f.toISOString().split('T')[0]; window.state.shiftHistoryFilter.toDate=d.toISOString().split('T')[0]; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">آخر 7 أيام</button>
+                        <button onclick="const d=new Date(); const f=new Date(); f.setDate(d.getDate()-30); window.state.shiftHistoryFilter.fromDate=f.toISOString().split('T')[0]; window.state.shiftHistoryFilter.toDate=d.toISOString().split('T')[0]; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">آخر 30 يوم</button>
+                        <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.shiftHistoryFilter.fromDate=f.toISOString().split('T')[0]; window.state.shiftHistoryFilter.toDate=t.toISOString().split('T')[0]; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الشهر اللي فات</button>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex:1;">
@@ -3913,48 +3937,47 @@
                 <!-- Top Feedback Categories -->
                 <div style="margin-bottom:5px;">
                     <h4 style="margin:0 0 15px 0; font-family:'Cairo'; font-size:1.1rem; color:#fff;">الحالة العامة للمطعم</h4>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:15px;">
-                        <div onclick="${opStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(0,0,0,0.3); border:1px solid ${opStatus.color}30; border-right:3px solid ${opStatus.color}; border-radius:10px; padding:15px; display:flex; align-items:center; gap:12px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(0,0,0,0.3)'; this.style.transform='translateY(0)';">
-                            <div style="width:40px; height:40px; border-radius:50%; background:${opStatus.color}20; display:flex; align-items:center; justify-content:center; color:${opStatus.color}; font-size:1.2rem; flex-shrink:0;">
+                        <div onclick="${opStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:flex; align-items:center; gap:12px;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
+                            <div style="width:45px; height:45px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:${opStatus.color}; font-size:1.4rem; flex-shrink:0;">
                                 <i class="fa-solid ${opStatus.icon}"></i>
                             </div>
                             <div>
-                                <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:3px;">حالة التشغيل</div>
-                                <div style="font-size:0.95rem; font-weight:900; color:${opStatus.color};">${opStatus.text}</div>
-                                <div style="font-size:0.7rem; color:#94a3b8; margin-top:2px; opacity:0.8;">${opStatus.subtext}</div>
+                                <div style="font-size:0.85rem; color:#cbd5e1; font-weight:bold; margin-bottom:3px;">حالة التشغيل</div>
+                                <div style="font-size:1.15rem; font-weight:900; color:${opStatus.color};">${opStatus.text}</div>
+                                <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px; opacity:0.9;">${opStatus.subtext}</div>
                             </div>
                         </div>
                         
-                        <div onclick="${menuInvStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(0,0,0,0.3); border:1px solid ${menuInvStatus.color}30; border-right:3px solid ${menuInvStatus.color}; border-radius:10px; padding:15px; display:flex; align-items:center; gap:12px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(0,0,0,0.3)'; this.style.transform='translateY(0)';">
-                            <div style="width:40px; height:40px; border-radius:50%; background:${menuInvStatus.color}20; display:flex; align-items:center; justify-content:center; color:${menuInvStatus.color}; font-size:1.2rem; flex-shrink:0;">
+                        <div onclick="${menuInvStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:flex; align-items:center; gap:12px;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
+                            <div style="width:45px; height:45px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:${menuInvStatus.color}; font-size:1.4rem; flex-shrink:0;">
                                 <i class="fa-solid ${menuInvStatus.icon}"></i>
                             </div>
                             <div>
-                                <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:3px;">مخزن المنيو</div>
-                                <div style="font-size:0.95rem; font-weight:900; color:${menuInvStatus.color};">${menuInvStatus.text}</div>
-                                <div style="font-size:0.7rem; color:#94a3b8; margin-top:2px; opacity:0.8;">${menuInvStatus.subtext}</div>
+                                <div style="font-size:0.85rem; color:#cbd5e1; font-weight:bold; margin-bottom:3px;">مخزن المنيو</div>
+                                <div style="font-size:1.15rem; font-weight:900; color:${menuInvStatus.color};">${menuInvStatus.text}</div>
+                                <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px; opacity:0.9;">${menuInvStatus.subtext}</div>
                             </div>
                         </div>
 
-                        <div onclick="${mainInvStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(0,0,0,0.3); border:1px solid ${mainInvStatus.color}30; border-right:3px solid ${mainInvStatus.color}; border-radius:10px; padding:15px; display:flex; align-items:center; gap:12px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(0,0,0,0.3)'; this.style.transform='translateY(0)';">
-                            <div style="width:40px; height:40px; border-radius:50%; background:${mainInvStatus.color}20; display:flex; align-items:center; justify-content:center; color:${mainInvStatus.color}; font-size:1.2rem; flex-shrink:0;">
+                        <div onclick="${mainInvStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:flex; align-items:center; gap:12px;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
+                            <div style="width:45px; height:45px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:${mainInvStatus.color}; font-size:1.4rem; flex-shrink:0;">
                                 <i class="fa-solid ${mainInvStatus.icon}"></i>
                             </div>
                             <div>
-                                <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:3px;">المخزن الرئيسي</div>
-                                <div style="font-size:0.95rem; font-weight:900; color:${mainInvStatus.color};">${mainInvStatus.text}</div>
-                                <div style="font-size:0.7rem; color:#94a3b8; margin-top:2px; opacity:0.8;">${mainInvStatus.subtext}</div>
+                                <div style="font-size:0.85rem; color:#cbd5e1; font-weight:bold; margin-bottom:3px;">المخزن الرئيسي</div>
+                                <div style="font-size:1.15rem; font-weight:900; color:${mainInvStatus.color};">${mainInvStatus.text}</div>
+                                <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px; opacity:0.9;">${mainInvStatus.subtext}</div>
                             </div>
                         </div>
 
-                        <div onclick="${staffStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(0,0,0,0.3); border:1px solid ${staffStatus.color}30; border-right:3px solid ${staffStatus.color}; border-radius:10px; padding:15px; display:flex; align-items:center; gap:12px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(0,0,0,0.3)'; this.style.transform='translateY(0)';">
-                            <div style="width:40px; height:40px; border-radius:50%; background:${staffStatus.color}20; display:flex; align-items:center; justify-content:center; color:${staffStatus.color}; font-size:1.2rem; flex-shrink:0;">
+                        <div onclick="${staffStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:flex; align-items:center; gap:12px;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
+                            <div style="width:45px; height:45px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:${staffStatus.color}; font-size:1.4rem; flex-shrink:0;">
                                 <i class="fa-solid ${staffStatus.icon}"></i>
                             </div>
                             <div>
-                                <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:3px;">طاقم العمل</div>
-                                <div style="font-size:0.95rem; font-weight:900; color:${staffStatus.color};">${staffStatus.text}</div>
-                                <div style="font-size:0.7rem; color:#94a3b8; margin-top:2px; opacity:0.8;">${staffStatus.subtext}</div>
+                                <div style="font-size:0.85rem; color:#cbd5e1; font-weight:bold; margin-bottom:3px;">طاقم العمل</div>
+                                <div style="font-size:1.15rem; font-weight:900; color:${staffStatus.color};">${staffStatus.text}</div>
+                                <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px; opacity:0.9;">${staffStatus.subtext}</div>
                             </div>
                         </div>
                     </div>
@@ -3965,25 +3988,23 @@
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:15px;">
                         
                         <!-- Top Item Card -->
-                        <div style="background:linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.9)); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.3); transition:all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 30px rgba(245,158,11,0.15)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.3)';">
-                            <div style="position:absolute; top:-20px; left:-20px; width:100px; height:100px; background:#f59e0b; filter:blur(40px); opacity:0.15; border-radius:50%;"></div>
+                        <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; transition:all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                 <div style="font-size:0.8rem; color:#94a3b8; font-weight:bold;"><i class="fa-solid fa-star" style="margin-left:5px; color:#f59e0b;"></i> نجم الوردية (الأكثر مبيعاً)</div>
                             </div>
                             <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
-                                <div style="width:50px; height:50px; border-radius:12px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#f59e0b; box-shadow:0 0 15px rgba(245,158,11,0.2);">
+                                <div style="width:50px; height:50px; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#f59e0b;">
                                     <i class="fa-solid fa-fire"></i>
                                 </div>
                                 <div style="flex:1; min-width:0;">
                                     <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${bestItemName}</div>
-                                    <div style="font-size:0.75rem; color:#f59e0b; background:rgba(245,158,11,0.1); display:inline-block; padding:3px 8px; border-radius:6px; font-weight:bold;">تم بيع ${bestItemQty} وحدة</div>
+                                    <div style="font-size:0.75rem; color:#94a3b8; background:rgba(255,255,255,0.05); display:inline-block; padding:3px 8px; border-radius:6px;">تم بيع ${bestItemQty} وحدة</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Cash Flow Card -->
-                        <div style="background:linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.9)); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.3); transition:all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 30px rgba(16,185,129,0.15)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.3)';">
-                            <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:var(--success); filter:blur(40px); opacity:0.1; border-radius:50%;"></div>
+                        <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; transition:all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                 <div style="font-size:0.8rem; color:#94a3b8; font-weight:bold;"><i class="fa-solid fa-wallet" style="margin-left:5px; color:var(--success);"></i> ملخص خزينة الوردية</div>
                             </div>
@@ -3996,8 +4017,7 @@
                         </div>
 
                         <!-- Trend Chart Card -->
-                        <div style="background:linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.9)); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.3); display:flex; flex-direction:column; transition:all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 30px rgba(14,165,233,0.15)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.3)';">
-                            <div style="position:absolute; bottom:-20px; right:50%; transform:translateX(50%); width:150px; height:50px; background:#0ea5e9; filter:blur(40px); opacity:0.15; border-radius:50%;"></div>
+                        <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; display:flex; flex-direction:column; transition:all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                 <div style="font-size:0.8rem; color:#94a3b8; font-weight:bold;"><i class="fa-solid fa-chart-line" style="margin-left:5px; color:#0ea5e9;"></i> مؤشر زحمة المطعم (آخر 6 ساعات)</div>
                             </div>
@@ -4010,19 +4030,21 @@
                 </div>
 
                 <!-- Quick Actions -->
-                <div style="display:flex; gap:15px; flex-wrap:wrap;">
-                    <button onclick="window.switchPage('shift_ops')" class="btn-luxury" style="padding:10px 20px; font-size:0.9rem; width:auto; border-radius:10px; display:flex; gap:8px; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-cash-register" style="color:#0ea5e9;"></i> ${isShiftActive ? 'متابعة الوردية الحالية' : 'متابعة الوردية'}</button>
-                    <button onclick="window.switchPage('expenses'); setTimeout(()=>document.getElementById('ex-amount').focus(), 300);" class="btn-luxury" style="padding:10px 20px; font-size:0.9rem; width:auto; border-radius:10px; display:flex; gap:8px; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-money-bill-wave" style="color:#ef4444;"></i> تسجيل مصروف سريع</button>
-                    <button onclick="window.switchPage('admin_inventory'); setTimeout(()=>window.openAdminInventoryAdd(), 300);" class="btn-luxury" style="padding:10px 20px; font-size:0.9rem; width:auto; border-radius:10px; display:flex; gap:8px; align-items:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-box-open" style="color:var(--primary);"></i> إضافة خامة للمخزن</button>
+                <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:30px; margin-top:25px;">
+                    <button onclick="window.switchPage('shift_ops')" class="btn-luxury" style="flex:1; min-width:200px; justify-content:center; padding:15px 25px; font-size:1.1rem; font-weight:bold; border-radius:12px; display:flex; gap:10px; align-items:center; background:rgba(14,165,233,0.15); border:1px solid rgba(14,165,233,0.4); color:#fff; transition:all 0.3s; box-shadow:0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(14,165,233,0.3)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(14,165,233,0.15)'; this.style.transform='translateY(0)';"><i class="fa-solid fa-cash-register" style="color:#38bdf8; font-size:1.4rem;"></i> <span>${isShiftActive ? 'متابعة الوردية الحالية' : 'متابعة الوردية'}</span></button>
+                    
+                    <button onclick="window.switchPage('expenses'); setTimeout(()=>document.getElementById('ex-amount').focus(), 300);" class="btn-luxury" style="flex:1; min-width:200px; justify-content:center; padding:15px 25px; font-size:1.1rem; font-weight:bold; border-radius:12px; display:flex; gap:10px; align-items:center; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#fff; transition:all 0.3s; box-shadow:0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(239,68,68,0.3)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.transform='translateY(0)';"><i class="fa-solid fa-money-bill-wave" style="color:#f87171; font-size:1.4rem;"></i> <span>تسجيل مصروف سريع</span></button>
+                    
+                    <button onclick="window.switchPage('admin_inventory'); setTimeout(()=>window.openAdminInventoryAdd(), 300);" class="btn-luxury" style="flex:1; min-width:200px; justify-content:center; padding:15px 25px; font-size:1.1rem; font-weight:bold; border-radius:12px; display:flex; gap:10px; align-items:center; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#fff; transition:all 0.3s; box-shadow:0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(245,158,11,0.3)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(245,158,11,0.15)'; this.style.transform='translateY(0)';"><i class="fa-solid fa-box-open" style="color:#fbbf24; font-size:1.4rem;"></i> <span>إضافة خامة للمخزن</span></button>
                 </div>
 
-                <div class="control-center-grid" style="display:grid; grid-template-columns: 2fr 1fr; gap:25px; align-items:start;">
+                <div class="control-center-grid" style="display:grid; grid-template-columns: 2fr 1fr; gap:30px; align-items:start;">
                 <!-- Main Content Left -->
                 <div>
                     ${alertsHtml}
 
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px;">
-                        <div onclick="window.switchPage('admin_inventory')" style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.03); border-radius:15px; padding:20px; cursor:pointer; transition:all 0.3s; display:flex; flex-direction:column; gap:10px;" onmouseover="this.style.background='rgba(251,191,36,0.1)'; this.style.borderColor='var(--primary)';" onmouseout="this.style.background='rgba(0,0,0,0.25)'; this.style.borderColor='rgba(255,255,255,0.03)';">
+                        <div onclick="window.switchPage('admin_inventory')" style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:15px; padding:20px; cursor:pointer; transition:all 0.3s; display:flex; flex-direction:column; gap:10px;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <i class="fa-solid fa-boxes-stacked" style="font-size:2rem; color:var(--primary);"></i>
                                 <div style="text-align:left;">
@@ -4034,12 +4056,12 @@
                                 <h3 style="margin:5px 0 0 0; font-size:1.2rem;">المخزن الرئيسي</h3>
                                 <span style="font-size:0.8rem; opacity:0.6;">إدارة الخامات الأولية للمطعم</span>
                             </div>
-                            <div style="margin-top:auto; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px; border-right:3px solid ${lowMainInvCount > 0 ? '#ef4444' : '#10b981'};">
+                            <div style="margin-top:auto; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px;">
                                 <p style="margin:0; font-size:0.8rem; color:${lowMainInvCount > 0 ? '#ef4444' : '#10b981'}; font-weight:700;">${lowMainInvCount > 0 ? lowMainInvCount + ' نواقص تحتاج شراء' : 'المخزن مستقر وجاهز'}</p>
                             </div>
                         </div>
                         
-                        <div onclick="window.switchPage('inventory')" style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.03); border-radius:15px; padding:20px; cursor:pointer; transition:all 0.3s; display:flex; flex-direction:column; gap:10px;" onmouseover="this.style.background='rgba(244,63,94,0.1)'; this.style.borderColor='#f43f5e';" onmouseout="this.style.background='rgba(0,0,0,0.25)'; this.style.borderColor='rgba(255,255,255,0.03)';">
+                        <div onclick="window.switchPage('inventory')" style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:15px; padding:20px; cursor:pointer; transition:all 0.3s; display:flex; flex-direction:column; gap:10px;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <i class="fa-solid fa-burger" style="font-size:2rem; color:#f43f5e;"></i>
                                 <div style="text-align:left;">
@@ -4051,13 +4073,13 @@
                                 <h3 style="margin:5px 0 0 0; font-size:1.2rem;">أصناف البيع</h3>
                                 <span style="font-size:0.8rem; opacity:0.6;">تحديث أرصدة المنتجات الجاهزة</span>
                             </div>
-                            <div style="margin-top:auto; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px; border-right:3px solid ${lowMenuInvCount > 0 ? '#ef4444' : '#10b981'};">
+                            <div style="margin-top:auto; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px;">
                                 <p style="margin:0; font-size:0.8rem; color:${lowMenuInvCount > 0 ? '#ef4444' : '#10b981'}; font-weight:700;">${lowMenuInvCount > 0 ? lowMenuInvCount + ' منتجات قاربت ع النفاذ' : 'كل الأصناف متاحة للبيع'}</p>
                             </div>
                         </div>
 
 
-                        <div onclick="window.switchPage('employees')" style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.03); border-radius:15px; padding:20px; cursor:pointer; transition:all 0.3s; display:flex; flex-direction:column; gap:10px;" onmouseover="this.style.background='rgba(16,185,129,0.1)'; this.style.borderColor='#10b981';" onmouseout="this.style.background='rgba(0,0,0,0.25)'; this.style.borderColor='rgba(255,255,255,0.03)';">
+                        <div onclick="window.switchPage('employees')" style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:15px; padding:20px; cursor:pointer; transition:all 0.3s; display:flex; flex-direction:column; gap:10px;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <i class="fa-solid fa-users" style="font-size:2rem; color:#10b981;"></i>
                                 <div style="text-align:left;">
@@ -4069,12 +4091,12 @@
                                 <h3 style="margin:5px 0 0 0; font-size:1.2rem;">شؤون الموظفين</h3>
                                 <span style="font-size:0.8rem; opacity:0.6;">حضور، انصراف، وسلف الفريق</span>
                             </div>
-                            <div style="margin-top:auto; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px; border-right:3px solid #10b981;">
+                            <div style="margin-top:auto; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px;">
                                 <p style="margin:0; font-size:0.8rem; color:#10b981; font-weight:700;">${onlineStaffCount > 0 ? 'الطاقم متواجد ويعمل حالياً' : 'لا يوجد موظفين مسجلين حضور'}</p>
                             </div>
                         </div>
                         
-                        <div onclick="window.switchPage('dashboard')" style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.03); border-radius:15px; padding:20px; cursor:pointer; transition:all 0.3s; display:flex; flex-direction:column; gap:10px;" onmouseover="this.style.background='rgba(168,85,247,0.1)'; this.style.borderColor='#a855f7';" onmouseout="this.style.background='rgba(0,0,0,0.25)'; this.style.borderColor='rgba(255,255,255,0.03)';">
+                        <div onclick="window.switchPage('dashboard')" style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:15px; padding:20px; cursor:pointer; transition:all 0.3s; display:flex; flex-direction:column; gap:10px;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <i class="fa-solid fa-chart-pie" style="font-size:2rem; color:#a855f7;"></i>
                             </div>
@@ -4082,12 +4104,12 @@
                                 <h3 style="margin:5px 0 0 0; font-size:1.2rem;">التحليلات الشاملة</h3>
                                 <span style="font-size:0.8rem; opacity:0.6;">تقارير الأرباح والمبيعات المفصلة</span>
                             </div>
-                            <div style="margin-top:auto; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px; border-right:3px solid #a855f7;">
+                            <div style="margin-top:auto; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px;">
                                 <p style="margin:0; font-size:0.8rem; color:#d8b4fe; font-weight:700;">مراقبة الأداء المالي للمطعم</p>
                             </div>
                         </div>
                         
-                        <div onclick="window.switchPage('financial_statement')" style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.03); border-radius:15px; padding:20px; cursor:pointer; transition:all 0.3s; display:flex; flex-direction:column; gap:10px;" onmouseover="this.style.background='rgba(234,179,8,0.1)'; this.style.borderColor='#eab308';" onmouseout="this.style.background='rgba(0,0,0,0.25)'; this.style.borderColor='rgba(255,255,255,0.03)';">
+                        <div onclick="window.switchPage('financial_statement')" style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:15px; padding:20px; cursor:pointer; transition:all 0.3s; display:flex; flex-direction:column; gap:10px;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <i class="fa-solid fa-file-invoice-dollar" style="font-size:2rem; color:#eab308;"></i>
                             </div>
@@ -4095,7 +4117,7 @@
                                 <h3 style="margin:5px 0 0 0; font-size:1.2rem;">السجلات المالية</h3>
                                 <span style="font-size:0.8rem; opacity:0.6;">كشف الحساب الموحد وحركة الخزنة</span>
                             </div>
-                            <div style="margin-top:auto; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px; border-right:3px solid #eab308;">
+                            <div style="margin-top:auto; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px;">
                                 <p style="margin:0; font-size:0.8rem; color:#fde047; font-weight:700;">راجع كل مليم دخل أو خرج</p>
                             </div>
                         </div>
@@ -4106,29 +4128,29 @@
                 <div style="background:rgba(15,23,42,0.6); border:1px solid rgba(255,255,255,0.03); border-radius:15px; padding:20px; display:flex; flex-direction:column; max-height:600px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0;">
                         <div style="display:flex; flex-direction:column; gap:2px;">
-                            <h4 style="margin:0; font-family:'Cairo'; font-size:1rem; display:flex; align-items:center; gap:8px;">
-                                <span style="width:8px; height:8px; border-radius:50%; background:var(--success); display:inline-block; animation:pulse-blue 2s infinite;"></span>
+                            <h4 style="margin:0; font-family:'Cairo'; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+                                <span style="width:10px; height:10px; border-radius:50%; background:var(--success); display:inline-block; animation:pulse-blue 2s infinite;"></span>
                                 مراقبة حركات النظام (سجل حي)
                             </h4>
-                            <span style="font-size:0.75rem; color:#94a3b8; margin-right:16px;">متابعة لحظية وتحديث تلقائي لآخر 20 حركة بالمطعم (أوردرات، مصروفات، مخزن)</span>
+                            <span style="font-size:0.85rem; color:#94a3b8; margin-right:16px;">متابعة لحظية وتحديث تلقائي لآخر 20 حركة بالمطعم (أوردرات، مصروفات، مخزن)</span>
                         </div>
-                        <span style="font-size:0.7rem; color:#64748b; background:rgba(255,255,255,0.03); padding:3px 10px; border-radius:6px;">${(feed||[]).length} حركة</span>
+                        <span style="font-size:0.8rem; font-weight:bold; color:#64748b; background:rgba(255,255,255,0.05); padding:4px 12px; border-radius:6px;">${(feed||[]).length} حركة</span>
                     </div>
                     
                     <div style="flex:1; overflow-y:auto; padding-left:5px;" class="hide-scroll">
                         ${(feed||[]).length > 0 ? (feed||[]).map((f, idx) => `
-                        <div style="display:flex; align-items:center; gap:12px; padding:10px 0; ${idx !== feed.length - 1 ? 'border-bottom:1px solid rgba(255,255,255,0.03);' : ''}">
-                            <div style="width:32px; height:32px; border-radius:8px; background:${f.color}12; border:1px solid ${f.color}25; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                <i class="fa-solid ${f.icon}" style="color:${f.color}; font-size:0.8rem;"></i>
+                        <div style="display:flex; align-items:center; gap:12px; padding:12px 0; ${idx !== feed.length - 1 ? 'border-bottom:1px solid rgba(255,255,255,0.03);' : ''}">
+                            <div style="width:38px; height:38px; border-radius:8px; background:${f.color}12; border:1px solid ${f.color}25; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="fa-solid ${f.icon}" style="color:${f.color}; font-size:1rem;"></i>
                             </div>
                             <div style="flex:1; min-width:0;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                                    <span style="font-size:0.85rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${f.title}</span>
-                                    <span style="font-size:0.8rem; font-weight:900; color:${f.color}; white-space:nowrap; font-family:'Orbitron';">${f.desc}</span>
+                                    <span style="font-size:0.95rem; font-weight:bold; color:#f8fafc; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${f.title}</span>
+                                    <span style="font-size:0.9rem; font-weight:900; color:${f.color}; white-space:nowrap; font-family:'Orbitron';">${f.desc}</span>
                                 </div>
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:3px;">
-                                    <span style="font-size:0.65rem; color:#64748b;"><i class="fa-solid fa-user" style="margin-left:3px;"></i>${f.user}</span>
-                                    <span style="font-size:0.65rem; color:#475569;">${new Date(f.time).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</span>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                                    <span style="font-size:0.75rem; color:#94a3b8;"><i class="fa-solid fa-user" style="margin-left:3px;"></i>${f.user}</span>
+                                    <span style="font-size:0.75rem; color:#94a3b8;"><i class="fa-regular fa-clock" style="margin-left:3px;"></i>${new Date(f.time).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</span>
                                 </div>
                             </div>
                         </div>
@@ -4173,7 +4195,11 @@
         }
 
         function renderDashboardOverview(c) {
-            const allOrders = [...(window.state.db.orders || []), ...(window.state.db.historical_orders || [])];
+            const _activeOrdersList = window.state.db.orders || [];
+            const _historicalOrdersList = window.state.db.historical_orders || [];
+            const _historicalIds = new Set(_historicalOrdersList.filter(Boolean).map(o => o.id));
+            const _uniqueActiveOrders = _activeOrdersList.filter(o => !_historicalIds.has(o.id));
+            const allOrders = [..._historicalOrdersList, ..._uniqueActiveOrders];
             const exps = window.state.db.exp || [];
             
             const filter = window.state.dashboardFilter; // null means all time
@@ -4465,9 +4491,9 @@
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
                     <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">كل الوقت</button>
                     <button onclick="const d=new Date(); window.state.dashboardFilter={from:d.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">اليوم</button>
-                    <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الأسبوع</button>
-                    <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر الحالي</button>
-                    <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر السابق</button>
+                    <button onclick="const d=new Date(); const f=new Date(); f.setDate(d.getDate()-7); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">آخر 7 أيام</button>
+                    <button onclick="const d=new Date(); const f=new Date(); f.setDate(d.getDate()-30); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">آخر 30 يوم</button>
+                    <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر اللي فات</button>
                     <div style="width:1px; height:18px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
                     <input type="date" id="dash-from" value="${filter ? filter.from : ''}" class="input-luxury" style="margin:0; padding:4px 8px; width:125px; font-size:0.8rem;">
                     <span style="font-size:0.8rem; opacity:0.8;">إلى</span>
@@ -4477,8 +4503,11 @@
             </div>
 
             <!-- Dynamic Date Clarification -->
-            <div style="margin-bottom:20px; background:linear-gradient(90deg, rgba(251,191,36,0.1), rgba(251,191,36,0.02)); border:1px solid rgba(251,191,36,0.3); border-right:4px solid #fbbf24; padding:12px 15px; border-radius:8px; font-size:0.85rem; color:#fff; font-family:'Cairo'; display:flex; justify-content:space-between; align-items:center;">
-                <div><i class="fa-solid fa-circle-info" style="color:#fbbf24; margin-left:8px;"></i> يعرض التحليل الحالي: ${filter && filter.from && filter.to ? (filter.from === filter.to ? `حركات يوم <strong>(${filter.from})</strong>` : `الفترة من <strong>(${filter.from})</strong> إلى <strong>(${filter.to})</strong>`) : '<strong>كل الوقت (جميع الحركات المسجلة)</strong>'}</div>
+            <div style="margin-bottom:25px; background:linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.02)); border:1px solid rgba(16,185,129,0.3); border-right:6px solid #10b981; padding:20px; border-radius:12px; font-family:'Cairo'; display:flex; flex-direction:column; gap:8px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+                <div style="font-size:1.15rem; font-weight:bold; color:#10b981; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-calendar-check"></i> النطاق الزمني للبيانات المعروضة حالياً:</div>
+                <div style="font-size:1.05rem; color:#fff; opacity:0.95; line-height:1.6;">
+                    ${filter && filter.from && filter.to ? (filter.from === filter.to ? `يتم الآن عرض بيانات وحسابات <strong style="color:#fbbf24; background:rgba(251,191,36,0.15); padding:2px 8px; border-radius:4px;">يوم واحد فقط وهو (${filter.from})</strong>` : `يتم الآن عرض البيانات وحسابات الفترة بدءاً من <strong style="color:#fbbf24; background:rgba(251,191,36,0.15); padding:2px 8px; border-radius:4px;">(${filter.from})</strong> وحتى نهاية يوم <strong style="color:#fbbf24; background:rgba(251,191,36,0.15); padding:2px 8px; border-radius:4px;">(${filter.to})</strong>`) : 'يتم الآن عرض <strong style="color:#fbbf24; background:rgba(251,191,36,0.15); padding:2px 8px; border-radius:4px;">جميع البيانات المسجلة في النظام (كل الوقت)</strong>.'}
+                </div>
             </div>
 
             <!-- Hero KPIs -->
@@ -4788,7 +4817,9 @@ function renderDashboardSales(c) {
     
     const orders = window.state.db.orders || [];
     const historyOrders = window.state.db.historical_orders || [];
-    const periodOrders = [...orders, ...historyOrders].filter(o => o.time >= fromTime && o.time <= toTime);
+    const _histIds = new Set(historyOrders.filter(Boolean).map(o => o.id));
+    const uniqueOrders = orders.filter(o => !_histIds.has(o.id));
+    const periodOrders = [...uniqueOrders, ...historyOrders].filter(o => o.time >= fromTime && o.time <= toTime);
     
     // Split into paid and canceled
     const paidOrders = periodOrders.filter(o => o.paid && o.status !== 'canceled');
@@ -4920,9 +4951,9 @@ function renderDashboardSales(c) {
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                 <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">كل الوقت</button>
                 <button onclick="const d=new Date(); window.state.dashboardFilter={from:d.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">اليوم</button>
-                <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الأسبوع</button>
-                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر الحالي</button>
-                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر السابق</button>
+                <button onclick="const d=new Date(); const f=new Date(); f.setDate(d.getDate()-7); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">آخر 7 أيام</button>
+                <button onclick="const d=new Date(); const f=new Date(); f.setDate(d.getDate()-30); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">آخر 30 يوم</button>
+                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر اللي فات</button>
                 
                 <div style="width:1px; height:20px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
                 
@@ -5057,7 +5088,9 @@ function renderDashboardSales(c) {
     // Get Sales for the same period
     const orders = window.state.db.orders || [];
     const historyOrders = window.state.db.historical_orders || [];
-    const periodSales = [...orders, ...historyOrders].filter(o => o.time >= fromTime && o.time <= toTime && o.status !== 'canceled' && o.paid).reduce((s,o)=>s+o.total, 0);
+    const _histIds = new Set(historyOrders.filter(Boolean).map(o => o.id));
+    const uniqueOrders = orders.filter(o => !_histIds.has(o.id));
+    const periodSales = [...uniqueOrders, ...historyOrders].filter(o => o.time >= fromTime && o.time <= toTime && o.status !== 'canceled' && o.paid).reduce((s,o)=>s+o.total, 0);
 
     const exps = window.state.db.exp || [];
     const periodExp = exps.filter(e => e.time >= fromTime && e.time <= toTime);
@@ -5169,9 +5202,9 @@ function renderDashboardSales(c) {
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                 <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">كل الوقت</button>
                 <button onclick="const d=new Date(); window.state.dashboardFilter={from:d.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">اليوم</button>
-                <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الأسبوع</button>
-                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر الحالي</button>
-                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر السابق</button>
+                <button onclick="const d=new Date(); const f=new Date(); f.setDate(d.getDate()-7); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">آخر 7 أيام</button>
+                <button onclick="const d=new Date(); const f=new Date(); f.setDate(d.getDate()-30); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">آخر 30 يوم</button>
+                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر اللي فات</button>
                 <div style="width:1px; height:20px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
                 <span style="font-size:0.9rem; opacity:0.8;">من:</span>
                 <input type="date" id="exp-dash-from" value="${filter ? filter.from : ''}" class="input-luxury" style="margin:0; padding:5px 8px; width:130px; font-size:0.85rem;">
@@ -5312,7 +5345,9 @@ function renderDashboardSales(c) {
     // Calculate Menu Top Sales
     const orders = window.state.db.orders || [];
     const historyOrders = window.state.db.historical_orders || [];
-    const periodOrders = [...orders, ...historyOrders].filter(o => o.time >= fromTime && o.time <= toTime && o.paid && o.status !== 'canceled');
+    const _histIds2 = new Set(historyOrders.filter(Boolean).map(o => o.id));
+    const uniqueOrders2 = orders.filter(o => !_histIds2.has(o.id));
+    const periodOrders = [...uniqueOrders2, ...historyOrders].filter(o => o.time >= fromTime && o.time <= toTime && o.paid && o.status !== 'canceled');
     
     const itemsMap = {};
     periodOrders.forEach(o => { (o.items || []).forEach(i => { itemsMap[i.name] = (itemsMap[i.name] || 0) + i.qty; }); });
@@ -5424,9 +5459,9 @@ function renderDashboardSales(c) {
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                 <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">كل الوقت</button>
                 <button onclick="const d=new Date(); window.state.dashboardFilter={from:d.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">اليوم</button>
-                <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الأسبوع</button>
-                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر الحالي</button>
-                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر السابق</button>
+                <button onclick="const d=new Date(); const f=new Date(); f.setDate(d.getDate()-7); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">آخر 7 أيام</button>
+                <button onclick="const d=new Date(); const f=new Date(); f.setDate(d.getDate()-30); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">آخر 30 يوم</button>
+                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر اللي فات</button>
                 <div style="width:1px; height:20px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
                 <span style="font-size:0.9rem; opacity:0.8;">من:</span>
                 <input type="date" id="inv-dash-from" value="${filter ? filter.from : ''}" class="input-luxury" style="margin:0; padding:5px 8px; width:130px; font-size:0.85rem;">
@@ -6299,7 +6334,7 @@ function renderDashboardSales(c) {
             const rawHistory = window.state.db.shifts_history || [];
             const activeOrdersList = (window.state.db.orders || []).filter(o => o.status !== 'canceled');
             const historicalOrdersList = window.state.db.historical_orders || [];
-            const historicalIds = new Set(historicalOrdersList.map(o => o.id));
+            const historicalIds = new Set(historicalOrdersList.filter(Boolean).map(o => o.id));
             const uniqueActiveOrders = activeOrdersList.filter(o => !historicalIds.has(o.id));
             const rawOrders = [...historicalOrdersList, ...uniqueActiveOrders];
             const rawExp = window.state.db.exp || [];
@@ -6520,7 +6555,7 @@ function renderDashboardSales(c) {
             const rawHistory = window.state.db.shifts_history || [];
             const activeOrdersList = window.state.db.orders || [];
             const historicalOrdersList = window.state.db.historical_orders || [];
-            const historicalIds = new Set(historicalOrdersList.map(o => o.id));
+            const historicalIds = new Set(historicalOrdersList.filter(Boolean).map(o => o.id));
             const uniqueActiveOrders = activeOrdersList.filter(o => !historicalIds.has(o.id));
             const rawOrders = [...historicalOrdersList, ...uniqueActiveOrders];
             const rawExp = window.state.db.exp || [];
@@ -6549,7 +6584,7 @@ function renderDashboardSales(c) {
             };
 
             // 3. Apply Global Filters
-            let filteredOrders = rawOrders.filter(o => o.status !== 'canceled');
+            let filteredOrders = rawOrders.filter(o => o.status !== 'canceled' && o.paid);
             let filteredOrdersWithCanceled = rawOrders;
             let filteredExpenses = rawExp;
 
@@ -6590,7 +6625,7 @@ function renderDashboardSales(c) {
             const periodNet = periodSales - periodExp;
             const totalOrders = filteredOrders.length;
 
-            const lifetimeSales = rawOrders.filter(o => o.status !== 'canceled').reduce((sum, o) => sum + (o.total - (o.discount || 0)), 0);
+            const lifetimeSales = rawOrders.filter(o => o.status !== 'canceled' && o.paid).reduce((sum, o) => sum + (o.total - (o.discount || 0)), 0);
             const lifetimeExp = rawExp.reduce((sum, e) => sum + (e.amount || 0), 0);
             const lifetimeNet = lifetimeSales - lifetimeExp;
 
@@ -6669,7 +6704,10 @@ function renderDashboardSales(c) {
                     <p style="margin:0 0 25px 0; font-family:'Cairo'; color:#94a3b8; font-size:0.85rem; max-width:400px; line-height:1.5;">قم باختيار أحد الفترات السريعة بالأسفل أو حدد تاريخاً مخصصاً لبدء عرض البيانات المالية والتحليلات.</p>
                     
                     <!-- Grid of presets -->
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; width:100%; max-width:580px; margin-bottom:20px;">
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; width:100%; max-width:680px; margin-bottom:20px;">
+                        <div onclick="window.state.reportsGlobal.fromDate=''; window.state.reportsGlobal.toDate=''; window.state.reportsGlobal.viewAll=true; window.render();" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); padding:15px 10px; border-radius:10px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(168,85,247,0.05)'; this.style.borderColor='rgba(168,85,247,0.25)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.06)';">
+                            <span style="font-family:'Cairo'; font-weight:bold; color:#fff; font-size:0.85rem; display:block;">🗂️ كل الوقت</span>
+                        </div>
                         <div onclick="window.setReportsDatePreset(0)" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); padding:15px 10px; border-radius:10px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.05)'; this.style.borderColor='rgba(16,185,129,0.25)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.06)';">
                             <span style="font-family:'Cairo'; font-weight:bold; color:#fff; font-size:0.85rem; display:block;">📅 اليوم</span>
                         </div>
@@ -6677,10 +6715,10 @@ function renderDashboardSales(c) {
                             <span style="font-family:'Cairo'; font-weight:bold; color:#fff; font-size:0.85rem; display:block;">⏱️ آخر 7 أيام</span>
                         </div>
                         <div onclick="window.setReportsDatePreset(30)" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); padding:15px 10px; border-radius:10px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(251,191,36,0.05)'; this.style.borderColor='rgba(251,191,36,0.25)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.06)';">
-                            <span style="font-family:'Cairo'; font-weight:bold; color:#fff; font-size:0.85rem; display:block;">📊 هذا الشهر</span>
+                            <span style="font-family:'Cairo'; font-weight:bold; color:#fff; font-size:0.85rem; display:block;">📊 آخر 30 يوم</span>
                         </div>
-                        <div onclick="window.state.reportsGlobal.viewAll = true; window.render();" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); padding:15px 10px; border-radius:10px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(168,85,247,0.05)'; this.style.borderColor='rgba(168,85,247,0.25)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.06)';">
-                            <span style="font-family:'Cairo'; font-weight:bold; color:#fff; font-size:0.85rem; display:block;">🗂️ كل البيانات</span>
+                        <div onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.reportsGlobal.fromDate=f.toISOString().split('T')[0]; window.state.reportsGlobal.toDate=t.toISOString().split('T')[0]; window.state.reportsGlobal.viewAll=false; window.state.reportsPagination={statement:1,sales:1,expenses:1}; window.render();" style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); padding:15px 10px; border-radius:10px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.05)'; this.style.borderColor='rgba(239,68,68,0.25)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.06)';">
+                            <span style="font-family:'Cairo'; font-weight:bold; color:#fff; font-size:0.85rem; display:block;">📉 الشهر اللي فات</span>
                         </div>
                     </div>
 
@@ -8258,11 +8296,11 @@ function renderDashboardSales(c) {
                         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex:1;">
                             <!-- Date Filter Presets -->
                             <div style="display:flex; gap:5px;">
+                                <button onclick="window.state.reportsGlobal.fromDate=''; window.state.reportsGlobal.toDate=''; window.state.reportsGlobal.viewAll=true; window.render();" style="background:${!global.fromDate && !global.toDate ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}; color:${!global.fromDate && !global.toDate ? '#000' : '#fff'}; border:1px solid ${!global.fromDate && !global.toDate ? 'var(--primary)' : 'rgba(255,255,255,0.1)'}; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">كل الوقت</button>
                                 <button onclick="window.setReportsDatePreset(0)" style="background:${global.fromDate === new Date().toISOString().split('T')[0] && global.toDate === new Date().toISOString().split('T')[0] ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}; color:${global.fromDate === new Date().toISOString().split('T')[0] && global.toDate === new Date().toISOString().split('T')[0] ? '#000' : '#fff'}; border:1px solid ${global.fromDate === new Date().toISOString().split('T')[0] && global.toDate === new Date().toISOString().split('T')[0] ? 'var(--primary)' : 'rgba(255,255,255,0.1)'}; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">اليوم</button>
-                                <button onclick="window.setReportsDatePreset(7)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">7 أيام</button>
-                                <button onclick="window.setReportsDatePreset(30)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">30 يوم</button>
-                                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.reportsGlobal.fromDate=f.toISOString().split('T')[0]; window.state.reportsGlobal.toDate=t.toISOString().split('T')[0]; window.state.reportsGlobal.viewAll=false; window.state.reportsPagination={statement:1,sales:1,expenses:1}; window.render();" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">الشهر الحالي</button>
-                                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.reportsGlobal.fromDate=f.toISOString().split('T')[0]; window.state.reportsGlobal.toDate=t.toISOString().split('T')[0]; window.state.reportsGlobal.viewAll=false; window.state.reportsPagination={statement:1,sales:1,expenses:1}; window.render();" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">الشهر السابق</button>
+                                <button onclick="window.setReportsDatePreset(7)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">آخر 7 أيام</button>
+                                <button onclick="window.setReportsDatePreset(30)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">آخر 30 يوم</button>
+                                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.reportsGlobal.fromDate=f.toISOString().split('T')[0]; window.state.reportsGlobal.toDate=t.toISOString().split('T')[0]; window.state.reportsGlobal.viewAll=false; window.state.reportsPagination={statement:1,sales:1,expenses:1}; window.render();" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">الشهر اللي فات</button>
                             </div>
 
                             <!-- Date Filter Inputs -->
@@ -8285,30 +8323,30 @@ function renderDashboardSales(c) {
 
                     <!-- 4. Verbal Active Filters Summary (Dynamic Arabic Description for Manager) -->
                     ${(global.fromDate || global.toDate || global.viewAll) ? (function() {
-                        let desc = '⚙️ يعرض التقرير الحالي: ';
+                        let desc = '';
                         
                         // Timeframe part
                         if (global.fromDate && global.toDate) {
                             if (global.fromDate === global.toDate) {
-                                desc += `حركات يوم <strong>(${global.fromDate})</strong>`;
+                                desc += `يتم الآن عرض بيانات وحسابات <strong style="color:#fbbf24; background:rgba(251,191,36,0.15); padding:2px 8px; border-radius:4px;">يوم واحد فقط وهو (${global.fromDate})</strong>`;
                             } else {
-                                desc += `الفترة من <strong>(${global.fromDate})</strong> إلى <strong>(${global.toDate})</strong>`;
+                                desc += `يتم الآن عرض البيانات وحسابات الفترة بدءاً من <strong style="color:#fbbf24; background:rgba(251,191,36,0.15); padding:2px 8px; border-radius:4px;">(${global.fromDate})</strong> وحتى نهاية يوم <strong style="color:#fbbf24; background:rgba(251,191,36,0.15); padding:2px 8px; border-radius:4px;">(${global.toDate})</strong>`;
                             }
                         } else if (global.viewAll) {
-                            desc += `<strong>جميع الحركات التاريخية المسجلة</strong>`;
+                            desc += `يتم الآن عرض <strong style="color:#fbbf24; background:rgba(251,191,36,0.15); padding:2px 8px; border-radius:4px;">جميع البيانات المسجلة في النظام (كل الوقت)</strong>`;
                         }
 
                         // Cashier part
                         if (global.cashier !== 'all') {
-                            desc += ` | تصفية للموظف: 👤 <strong>[${global.cashier}]</strong>`;
+                            desc += `<br> <span style="opacity:0.8; font-size:0.9rem;">— مُصفاة للموظف الكاشير:</span> <strong style="color:#60a5fa; background:rgba(96,165,250,0.15); padding:2px 8px; border-radius:4px;">${global.cashier}</strong>`;
                         } else {
-                            desc += ` | جميع الموظفين 👥`;
+                            desc += `<br> <span style="opacity:0.8; font-size:0.9rem;">— تشمل جميع الموظفين</span>`;
                         }
 
                         // Payment part
                         if (global.paymentMethod !== 'all') {
                             const pName = global.paymentMethod === 'visa' ? 'فيزا 💳' : (global.paymentMethod === 'wallet' ? 'محفظة إلكترونية 📱' : 'نقدية (كاش) 💵');
-                            desc += ` | طريقة الدفع: 💳 <strong>[${pName}]</strong>`;
+                            desc += ` <span style="opacity:0.8; font-size:0.9rem;">| طريقة الدفع:</span> <strong style="color:#a78bfa; background:rgba(167,139,250,0.15); padding:2px 8px; border-radius:4px;">${pName}</strong>`;
                         }
 
                         // Render dynamic matches badge based on active tab
@@ -8322,9 +8360,14 @@ function renderDashboardSales(c) {
                         }
 
                         return `
-                        <div class="no-print" style="margin: 0 15px 15px 15px; background:linear-gradient(90deg, rgba(251,191,36,0.1), rgba(251,191,36,0.02)); border:1px solid rgba(251,191,36,0.3); border-right:4px solid #fbbf24; padding:12px 15px; border-radius:8px; font-size:0.85rem; color:#fff; font-family:'Cairo'; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; box-shadow:0 5px 15px rgba(0,0,0,0.2);">
-                            <span>${desc}</span>
-                            <span style="opacity:0.9; font-size:0.8rem; font-weight:bold; background:rgba(0,0,0,0.4); padding:4px 10px; border-radius:6px; font-family:'Cairo'; border:1px solid rgba(255,255,255,0.1);">${matchDetails}</span>
+                        <div class="no-print" style="margin: 0 15px 25px 15px; background:linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.02)); border:1px solid rgba(16,185,129,0.3); border-right:6px solid #10b981; padding:20px; border-radius:12px; font-family:'Cairo'; display:flex; flex-direction:column; gap:10px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+                            <div style="font-size:1.15rem; font-weight:bold; color:#10b981; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-calendar-check"></i> النطاق الزمني للفلاتر المعروضة حالياً:</div>
+                            <div style="font-size:1.05rem; color:#fff; opacity:0.95; line-height:1.6;">
+                                ${desc}
+                            </div>
+                            <div style="margin-top:5px; align-self:flex-start;">
+                                <span style="font-size:0.95rem; font-weight:bold; background:rgba(0,0,0,0.5); padding:6px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); box-shadow:inset 0 2px 5px rgba(0,0,0,0.5); color:#fbbf24;">${matchDetails}</span>
+                            </div>
                         </div>
                         `;
                     })() : ''}
@@ -8416,14 +8459,45 @@ function renderDashboardSales(c) {
                 <input id="emp-pin" type="password" placeholder="كود الدخول للسيستم (مثال: 1234)" class="input-luxury">
                 <input id="emp-zk-id" type="number" placeholder="رقم الموظف في جهاز البصمة ZKTeco (اختياري)" class="input-luxury">
                 <input id="emp-salary" type="number" placeholder="الراتب الشهري (مثال: 5000)" class="input-luxury" style="margin-bottom:12px;">
-                <button onclick="window.addEmployee()" class="btn-luxury" style="padding:15px; margin-bottom:20px;">حفظ الموظف ✅</button>
-                <hr style="border:1px dashed rgba(255,255,255,0.1); margin:15px 0;">
+                <button onclick="window.addEmployee()" class="btn-luxury" style="padding:15px; margin-bottom:20px; background:var(--primary); color:#000; font-weight:bold;">حفظ الموظف ✅</button>
                 
-                <button onclick="document.getElementById('emp-list-modal').style.display='flex'" class="btn-luxury" style="padding:12px; background:rgba(0,0,0,0.2); border-color:rgba(255,255,255,0.05); color:var(--primary);"><i class="fa-solid fa-users-viewfinder"></i> عرض قائمة الموظفين</button>
+                <hr style="border:1px dashed rgba(255,255,255,0.1); margin:25px 0 20px 0;">
+                
+                <!-- Inline Employee List -->
+                <div style="background:rgba(0,0,0,0.2); border-radius:12px; padding:20px; border:1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h4 style="margin:0; color:var(--primary); font-size:1.1rem;"><i class="fa-solid fa-users"></i> الموظفين المسجلين حالياً</h4>
+                        <span style="background:rgba(251,191,36,0.2); color:#fbbf24; padding:3px 10px; border-radius:12px; font-size:0.8rem; font-weight:bold;">${(window.state.db.employees || []).length} موظف</span>
+                    </div>
+                    
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        ${(window.state.db.employees || []).map(e => `
+                        <div style="background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div style="width:40px; height:40px; border-radius:50%; background:rgba(16,185,129,0.1); color:#10b981; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                                    <i class="fa-solid fa-user-tie"></i>
+                                </div>
+                                <div>
+                                    <h5 style="margin:0 0 5px 0; font-size:1.05rem; color:#fff;">${e.name}</h5>
+                                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                        <span style="font-size:0.75rem; color:#cbd5e1; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;"><i class="fa-solid fa-briefcase"></i> ${e.role}</span>
+                                        <span style="font-size:0.75rem; color:#cbd5e1; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;"><i class="fa-solid fa-key"></i> PIN: ${e.pin}</span>
+                                        ${e.zkId ? `<span style="font-size:0.75rem; color:#cbd5e1; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;"><i class="fa-solid fa-fingerprint"></i> ZK: ${e.zkId}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button onclick="window.openEditEmployee(${e.id})" class="btn-luxury" style="width:auto; padding:6px 12px; font-size:0.85rem; border-radius:8px; background:rgba(59,130,246,0.2); color:#3b82f6; border:1px solid rgba(59,130,246,0.3);"><i class="fa-solid fa-pen-to-square"></i> تعديل</button>
+                                <button onclick="window.deleteEmployee(${e.id}); window.render();" class="btn-luxury danger" style="width:auto; padding:6px 12px; font-size:0.85rem; border-radius:8px;"><i class="fa-solid fa-trash"></i> حذف</button>
+                            </div>
+                        </div>`).join('') || '<div style="text-align:center; padding:20px; color:#9ca3af; font-size:0.9rem; border:1px dashed rgba(255,255,255,0.1); border-radius:8px;">لا يوجد موظفين مسجلين في النظام</div>'}
+                    </div>
+                </div>
+
             </div>
             <div class="cart-side" style="overflow-y:auto;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-                    <h4 style="margin:0; color:var(--primary);"><i class="fa-solid fa-fingerprint"></i> سجل الحضور والانصراف (اليوم)</h4>
+                    <h4 style="margin:0; color:var(--primary);"><i class="fa-solid fa-clock-rotate-left"></i> سجل الحضور والانصراف (اليوم)</h4>
                     <div style="display:flex; gap:10px;">
                         <button onclick="alert('سيتم تفعيل أرشيف التقارير قريباً لحفظ وعرض سجلات الشهور السابقة واستخراج تقارير الرواتب.')" class="btn-luxury" style="padding:6px 12px; font-size:0.8rem; background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); width:auto;"><i class="fa-solid fa-box-archive"></i> الأرشيف والتقارير</button>
                         <button onclick="alert('سيتم تفعيل ربط الشبكة فور تركيب جهاز ZKTeco.')" class="btn-luxury" style="padding:6px 12px; font-size:0.8rem; background:rgba(16,185,129,0.1); border-color:#10b981; color:#10b981; width:auto;"><i class="fa-solid fa-network-wired"></i> سحب من الجهاز</button>
@@ -8432,39 +8506,41 @@ function renderDashboardSales(c) {
                     </div>
                 </div>
                 
-                <div style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:15px; margin-bottom:15px; display:flex; align-items:center; gap:15px;">
-                    <div style="width:50px; height:50px; border-radius:50%; background:rgba(16,185,129,0.1); color:#10b981; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
+                <div style="background:linear-gradient(90deg, rgba(16,185,129,0.05), rgba(16,185,129,0.01)); border:1px solid rgba(16,185,129,0.2); border-right:4px solid #10b981; border-radius:12px; padding:15px; margin-bottom:20px; display:flex; align-items:center; gap:15px;">
+                    <div style="width:45px; height:45px; border-radius:10px; background:rgba(16,185,129,0.1); color:#10b981; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0;">
                         <i class="fa-solid fa-satellite-dish"></i>
                     </div>
                     <div>
-                        <h4 style="margin:0 0 5px 0; font-size:1rem;">حالة جهاز البصمة (ZKTeco)</h4>
-                        <p style="margin:0; font-size:0.8rem; color:#94a3b8;">الجهاز غير متصل بالشبكة حالياً. يرجى توصيل الجهاز وإعداد الـ IP.</p>
+                        <h4 style="margin:0 0 5px 0; font-size:1rem; color:#10b981;">حالة جهاز البصمة (ZKTeco)</h4>
+                        <p style="margin:0; font-size:0.85rem; color:#9ca3af; line-height:1.4;">الجهاز غير متصل بالشبكة حالياً. يرجى توصيل الجهاز وإعداد الـ IP.</p>
                     </div>
                 </div>
 
-                <table class="foush-table">
-                    <thead><tr><th>الموظف</th><th>الوظيفة</th><th>نوع الحركة</th><th>التاريخ والوقت</th></tr></thead>
-                    <tbody>${(window.state.db.attendance || []).slice().reverse().map(a => {
-                const emp = (window.state.db.employees || []).find(x => x.id === a.empId);
-                return `<tr><td>${emp ? emp.name : 'مجهول'}</td><td>${emp ? emp.role : '-'}</td><td><span class="badge badge-${a.type === 'in' ? 'ready' : 'preparing'}">${a.type === 'in' ? 'حضور ✅' : 'انصراف 🚪'}</span></td><td>${new Date(a.time).toLocaleString('ar-EG')}</td></tr>`;
-            }).join('') || '<tr><td colspan="4" style="text-align:center; opacity:0.5;">لا يوجد سجلات حضور وانصراف</td></tr>'}</tbody>
-                </table>
-            </div>
-            
-            <!-- Employee List Modal -->
-            <div id="emp-list-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.9); z-index:9999; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
-                <div style="background:#1e293b; padding:25px; border-radius:15px; width:600px; max-height:80vh; overflow-y:auto; border:1px solid var(--primary); box-shadow:0 10px 30px rgba(0,0,0,0.5);">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:20px; align-items:center;">
-                        <h3 style="margin:0; color:var(--primary);"><i class="fa-solid fa-users"></i> قائمة الموظفين المسجلين</h3>
-                        <button onclick="document.getElementById('emp-list-modal').style.display='none'" class="btn-luxury danger" style="width:auto; padding:5px 15px; border-radius:8px;">إغلاق <i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                    <div style="display:flex; flex-direction:column; gap:10px;">
-                        ${(window.state.db.employees || []).map(e => `<div class="order-card" style="padding:15px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05); background:rgba(0,0,0,0.2);">
-                            <div><h4 style="margin:0 0 5px 0; font-size:1.2rem; color:#fff;">${e.name}</h4><small style="opacity:0.7;">${e.role} | كود الدخول: ${e.pin}${e.zkId ? ` | رقم البصمة: ${e.zkId}` : ''}${e.salary ? ` | الراتب: ${e.salary} ج.م` : ''}</small></div>
-                            <button onclick="window.deleteEmployee(${e.id}); window.render();" class="btn-luxury danger" style="width:auto; padding:8px 12px; font-size:0.9rem;"><i class="fa-solid fa-trash"></i> حذف</button>
-                        </div>`).join('') || '<p style="text-align:center; opacity:0.5;">لا يوجد موظفين مسجلين</p>'}
-
-                    </div>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    ${(window.state.db.attendance || []).slice().reverse().map(a => {
+                        const emp = (window.state.db.employees || []).find(x => x.id === a.empId);
+                        return `
+                        <div style="background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+                            <div style="display:flex; align-items:center; gap:15px;">
+                                <div style="width:45px; height:45px; border-radius:50%; background:rgba(251,191,36,0.1); display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:var(--primary); border:1px solid rgba(251,191,36,0.2);">
+                                    <i class="fa-solid fa-user-clock"></i>
+                                </div>
+                                <div>
+                                    <h4 style="margin:0 0 4px 0; font-size:1.1rem; color:#fff;">${emp ? emp.name : 'مجهول'}</h4>
+                                    <span style="font-size:0.8rem; color:#cbd5e1; background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-briefcase"></i> ${emp ? emp.role : '-'}</span>
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+                                <div style="text-align:right;">
+                                    <div style="font-size:1rem; font-family:'Orbitron', 'Cairo'; color:#fff; margin-bottom:4px;"><i class="fa-regular fa-clock" style="color:var(--primary); font-size:0.9rem;"></i> ${new Date(a.time).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</div>
+                                    <div style="font-size:0.8rem; color:#64748b;"><i class="fa-regular fa-calendar-days"></i> ${new Date(a.time).toLocaleDateString('ar-EG')}</div>
+                                </div>
+                                <span style="font-size:0.9rem; font-weight:bold; padding:6px 15px; border-radius:8px; display:flex; align-items:center; gap:6px; ${a.type === 'in' ? 'background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3);' : 'background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3);'}">
+                                    ${a.type === 'in' ? '<i class="fa-solid fa-arrow-right-to-bracket"></i> حضور' : '<i class="fa-solid fa-person-walking-arrow-right"></i> انصراف'}
+                                </span>
+                            </div>
+                        </div>`;
+                    }).join('') || '<div style="text-align:center; padding:40px 20px; background:rgba(0,0,0,0.2); border-radius:12px; border:1px dashed rgba(255,255,255,0.1); color:#9ca3af;"><i class="fa-solid fa-fingerprint" style="font-size:2.5rem; margin-bottom:15px; opacity:0.3;"></i><br><h4 style="margin:0; font-size:1.1rem; color:#fff;">لا يوجد سجلات حضور وانصراف</h4><p style="margin:5px 0 0 0; font-size:0.85rem;">سيظهر سجل الموظفين هنا بمجرد تسجيل حضورهم.</p></div>'}
                 </div>
             </div>
 
@@ -8589,6 +8665,35 @@ function renderDashboardSales(c) {
 
         window.addEmployee = () => { const n = document.getElementById('emp-name').value; const r = document.getElementById('emp-role').value; const p = document.getElementById('emp-pin').value; const s = Number(document.getElementById('emp-salary').value) || 0; const zk = document.getElementById('emp-zk-id').value; if (n && p) { window.state.db.employees.push({ id: Date.now(), name: n, role: r, pin: p, salary: s, zkId: zk }); window.save(); window.render(); window.showToast("تم إضافة الموظف ✅"); } };
         window.deleteEmployee = (id) => { if (confirm('حذف الموظف نهائياً؟')) { window.state.db.employees = window.state.db.employees.filter(e => e.id !== id); window.save(); window.render(); window.showToast("تم الحذف"); } };
+        
+        window.openEditEmployee = (id) => {
+            const emp = (window.state.db.employees || []).find(e => e.id === id);
+            if (!emp) return;
+            window.state.editingEmployeeId = id;
+            document.getElementById('edit-emp-name').value = emp.name || '';
+            document.getElementById('edit-emp-role').value = emp.role || 'waiter';
+            document.getElementById('edit-emp-pin').value = emp.pin || '';
+            document.getElementById('edit-emp-zk-id').value = emp.zkId || '';
+            document.getElementById('edit-emp-salary').value = emp.salary || '';
+            document.getElementById('emp-edit-modal').style.display = 'flex';
+        };
+
+        window.saveEditEmployee = () => {
+            const id = window.state.editingEmployeeId;
+            if (!id) return;
+            const emp = window.state.db.employees.find(e => e.id === id);
+            if (emp) {
+                emp.name = document.getElementById('edit-emp-name').value;
+                emp.role = document.getElementById('edit-emp-role').value;
+                emp.pin = document.getElementById('edit-emp-pin').value;
+                emp.zkId = document.getElementById('edit-emp-zk-id').value;
+                emp.salary = Number(document.getElementById('edit-emp-salary').value) || 0;
+                window.save();
+                window.render();
+                document.getElementById('emp-edit-modal').style.display = 'none';
+                window.showToast("تم تعديل بيانات الموظف بنجاح ✅");
+            }
+        };
 
         window.registerAttendance = () => {
             const pin = document.getElementById('att-pin').value; const msg = document.getElementById('att-msg');

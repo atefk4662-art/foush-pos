@@ -354,10 +354,9 @@ class PWAInstallManager {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   console.log('[PWA] New SW version available');
-                  this.showToast('تحديث جديد متوفر', 'info');
-                  
-                  // Optionally skip waiting
-                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                  this.showToast('تحديث جديد متوفر في الخلفية، سيتم تطبيقه في الزيارة القادمة', 'info');
+                  // We do NOT forcefully skip waiting and reload the page anymore 
+                  // to avoid interrupting the user while they are making orders.
                 }
               });
             });
@@ -367,10 +366,9 @@ class PWAInstallManager {
           });
       });
 
-      // Handle SW controller change
+      // Handle SW controller change (we keep this in case the user manually reloads)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         console.log('[PWA] Service Worker controller changed');
-        window.location.reload();
       });
     }
   }
