@@ -9202,10 +9202,7 @@ function renderDashboardSales(c) {
             }
         };
         window.boot();
-        // Seed mock data for last 60 days on startup if database has fewer than 50 historical orders
-        if (!window.state.db.historical_orders || window.state.db.historical_orders.length < 50) {
-            window.seedMockData();
-        }
+
         let lastOrdersData = [];
         let isInitialOrdersLoad = true;
 

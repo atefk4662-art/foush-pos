@@ -2748,9 +2748,10 @@
 
         const DEFAULT_MENU = [{ id: 1, name: 'طاجن لحم', price: 250, category: 'طواجن', stock: 100 }, { id: 2, name: 'أرز بالشعيرية', price: 40, category: 'أرز وفتة', stock: 100, unlimited: true }, { id: 3, name: 'شوربة طواجن', price: 60, category: 'شوربة', stock: 100 }];
         function safeGet(k, d) { try { const v = localStorage.getItem(k); return (v && v !== 'undefined') ? JSON.parse(v) : d; } catch (e) { return d; } }
+        function safeSessionGet(k, d) { try { const v = sessionStorage.getItem(k); return (v && v !== 'undefined' && v !== null) ? v : d; } catch (e) { return d; } }
 
         window.state = {
-            role: sessionStorage.getItem('foush_role'), page: sessionStorage.getItem('foush_last_page') || 'pos',
+            role: safeSessionGet('foush_role', null), page: safeSessionGet('foush_last_page', 'pos'),
             db: { menu: safeGet('f_menu', DEFAULT_MENU), orders: safeGet('f_orders', []), historical_orders: safeGet('f_historical_orders', []), exp: safeGet('f_exp', []), shift: safeGet('f_shift', null), tables: safeGet('f_tables', []), shifts_history: safeGet('f_history', []), stock_history: safeGet('f_stock_history', []), employees: safeGet('f_employees', []), attendance: safeGet('f_attendance', []), main_inventory: safeGet('f_main_inventory', []), frequent_expenses: safeGet('f_frequent_expenses', []), waste_log: safeGet('f_waste_log', []) },
             cart: [], cat: 'الكل', invCat: 'الكل', type: 'takeaway', selectedTable: 'خارجي', tempOrder: null, selectedItemId: null, editingTableId: null, custName: '', custPhone: ''
         };
@@ -9201,10 +9202,7 @@ function renderDashboardSales(c) {
             }
         };
         window.boot();
-        // Seed mock data for last 60 days on startup if database has fewer than 50 historical orders
-        if (!window.state.db.historical_orders || window.state.db.historical_orders.length < 50) {
-            window.seedMockData();
-        }
+
         let lastOrdersData = [];
         let isInitialOrdersLoad = true;
 
