@@ -288,6 +288,14 @@
     }
 
 
+
+    /* CONTROL CENTER PAGE - Mobile Grid */
+    .control-center-grid {
+        grid-template-columns: 1fr !important;
+        height: auto !important;
+    }
+
+
 @media (max-width: 600px) {
     /* ========== EXTRA SMALL PHONE SPECIFIC FIXES ========== */
 
