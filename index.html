@@ -2125,20 +2125,18 @@
 
 <body>
 
-    <!-- PWA Custom Install Banner -->
-    <div id="pwa-install-banner" class="pwa-banner" style="display: none;">
-        <div class="pwa-banner-content">
-            <img src="logo.png" alt="Logo" class="pwa-banner-logo">
-            <div class="pwa-banner-text">
-                <h4>تطبيق طواجن فؤش 🥘</h4>
-                <p>ثبّت التطبيق على شاشة موبايلك لتجربة أسرع وأفضل!</p>
+    <!-- PWA Custom Install Banner (Now an overlay modal) -->
+    <div id="pwa-install-banner" class="overlay" style="display: none; z-index:99999;">
+        <div class="modal-body" style="text-align: center; max-width: 380px;">
+            <div class="role-logo-main" style="width: 120px; height: 120px; margin: 0 auto 15px;"></div>
+            <h3 style="color: var(--primary); margin-bottom: 10px; font-family:'Cairo';">تثبيت التطبيق 📲</h3>
+            <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; opacity: 0.9; text-align: center; color:#e2e8f0;">
+                للحصول على أسرع وأفضل تجربة، ولتتمكن من الدخول المباشر للأنظمة، قم بتثبيت تطبيق فؤش الآن على جهازك!
+            </p>
+            <div style="display:flex; gap:15px; justify-content:center;">
+                <button id="pwa-install-btn" class="btn-luxury" style="width:auto; flex:2; padding:12px 25px; font-size:1.1rem; font-weight:bold; background:var(--primary); color:#000;">تثبيت الآن ✅</button>
+                <button onclick="document.getElementById('pwa-install-banner').style.display='none'" style="flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#94a3b8; border-radius:12px; padding:12px 20px; cursor:pointer; font-weight:bold;">لاحقاً</button>
             </div>
-        </div>
-        <div class="pwa-banner-actions">
-            <button id="pwa-install-btn" class="btn-luxury"
-                style="padding: 8px 15px; font-size: 0.9rem; width: auto; font-weight: 900;">تثبيت 📲</button>
-            <button onclick="document.getElementById('pwa-install-banner').style.display='none'"
-                class="pwa-close-btn">&times;</button>
         </div>
     </div>
 
@@ -2656,10 +2654,7 @@
             <div id="billing-badge"
                 style="display:none; background:#a855f7; color:#fff; font-weight:900; padding:5px 12px; border-radius:20px; font-size:0.9rem; animation:pulse-purple 1.5s infinite; cursor:pointer;"
                 onclick="window.switchPage('pos')">💰 <span id="billing-count">0</span> طلب حساب!</div>
-            <button id="generate-mock-btn"
-                onclick="window.generate30DaysMockData()"
-                class="btn-luxury"
-                style="width:auto; background:var(--primary); color:#000; border:none; padding:5px 10px; font-size:0.75rem; font-weight:bold;">توليد 30 يوم 🧪</button>
+
             <button id="clear-storage-btn"
                 onclick="if(prompt('تحذير! هذا الخيار سيمسح جميع البيانات من النظام! أدخل الرقم السري (12345) للتأكيد:') === '12345') { localStorage.clear(); location.reload(); }"
                 class="btn-luxury"
@@ -3659,10 +3654,11 @@
                     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex:1;">
                         <div style="display:flex; align-items:center; background:rgba(0,0,0,0.3); border-radius:6px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
                             <span style="padding:6px 10px; font-size:0.8rem; background:rgba(255,255,255,0.05); border-left:1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-calendar-days"></i></span>
-                            <input type="date" value="${filter.fromDate}" onchange="window.state.shiftHistoryFilter.fromDate = this.value; window.render();" style="background:transparent; border:none; color:#fff; font-size:0.8rem; padding:6px; outline:none; font-family:'Cairo';">
+                            <input type="date" value="${filter.fromDate}" onchange="window.state.shiftHistoryFilter.fromDate = this.value;" style="background:transparent; border:none; color:#fff; font-size:0.8rem; padding:6px; outline:none; font-family:'Cairo';">
                             <span style="padding:5px; font-size:0.8rem; opacity:0.5;">إلى</span>
-                            <input type="date" value="${filter.toDate}" onchange="window.state.shiftHistoryFilter.toDate = this.value; window.render();" style="background:transparent; border:none; color:#fff; font-size:0.8rem; padding:6px; outline:none; font-family:'Cairo';">
+                            <input type="date" value="${filter.toDate}" onchange="window.state.shiftHistoryFilter.toDate = this.value;" style="background:transparent; border:none; color:#fff; font-size:0.8rem; padding:6px; outline:none; font-family:'Cairo';">
                         </div>
+                        <button onclick="window.render();" class="btn-luxury" style="padding:6px 15px; font-size:0.85rem; width:auto; border-radius:6px; margin:0;"><i class="fa-solid fa-check"></i> تطبيق</button>
                     </div>
 
                     <button onclick="window.state.shiftHistoryFilter = { fromDate: '', toDate: '' }; window.render();" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:var(--danger); font-size:0.85rem; cursor:pointer; padding:8px 15px; border-radius:6px; transition:all 0.2s;"><i class="fa-solid fa-rotate-left"></i> إعادة ضبط</button>
@@ -3987,22 +3983,6 @@
                 <div style="margin-bottom:15px;">
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:15px;">
                         
-                        <!-- Top Item Card -->
-                        <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; transition:all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                <div style="font-size:0.8rem; color:#94a3b8; font-weight:bold;"><i class="fa-solid fa-star" style="margin-left:5px; color:#f59e0b;"></i> نجم الوردية (الأكثر مبيعاً)</div>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
-                                <div style="width:50px; height:50px; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#f59e0b;">
-                                    <i class="fa-solid fa-fire"></i>
-                                </div>
-                                <div style="flex:1; min-width:0;">
-                                    <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${bestItemName}</div>
-                                    <div style="font-size:0.75rem; color:#94a3b8; background:rgba(255,255,255,0.05); display:inline-block; padding:3px 8px; border-radius:6px;">تم بيع ${bestItemQty} وحدة</div>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Cash Flow Card -->
                         <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; transition:all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -4013,16 +3993,6 @@
                                 <div style="display:flex; justify-content:space-between; font-size:0.85rem;"><span style="color:#94a3b8;">مصروفات:</span> <span style="font-family:'Orbitron'; color:#ef4444; font-weight:bold;">${shiftExpValue.toLocaleString()} ج</span></div>
                                 <div style="width:100%; height:1px; background:rgba(255,255,255,0.1); margin:2px 0;"></div>
                                 <div style="display:flex; justify-content:space-between; font-size:1rem; font-weight:900;"><span style="color:#fff;">الصافي المتوقع:</span> <span style="font-family:'Orbitron'; color:${netCash >= 0 ? 'var(--success)' : '#ef4444'};">${netCash.toLocaleString()} ج</span></div>
-                            </div>
-                        </div>
-
-                        <!-- Trend Chart Card -->
-                        <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; display:flex; flex-direction:column; transition:all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                <div style="font-size:0.8rem; color:#94a3b8; font-weight:bold;"><i class="fa-solid fa-chart-line" style="margin-left:5px; color:#0ea5e9;"></i> مؤشر زحمة المطعم (آخر 6 ساعات)</div>
-                            </div>
-                            <div style="flex:1; display:flex; align-items:flex-end; gap:6px; margin-top:10px; height:45px; padding-bottom:5px;">
-                                ${trendHtml || '<div style="width:100%; text-align:center; opacity:0.3; font-size:0.8rem; margin-bottom:10px;">لا يوجد طلبات في هذه الوردية بعد</div>'}
                             </div>
                         </div>
 
@@ -4371,6 +4341,13 @@
             let adminOrdersData = [];
             let adminCanceledData = [];
             
+            // Operational Metrics for Admin (Moved up to fix TDZ Uninitialized Variable issue)
+            const totalOrdersCount = curOrders.length;
+            const canceledOrdersCount = allPeriodOrders.filter(o => o.status === 'canceled').length;
+            const cancelRate = allPeriodOrders.length > 0 ? ((canceledOrdersCount / allPeriodOrders.length) * 100).toFixed(1) : 0;
+            const totalItemsSold = curOrders.reduce((sum, o) => sum + (o.items || []).reduce((s2, i) => s2 + (i.qty || 1), 0), 0);
+            const activeShiftMsg = (window.state.db.shift && window.state.db.shift.start) ? 'مفتوحة الآن' : 'مغلقة';
+            
             if (!filter || !filter.from || !filter.to) {
                 // All Time -> Last 12 Months
                 const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
@@ -4445,13 +4422,6 @@
                     adminItemsData.push(totalItemsSold);
                 }
             }
-            
-            // Operational Metrics for Admin
-            const totalOrdersCount = curOrders.length;
-            const canceledOrdersCount = allPeriodOrders.filter(o => o.status === 'canceled').length;
-            const cancelRate = allPeriodOrders.length > 0 ? ((canceledOrdersCount / allPeriodOrders.length) * 100).toFixed(1) : 0;
-            const totalItemsSold = curOrders.reduce((sum, o) => sum + (o.items || []).reduce((s2, i) => s2 + (i.qty || 1), 0), 0);
-            const activeShiftMsg = (window.state.db.shift && window.state.db.shift.start) ? 'مفتوحة الآن' : 'مغلقة';
 
             // Textual Summary Logic
             let maxSales = Math.max(...salesData);
@@ -8271,11 +8241,11 @@ function renderDashboardSales(c) {
                 <div style="margin-top:20px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.04); border-radius:14px; display:flex; flex-direction:column; min-height:400px;">
                     <!-- Tabs Header -->
                     <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.06); padding:0 10px; flex-wrap:wrap; gap:10px;">
-                        <div style="display:flex; overflow-x:auto;" class="hide-scroll">
-                            ${window.state.role !== 'admin' ? `<button onclick="window.state.activeReportsTab = 'financial_statement'; window.render();" style="background:none; border:none; padding:15px; font-size:0.85rem; font-weight:bold; color:${activeTab === 'financial_statement' ? 'var(--primary)' : '#fff'}; opacity:${activeTab === 'financial_statement' ? '1' : '0.5'}; border-bottom:2px solid ${activeTab === 'financial_statement' ? 'var(--primary)' : 'transparent'}; cursor:pointer; white-space:nowrap; transition:all 0.2s;"><i class="fa-solid fa-scale-balanced"></i> كشف الحساب المالي الموحد</button>
-                            <button onclick="window.state.activeReportsTab = 'sales_history'; window.render();" style="background:none; border:none; padding:15px; font-size:0.85rem; font-weight:bold; color:${activeTab === 'sales_history' ? 'var(--primary)' : '#fff'}; opacity:${activeTab === 'sales_history' ? '1' : '0.5'}; border-bottom:2px solid ${activeTab === 'sales_history' ? 'var(--primary)' : 'transparent'}; cursor:pointer; white-space:nowrap; transition:all 0.2s;"><i class="fa-solid fa-basket-shopping"></i> سجل المبيعات</button>` : ''}
-                            <button onclick="window.state.activeReportsTab = 'expenses_history'; window.render();" style="background:none; border:none; padding:15px; font-size:0.85rem; font-weight:bold; color:${activeTab === 'expenses_history' ? 'var(--primary)' : '#fff'}; opacity:${activeTab === 'expenses_history' ? '1' : '0.5'}; border-bottom:2px solid ${activeTab === 'expenses_history' ? 'var(--primary)' : 'transparent'}; cursor:pointer; white-space:nowrap; transition:all 0.2s;"><i class="fa-solid fa-file-invoice-dollar"></i> سجل المصروفات</button>
-                            ${window.state.role !== 'admin' ? `<button onclick="window.state.activeReportsTab = 'financials'; window.render();" style="background:none; border:none; padding:15px; font-size:0.85rem; font-weight:bold; color:${activeTab === 'financials' ? 'var(--primary)' : '#fff'}; opacity:${activeTab === 'financials' ? '1' : '0.5'}; border-bottom:2px solid ${activeTab === 'financials' ? 'var(--primary)' : 'transparent'}; cursor:pointer; white-space:nowrap; transition:all 0.2s;"><i class="fa-solid fa-chart-pie"></i> التقارير المالية</button>` : ''}
+                        <div style="display:flex; overflow-x:auto; flex-wrap:nowrap; max-width:100%; -webkit-overflow-scrolling:touch; gap:5px; padding-bottom:5px;" class="hide-scroll">
+                            ${window.state.role !== 'admin' ? `<button onclick="window.state.activeReportsTab = 'financial_statement'; window.render();" style="background:none; border:none; padding:15px; font-size:0.85rem; font-weight:bold; color:${activeTab === 'financial_statement' ? 'var(--primary)' : '#fff'}; opacity:${activeTab === 'financial_statement' ? '1' : '0.5'}; border-bottom:2px solid ${activeTab === 'financial_statement' ? 'var(--primary)' : 'transparent'}; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all 0.2s;"><i class="fa-solid fa-scale-balanced"></i> كشف الحساب المالي الموحد</button>
+                            <button onclick="window.state.activeReportsTab = 'sales_history'; window.render();" style="background:none; border:none; padding:15px; font-size:0.85rem; font-weight:bold; color:${activeTab === 'sales_history' ? 'var(--primary)' : '#fff'}; opacity:${activeTab === 'sales_history' ? '1' : '0.5'}; border-bottom:2px solid ${activeTab === 'sales_history' ? 'var(--primary)' : 'transparent'}; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all 0.2s;"><i class="fa-solid fa-basket-shopping"></i> سجل المبيعات</button>` : ''}
+                            <button onclick="window.state.activeReportsTab = 'expenses_history'; window.render();" style="background:none; border:none; padding:15px; font-size:0.85rem; font-weight:bold; color:${activeTab === 'expenses_history' ? 'var(--primary)' : '#fff'}; opacity:${activeTab === 'expenses_history' ? '1' : '0.5'}; border-bottom:2px solid ${activeTab === 'expenses_history' ? 'var(--primary)' : 'transparent'}; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all 0.2s;"><i class="fa-solid fa-file-invoice-dollar"></i> سجل المصروفات</button>
+                            ${window.state.role !== 'admin' ? `<button onclick="window.state.activeReportsTab = 'financials'; window.render();" style="background:none; border:none; padding:15px; font-size:0.85rem; font-weight:bold; color:${activeTab === 'financials' ? 'var(--primary)' : '#fff'}; opacity:${activeTab === 'financials' ? '1' : '0.5'}; border-bottom:2px solid ${activeTab === 'financials' ? 'var(--primary)' : 'transparent'}; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all 0.2s;"><i class="fa-solid fa-chart-pie"></i> التقارير المالية</button>` : ''}
                         </div>
                         
                         <!-- Branch Filter Mockup & Last Updated Info -->
@@ -8306,10 +8276,12 @@ function renderDashboardSales(c) {
                             <!-- Date Filter Inputs -->
                             <div style="display:flex; align-items:center; background:rgba(0,0,0,0.3); border-radius:6px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
                                 <span style="padding:5px 10px; font-size:0.8rem; background:rgba(255,255,255,0.05); border-left:1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-calendar-days"></i></span>
-                                <input type="date" value="${global.fromDate}" onchange="window.state.reportsGlobal.fromDate = this.value; window.render();" style="background:transparent; border:none; color:#fff; font-size:0.8rem; padding:5px 8px; outline:none; font-family:'Cairo';">
+                                <input type="date" value="${global.fromDate}" onchange="window.state.reportsGlobal.fromDate = this.value;" style="background:transparent; border:none; color:#fff; font-size:0.8rem; padding:5px 8px; outline:none; font-family:'Cairo';">
                                 <span style="padding:5px; font-size:0.8rem; opacity:0.5;">إلى</span>
-                                <input type="date" value="${global.toDate}" onchange="window.state.reportsGlobal.toDate = this.value; window.render();" style="background:transparent; border:none; color:#fff; font-size:0.8rem; padding:5px 8px; outline:none; font-family:'Cairo';">
+                                <input type="date" value="${global.toDate}" onchange="window.state.reportsGlobal.toDate = this.value;" style="background:transparent; border:none; color:#fff; font-size:0.8rem; padding:5px 8px; outline:none; font-family:'Cairo';">
                             </div>
+                            
+                            <button onclick="window.render();" class="btn-luxury" style="padding:6px 15px; font-size:0.85rem; width:auto; border-radius:6px; margin:0;"><i class="fa-solid fa-check"></i> تطبيق</button>
 
                             <!-- Reset Button -->
                             <button onclick="window.resetReportsGlobal()" style="background:none; border:none; color:var(--danger); font-size:0.8rem; cursor:pointer; padding:5px; opacity:0.8; transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8"><i class="fa-solid fa-rotate-left"></i> إعادة ضبط</button>
