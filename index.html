@@ -2131,7 +2131,7 @@
             <img src="logo.png" alt="Logo" class="pwa-banner-logo">
             <div class="pwa-banner-text">
                 <h4>تطبيق طواجن فؤش 🥘</h4>
-                <p>ثبّت التطبيق على شاشة موبايلك لتجربة أسرع بدون متصفح!</p>
+                <p>ثبّت التطبيق على شاشة موبايلك لتجربة أسرع وأفضل!</p>
             </div>
         </div>
         <div class="pwa-banner-actions">
@@ -2624,6 +2624,10 @@
             <div id="billing-badge"
                 style="display:none; background:#a855f7; color:#fff; font-weight:900; padding:5px 12px; border-radius:20px; font-size:0.9rem; animation:pulse-purple 1.5s infinite; cursor:pointer;"
                 onclick="window.switchPage('pos')">💰 <span id="billing-count">0</span> طلب حساب!</div>
+            <button id="generate-mock-btn"
+                onclick="window.generate30DaysMockData()"
+                class="btn-luxury"
+                style="width:auto; background:var(--primary); color:#000; border:none; padding:5px 10px; font-size:0.75rem; font-weight:bold;">توليد 30 يوم 🧪</button>
             <button id="clear-storage-btn"
                 onclick="if(prompt('تحذير! هذا الخيار سيمسح جميع البيانات من النظام! أدخل الرقم السري (12345) للتأكيد:') === '12345') { localStorage.clear(); location.reload(); }"
                 class="btn-luxury"
@@ -3831,20 +3835,64 @@
                 </div>`;
             }
 
-            // 4. Live Activity Feed (last 5 actions)
+            // 4. Live Activity Feed (last 20 actions)
             let activities = [];
             (window.state.db.orders || []).filter(o => o.paid).forEach(o => activities.push({time: o.time, type: 'order', icon: 'fa-receipt', color: 'var(--success)', title: `فاتورة #${o.id}`, desc: `${o.total} ج`, user: o.cashier || 'كاشير'}));
             (window.state.db.exp || []).forEach(e => activities.push({time: e.time, type: 'exp', icon: 'fa-money-bill-wave', color: '#ef4444', title: `مصروف: ${e.name}`, desc: `${e.amount} ج`, user: e.isShiftExpense ? 'كاشير' : 'إدارة'}));
             (window.state.db.stock_history || []).forEach(h => activities.push({time: h.time, type: 'stock', icon: 'fa-box', color: 'var(--primary)', title: h.item, desc: h.action, user: h.by}));
             
             activities.sort((a,b) => b.time - a.time);
-            const feed = activities.slice(0, 12);
+            const feed = activities.slice(0, 20);
 
             // 5. Focus Status Categories Logic
             const opStatus = activeOrders.length > 5 ? { text: 'ضغط عالي', subtext: `${activeOrders.length} طلب نشط حالياً`, color: '#f59e0b', icon: 'fa-fire', action: "window.switchPage('kitchen')" } : { text: 'التشغيل مستقر', subtext: activeOrders.length > 0 ? `${activeOrders.length} طلب جاري التجهيز` : 'لا يوجد طلبات حالياً', color: 'var(--success)', icon: 'fa-check-circle', action: "window.switchPage('kitchen')" };
             const mainInvStatus = lowMainInvCount > 0 ? { text: `نواقص ${lowMainInvCount}`, subtext: 'خامات تحتاج لشراء فوري', color: 'var(--danger)', icon: 'fa-triangle-exclamation', action: "window.switchPage('admin_inventory')" } : { text: 'مستقر', subtext: 'كل الخامات الأساسية متوفرة', color: 'var(--success)', icon: 'fa-check-circle', action: "window.switchPage('admin_inventory')" };
             const menuInvStatus = lowMenuInvCount > 0 ? { text: `نواقص ${lowMenuInvCount}`, subtext: 'أصناف قاربت على النفاذ', color: 'var(--danger)', icon: 'fa-triangle-exclamation', action: "window.switchPage('inventory')" } : { text: 'متاحة', subtext: 'جميع أصناف المنيو جاهزة', color: 'var(--success)', icon: 'fa-check-circle', action: "window.switchPage('inventory')" };
             const staffStatus = onlineStaffCount > 0 ? { text: `${onlineStaffCount} حضور`, subtext: `من إجمالي ${totalStaff} مسجلين`, color: '#0ea5e9', icon: 'fa-users', action: "window.switchPage('employees')" } : { text: 'لا يوجد حضور', subtext: 'لم يتم تسجيل دخول اليوم', color: '#94a3b8', icon: 'fa-user-slash', action: "window.switchPage('employees')" };
+
+            // 6. WOW Factors (Dashboard Enhancements)
+            let itemCounts = {};
+            let shiftSalesValue = 0;
+            (window.state.db.orders || []).forEach(o => {
+                if (window.state.db.shift && o.time >= window.state.db.shift.start && o.paid) {
+                    shiftSalesValue += o.total;
+                    (o.items || []).forEach(i => {
+                        itemCounts[i.name] = (itemCounts[i.name] || 0) + i.qty;
+                    });
+                }
+            });
+            let bestItemName = 'لا يوجد';
+            let bestItemQty = 0;
+            for (let [name, qty] of Object.entries(itemCounts)) {
+                if (qty > bestItemQty) {
+                    bestItemQty = qty;
+                    bestItemName = name;
+                }
+            }
+
+            let shiftExpValue = 0;
+            (window.state.db.exp || []).forEach(e => {
+                if (window.state.db.shift && e.time >= window.state.db.shift.start) {
+                    shiftExpValue += e.amount;
+                }
+            });
+            let netCash = shiftSalesValue - shiftExpValue;
+
+            let hourCounts = [0,0,0,0,0,0];
+            let trendHtml = '';
+            if (window.state.db.shift) {
+                const nowHour = Date.now();
+                (window.state.db.orders || []).forEach(o => {
+                    if (o.time >= window.state.db.shift.start) {
+                        const hoursAgo = Math.floor((nowHour - o.time) / 3600000);
+                        if (hoursAgo >= 0 && hoursAgo < 6) {
+                            hourCounts[5 - hoursAgo]++;
+                        }
+                    }
+                });
+                const maxCount = Math.max(...hourCounts, 1);
+                trendHtml = hourCounts.map(c => `<div style="flex:1; background:rgba(14,165,233,${Math.max(0.2, c/maxCount)}); border-radius:4px; height:${Math.max(15, (c/maxCount)*100)}%; transition:all 0.5s; position:relative;" title="${c} طلبات"><div style="position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:0.65rem; color:#94a3b8; font-weight:bold;">${c>0?c:''}</div></div>`).join('');
+            }
 
             c.innerHTML = `
             <div style="padding-top: 5px; display:flex; flex-direction:column; gap:25px;">
@@ -3855,7 +3903,7 @@
                             <div style="width:10px; height:10px; border-radius:50%; background:${isShiftActive ? 'var(--success)' : '#64748b'}; box-shadow:0 0 8px ${isShiftActive ? 'var(--success)' : '#64748b'}; animation:${isShiftActive ? 'pulse-blue 2s infinite' : 'none'}"></div>
                             <span style="font-weight:900; font-size:0.9rem; color:${isShiftActive ? 'var(--success)' : '#94a3b8'};">${isShiftActive ? 'وردية نشطة' : 'الوردية مغلقة'}</span>
                         </div>
-                        ${isShiftActive ? `<div style="font-size:0.8rem; opacity:0.8;"><i class="fa-solid fa-user-tie" style="color:var(--primary); margin-left:4px;"></i> ${shift.cashier || window.state.currentUser || (window.state.role === 'admin' ? 'الإدارة' : (window.state.role === 'manager' ? 'المدير' : 'الكاشير'))}</div>` : ''}
+                        ${isShiftActive ? `<div style="font-size:0.8rem; opacity:0.8;"><i class="fa-solid fa-user-tie" style="color:var(--primary); margin-left:4px;"></i> كاشير الوردية: ${shift.cashier || 'الكاشير'}</div>` : ''}
                         <div style="font-size:0.8rem; opacity:0.8;"><i class="fa-solid fa-fire" style="color:#f59e0b; margin-left:4px;"></i> ${activeOrders.length} طلب نشط</div>
                         <div style="font-size:0.8rem; opacity:0.8;"><i class="fa-regular fa-clock" style="margin-left:4px;"></i> ${shiftDurationText}</div>
                     </div>
@@ -3909,6 +3957,55 @@
                                 <div style="font-size:0.7rem; color:#94a3b8; margin-top:2px; opacity:0.8;">${staffStatus.subtext}</div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- WOW Factors Section: نظرة سريعة على الوردية الحالية -->
+                <div style="margin-bottom:15px;">
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:15px;">
+                        
+                        <!-- Top Item Card -->
+                        <div style="background:linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.9)); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.3); transition:all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 30px rgba(245,158,11,0.15)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.3)';">
+                            <div style="position:absolute; top:-20px; left:-20px; width:100px; height:100px; background:#f59e0b; filter:blur(40px); opacity:0.15; border-radius:50%;"></div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <div style="font-size:0.8rem; color:#94a3b8; font-weight:bold;"><i class="fa-solid fa-star" style="margin-left:5px; color:#f59e0b;"></i> نجم الوردية (الأكثر مبيعاً)</div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+                                <div style="width:50px; height:50px; border-radius:12px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#f59e0b; box-shadow:0 0 15px rgba(245,158,11,0.2);">
+                                    <i class="fa-solid fa-fire"></i>
+                                </div>
+                                <div style="flex:1; min-width:0;">
+                                    <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${bestItemName}</div>
+                                    <div style="font-size:0.75rem; color:#f59e0b; background:rgba(245,158,11,0.1); display:inline-block; padding:3px 8px; border-radius:6px; font-weight:bold;">تم بيع ${bestItemQty} وحدة</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cash Flow Card -->
+                        <div style="background:linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.9)); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.3); transition:all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 30px rgba(16,185,129,0.15)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.3)';">
+                            <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:var(--success); filter:blur(40px); opacity:0.1; border-radius:50%;"></div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <div style="font-size:0.8rem; color:#94a3b8; font-weight:bold;"><i class="fa-solid fa-wallet" style="margin-left:5px; color:var(--success);"></i> ملخص خزينة الوردية</div>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:5px; margin-top:5px;">
+                                <div style="display:flex; justify-content:space-between; font-size:0.85rem;"><span style="color:#94a3b8;">مبيعات:</span> <span style="font-family:'Orbitron'; color:var(--success); font-weight:bold;">${shiftSalesValue.toLocaleString()} ج</span></div>
+                                <div style="display:flex; justify-content:space-between; font-size:0.85rem;"><span style="color:#94a3b8;">مصروفات:</span> <span style="font-family:'Orbitron'; color:#ef4444; font-weight:bold;">${shiftExpValue.toLocaleString()} ج</span></div>
+                                <div style="width:100%; height:1px; background:rgba(255,255,255,0.1); margin:2px 0;"></div>
+                                <div style="display:flex; justify-content:space-between; font-size:1rem; font-weight:900;"><span style="color:#fff;">الصافي المتوقع:</span> <span style="font-family:'Orbitron'; color:${netCash >= 0 ? 'var(--success)' : '#ef4444'};">${netCash.toLocaleString()} ج</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Trend Chart Card -->
+                        <div style="background:linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.9)); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; box-shadow:0 10px 25px rgba(0,0,0,0.3); display:flex; flex-direction:column; transition:all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 30px rgba(14,165,233,0.15)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.3)';">
+                            <div style="position:absolute; bottom:-20px; right:50%; transform:translateX(50%); width:150px; height:50px; background:#0ea5e9; filter:blur(40px); opacity:0.15; border-radius:50%;"></div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <div style="font-size:0.8rem; color:#94a3b8; font-weight:bold;"><i class="fa-solid fa-chart-line" style="margin-left:5px; color:#0ea5e9;"></i> مؤشر زحمة المطعم (آخر 6 ساعات)</div>
+                            </div>
+                            <div style="flex:1; display:flex; align-items:flex-end; gap:6px; margin-top:10px; height:45px; padding-bottom:5px;">
+                                ${trendHtml || '<div style="width:100%; text-align:center; opacity:0.3; font-size:0.8rem; margin-bottom:10px;">لا يوجد طلبات في هذه الوردية بعد</div>'}
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -4013,7 +4110,7 @@
                                 <span style="width:8px; height:8px; border-radius:50%; background:var(--success); display:inline-block; animation:pulse-blue 2s infinite;"></span>
                                 مراقبة حركات النظام (سجل حي)
                             </h4>
-                            <span style="font-size:0.75rem; color:#94a3b8; margin-right:16px;">متابعة لحظية لجميع الأوردرات والمصروفات لتسهيل الرقابة والإدارة</span>
+                            <span style="font-size:0.75rem; color:#94a3b8; margin-right:16px;">متابعة لحظية وتحديث تلقائي لآخر 20 حركة بالمطعم (أوردرات، مصروفات، مخزن)</span>
                         </div>
                         <span style="font-size:0.7rem; color:#64748b; background:rgba(255,255,255,0.03); padding:3px 10px; border-radius:6px;">${(feed||[]).length} حركة</span>
                     </div>
@@ -4366,17 +4463,22 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
                 <h2 style="margin:0; font-family:'Orbitron'; color:var(--primary); font-size:1.4rem;"><i class="fa-solid fa-chess-king"></i> النظرة العامة (Overview)</h2>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
-                    <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">كل الوقت</button>
-                    <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">كل الوقت</button>
-                <button onclick="const d=new Date(); window.state.dashboardFilter={from:d.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">اليوم</button>
-                    <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الأسبوع</button>
-                    <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الشهر</button>
+                    <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">كل الوقت</button>
+                    <button onclick="const d=new Date(); window.state.dashboardFilter={from:d.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">اليوم</button>
+                    <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الأسبوع</button>
+                    <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر الحالي</button>
+                    <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر السابق</button>
                     <div style="width:1px; height:18px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
                     <input type="date" id="dash-from" value="${filter ? filter.from : ''}" class="input-luxury" style="margin:0; padding:4px 8px; width:125px; font-size:0.8rem;">
                     <span style="font-size:0.8rem; opacity:0.8;">إلى</span>
                     <input type="date" id="dash-to" value="${filter ? filter.to : ''}" class="input-luxury" style="margin:0; padding:4px 8px; width:125px; font-size:0.8rem;">
                     <button onclick="if(document.getElementById('dash-from').value && document.getElementById('dash-to').value) { window.state.dashboardFilter = {from: document.getElementById('dash-from').value, to: document.getElementById('dash-to').value}; window.render(); }" class="btn-luxury" style="width:auto; padding:4px 12px; margin:0; font-size:0.85rem;"><i class="fa-solid fa-filter"></i> عرض</button>
                 </div>
+            </div>
+
+            <!-- Dynamic Date Clarification -->
+            <div style="margin-bottom:20px; background:linear-gradient(90deg, rgba(251,191,36,0.1), rgba(251,191,36,0.02)); border:1px solid rgba(251,191,36,0.3); border-right:4px solid #fbbf24; padding:12px 15px; border-radius:8px; font-size:0.85rem; color:#fff; font-family:'Cairo'; display:flex; justify-content:space-between; align-items:center;">
+                <div><i class="fa-solid fa-circle-info" style="color:#fbbf24; margin-left:8px;"></i> يعرض التحليل الحالي: ${filter && filter.from && filter.to ? (filter.from === filter.to ? `حركات يوم <strong>(${filter.from})</strong>` : `الفترة من <strong>(${filter.from})</strong> إلى <strong>(${filter.to})</strong>`) : '<strong>كل الوقت (جميع الحركات المسجلة)</strong>'}</div>
             </div>
 
             <!-- Hero KPIs -->
@@ -4816,10 +4918,11 @@ function renderDashboardSales(c) {
         <!-- Filters -->
         <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px; flex-wrap:wrap; gap:10px;">
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">كل الوقت</button>
-                <button onclick="const d=new Date(); window.state.dashboardFilter={from:d.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">اليوم</button>
-                <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الأسبوع</button>
-                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الشهر</button>
+                <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">كل الوقت</button>
+                <button onclick="const d=new Date(); window.state.dashboardFilter={from:d.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">اليوم</button>
+                <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الأسبوع</button>
+                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر الحالي</button>
+                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر السابق</button>
                 
                 <div style="width:1px; height:20px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
                 
@@ -4828,6 +4931,11 @@ function renderDashboardSales(c) {
                 <span style="font-size:0.9rem; opacity:0.8;">إلى:</span>
                 <input type="date" id="sales-dash-to" value="${filter ? filter.to : ''}" class="input-luxury" style="margin:0; padding:5px 8px; width:130px; font-size:0.85rem;">
                 <button onclick="window.state.dashboardFilter = {from: document.getElementById('sales-dash-from').value, to: document.getElementById('sales-dash-to').value}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.85rem; background:var(--primary); color:#000;"><i class="fa-solid fa-filter"></i> تطبيق</button>
+            </div>
+            
+            <!-- Dynamic Date Clarification -->
+            <div style="margin:15px 0; background:linear-gradient(90deg, rgba(251,191,36,0.1), rgba(251,191,36,0.02)); border:1px solid rgba(251,191,36,0.3); border-right:4px solid #fbbf24; padding:12px 15px; border-radius:8px; font-size:0.85rem; color:#fff; font-family:'Cairo'; display:flex; justify-content:space-between; align-items:center;">
+                <div><i class="fa-solid fa-circle-info" style="color:#fbbf24; margin-left:8px;"></i> يعرض التحليل الحالي: ${filter && filter.from && filter.to ? (filter.from === filter.to ? `حركات يوم <strong>(${filter.from})</strong>` : `الفترة من <strong>(${filter.from})</strong> إلى <strong>(${filter.to})</strong>`) : '<strong>كل الوقت (جميع الحركات المسجلة)</strong>'}</div>
             </div>
             <div style="font-family:'Orbitron'; font-size:1.5rem; font-weight:900; color:var(--success);">
                 ${window.state.role === 'admin' ? `${totalOrders} طلب <span style="font-size:0.8rem; font-family:'Cairo'; opacity:0.7;">(إجمالي طلبات)</span>` : `${totalSales.toLocaleString()} ج <span style="font-size:0.8rem; font-family:'Cairo'; opacity:0.7;">(مبيعات)</span>`}
@@ -5059,16 +5167,22 @@ function renderDashboardSales(c) {
     c.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px; flex-wrap:wrap; gap:10px;">
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">كل الوقت</button>
-                <button onclick="const d=new Date(); window.state.dashboardFilter={from:d.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">اليوم</button>
-                <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الأسبوع</button>
-                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الشهر</button>
+                <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">كل الوقت</button>
+                <button onclick="const d=new Date(); window.state.dashboardFilter={from:d.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">اليوم</button>
+                <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الأسبوع</button>
+                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر الحالي</button>
+                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر السابق</button>
                 <div style="width:1px; height:20px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
                 <span style="font-size:0.9rem; opacity:0.8;">من:</span>
                 <input type="date" id="exp-dash-from" value="${filter ? filter.from : ''}" class="input-luxury" style="margin:0; padding:5px 8px; width:130px; font-size:0.85rem;">
                 <span style="font-size:0.9rem; opacity:0.8;">إلى:</span>
                 <input type="date" id="exp-dash-to" value="${filter ? filter.to : ''}" class="input-luxury" style="margin:0; padding:5px 8px; width:130px; font-size:0.85rem;">
                 <button onclick="window.state.dashboardFilter = {from: document.getElementById('exp-dash-from').value, to: document.getElementById('exp-dash-to').value}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.85rem; background:var(--danger); color:#000;"><i class="fa-solid fa-filter"></i> تطبيق</button>
+            </div>
+            
+            <!-- Dynamic Date Clarification -->
+            <div style="margin:15px 0; background:linear-gradient(90deg, rgba(251,191,36,0.1), rgba(251,191,36,0.02)); border:1px solid rgba(251,191,36,0.3); border-right:4px solid #fbbf24; padding:12px 15px; border-radius:8px; font-size:0.85rem; color:#fff; font-family:'Cairo'; display:flex; justify-content:space-between; align-items:center;">
+                <div><i class="fa-solid fa-circle-info" style="color:#fbbf24; margin-left:8px;"></i> يعرض التحليل الحالي: ${filter && filter.from && filter.to ? (filter.from === filter.to ? `حركات يوم <strong>(${filter.from})</strong>` : `الفترة من <strong>(${filter.from})</strong> إلى <strong>(${filter.to})</strong>`) : '<strong>كل الوقت (جميع الحركات المسجلة)</strong>'}</div>
             </div>
         </div>
 
@@ -5308,16 +5422,22 @@ function renderDashboardSales(c) {
     c.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px; flex-wrap:wrap; gap:10px;">
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">كل الوقت</button>
-                <button onclick="const d=new Date(); window.state.dashboardFilter={from:d.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">اليوم</button>
-                <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الأسبوع</button>
-                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.8rem; background:rgba(255,255,255,0.05);">الشهر</button>
+                <button onclick="window.state.dashboardFilter=null; window.render();" class="btn-luxury ${(!filter || !filter.from) ? 'active' : ''}" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">كل الوقت</button>
+                <button onclick="const d=new Date(); window.state.dashboardFilter={from:d.toISOString().split('T')[0], to:d.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">اليوم</button>
+                <button onclick="const d=new Date(); const f=new Date(d.setDate(d.getDate()-d.getDay())); const t=new Date(d.setDate(d.getDate()+6)); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الأسبوع</button>
+                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر الحالي</button>
+                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.dashboardFilter={from:f.toISOString().split('T')[0], to:t.toISOString().split('T')[0]}; window.render();" class="btn-luxury" style="width:auto; padding:8px 15px; margin:0; font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.05);">الشهر السابق</button>
                 <div style="width:1px; height:20px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
                 <span style="font-size:0.9rem; opacity:0.8;">من:</span>
                 <input type="date" id="inv-dash-from" value="${filter ? filter.from : ''}" class="input-luxury" style="margin:0; padding:5px 8px; width:130px; font-size:0.85rem;">
                 <span style="font-size:0.9rem; opacity:0.8;">إلى:</span>
                 <input type="date" id="inv-dash-to" value="${filter ? filter.to : ''}" class="input-luxury" style="margin:0; padding:5px 8px; width:130px; font-size:0.85rem;">
                 <button onclick="window.state.dashboardFilter = {from: document.getElementById('inv-dash-from').value, to: document.getElementById('inv-dash-to').value}; window.render();" class="btn-luxury" style="width:auto; padding:5px 12px; margin:0; font-size:0.85rem; background:#10b981; color:#000;"><i class="fa-solid fa-filter"></i> تطبيق التحديث</button>
+            </div>
+            
+            <!-- Dynamic Date Clarification -->
+            <div style="margin:15px 0; background:linear-gradient(90deg, rgba(251,191,36,0.1), rgba(251,191,36,0.02)); border:1px solid rgba(251,191,36,0.3); border-right:4px solid #fbbf24; padding:12px 15px; border-radius:8px; font-size:0.85rem; color:#fff; font-family:'Cairo'; display:flex; justify-content:space-between; align-items:center;">
+                <div><i class="fa-solid fa-circle-info" style="color:#fbbf24; margin-left:8px;"></i> يعرض التحليل الحالي: ${filter && filter.from && filter.to ? (filter.from === filter.to ? `حركات يوم <strong>(${filter.from})</strong>` : `الفترة من <strong>(${filter.from})</strong> إلى <strong>(${filter.to})</strong>`) : '<strong>كل الوقت (جميع الحركات المسجلة)</strong>'}</div>
             </div>
         </div>
 
@@ -6058,6 +6178,54 @@ function renderDashboardSales(c) {
                     </div>` : ''}
                 </div>
 
+                </div>
+            ` : window.state.expensesTab === 'history' ? `
+                <div style="background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.1); border-radius:15px; padding:20px; flex:1; display:flex; flex-direction:column; max-height:100%;">
+                    <div style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+                        <h3 style="margin:0; color:var(--primary); font-size:1.2rem;"><i class="fa-solid fa-clock-rotate-left"></i> سجل المصروفات الحديثة</h3>
+                    </div>
+                    
+                    <!-- Explanatory Note -->
+                    <div style="background:linear-gradient(90deg, rgba(251,191,36,0.05), rgba(251,191,36,0.01)); border:1px solid rgba(251,191,36,0.2); border-right:4px solid #fbbf24; border-radius:10px; padding:12px 15px; margin-bottom:20px; flex-shrink:0;">
+                        <div style="display:flex; align-items:flex-start; gap:10px;">
+                            <i class="fa-solid fa-circle-info" style="color:#fbbf24; font-size:1.2rem; margin-top:2px;"></i>
+                            <div>
+                                <span style="color:#fbbf24; font-size:0.9rem; font-weight:bold; display:block; margin-bottom:4px;">توضيح هام:</span>
+                                <p style="margin:0; color:#e2e8f0; font-size:0.85rem; line-height:1.5;">هذه الصفحة تعرض <strong>أحدث المصروفات التي تم تسجيلها مؤخراً</strong>. إذا كانت هذه القائمة فارغة أدناه، فهذا طبيعي ويعني ببساطة أنه لم يتم تسجيل أي مصروفات حديثة في النظام حتى الآن.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expenses List -->
+                    <div style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:5px;" class="foush-scrollbar">
+                        ${(function(){
+                            const feed = displayedExpenses;
+                            if (feed.length === 0) return '<div style="text-align:center; padding:60px 20px; opacity:0.4;"><div style="width:80px; height:80px; background:rgba(255,255,255,0.05); border-radius:50%; display:flex; justify-content:center; align-items:center; margin:0 auto 15px auto;"><i class="fa-solid fa-receipt" style="font-size:2.5rem; color:#94a3b8;"></i></div><h3 style="color:#e2e8f0; margin-bottom:5px;">سجل المصروفات فارغ</h3><p style="font-size:0.85rem; color:#94a3b8;">لم يتم تسجيل أي مصروفات حديثة لتظهر هنا.</p></div>';
+                            
+                            return feed.map(e => {
+                                const timeAgo = (function (t) { const d = Math.floor((Date.now() - t) / 1000); if (d < 60) return 'الآن'; if (d < 3600) return 'منذ ' + Math.floor(d / 60) + ' د'; if (d < 86400) return 'منذ ' + Math.floor(d / 3600) + ' س'; return new Date(t).toLocaleDateString('ar-EG'); })(e.time);
+                                const typeBadge = e.type === 'inventory' ? '<span style="background:rgba(16,185,129,0.2); color:#10b981; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:700;">' + (e.category || 'خامات') + '</span>' : e.type === 'salaries' ? '<span style="background:rgba(167,139,250,0.2); color:#a78bfa; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:700;">مرتبات</span>' : e.type === 'emergency' ? '<span style="background:rgba(239,68,68,0.2); color:#ef4444; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:700;">طوارئ</span>' : '<span style="background:rgba(255,255,255,0.08); color:#94a3b8; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:700;">عام</span>';
+                                const roleBadge = e.isShiftExpense ? '<span style="background:rgba(14,165,233,0.15); color:#38bdf8; padding:3px 8px; border-radius:6px; font-size:0.75rem;">كاشير</span>' : '<span style="background:rgba(251,191,36,0.15); color:var(--primary); padding:3px 8px; border-radius:6px; font-size:0.75rem;">إدارة</span>';
+                                const canDelete = (window.state.role === 'admin');
+                                
+                                return `<div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; display:flex; align-items:center; gap:15px; transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.15)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)'">
+                                            <div style="flex:1; min-width:0;">
+                                                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                                                    ${typeBadge} ${roleBadge}
+                                                    <span style="font-size:0.8rem; opacity:0.5; margin-right:auto; display:flex; align-items:center; gap:5px;"><i class="fa-regular fa-clock"></i> ${timeAgo}</span>
+                                                </div>
+                                                <div style="font-size:1.05rem; font-weight:700; color:#fff; margin-bottom:4px;">${e.name || e.invItem || e.details || 'مصروف عام'}</div>
+                                                ${e.details && e.name ? '<div style="font-size:0.85rem; color:#94a3b8;"><i class="fa-solid fa-align-right" style="font-size:0.7rem; margin-left:5px;"></i>' + e.details + '</div>' : ''}
+                                            </div>
+                                            <div style="text-align:left; flex-shrink:0; background:rgba(239,68,68,0.05); padding:10px 15px; border-radius:10px; border:1px solid rgba(239,68,68,0.1);">
+                                                <div style="font-size:1.4rem; font-weight:900; color:var(--danger); font-family:'Orbitron'; line-height:1;">${e.amount}</div>
+                                                <div style="font-size:0.7rem; opacity:0.6; text-align:center; margin-top:4px;">ج.م</div>
+                                            </div>
+                                            ${canDelete ? '<button onclick="window.deleteExpense(' + e.time + ')" title="حذف المصروف" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); border-radius:8px; color:#ef4444; cursor:pointer; padding:10px; font-size:1rem; transition:all 0.2s; flex-shrink:0; display:flex; align-items:center; justify-content:center;" onmouseover="this.style.background=\'rgba(239,68,68,0.2)\'; this.style.borderColor=\'rgba(239,68,68,0.4)\'" onmouseout="this.style.background=\'rgba(239,68,68,0.1)\'; this.style.borderColor=\'rgba(239,68,68,0.2)\'"><i class="fa-solid fa-trash-can"></i></button>' : ''}
+                                        </div>`;
+                            }).join('');
+                        })()}
+                    </div>
                 </div>
             ` : ''}
             </div>`;
@@ -8062,7 +8230,7 @@ function renderDashboardSales(c) {
             // 6. Render Full Page
             c.innerHTML = `
                 <!-- Reports Workspace -->
-                <div style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.04); border-radius:14px; display:flex; flex-direction:column; min-height:400px;">
+                <div style="margin-top:20px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.04); border-radius:14px; display:flex; flex-direction:column; min-height:400px;">
                     <!-- Tabs Header -->
                     <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.06); padding:0 10px; flex-wrap:wrap; gap:10px;">
                         <div style="display:flex; overflow-x:auto;" class="hide-scroll">
@@ -8074,7 +8242,7 @@ function renderDashboardSales(c) {
                         
                         <!-- Branch Filter Mockup & Last Updated Info -->
                         <div style="display:flex; align-items:center; gap:8px; margin: 5px 0;">
-                            <span style="font-size:0.72rem; color:#94a3b8; font-family:'Cairo'; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); padding:4px 10px; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
+                            <span style="font-size:0.75rem; font-weight:bold; color:#e2e8f0; font-family:'Cairo'; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; box-shadow:0 0 10px rgba(16,185,129,0.1);">
                                 <span style="width:6px; height:6px; border-radius:50%; background:#10b981; display:inline-block; box-shadow: 0 0 8px #10b981;"></span>
                                 آخر تحديث للبيانات: ${lastUpdateStr}
                             </span>
@@ -8090,9 +8258,11 @@ function renderDashboardSales(c) {
                         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex:1;">
                             <!-- Date Filter Presets -->
                             <div style="display:flex; gap:5px;">
-                                <button onclick="window.setReportsDatePreset(0)" style="background:${global.fromDate === new Date().toISOString().split('T')[0] && global.toDate === new Date().toISOString().split('T')[0] ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}; color:${global.fromDate === new Date().toISOString().split('T')[0] && global.toDate === new Date().toISOString().split('T')[0] ? '#000' : '#fff'}; border:1px solid ${global.fromDate === new Date().toISOString().split('T')[0] && global.toDate === new Date().toISOString().split('T')[0] ? 'var(--primary)' : 'rgba(255,255,255,0.1)'}; font-size:0.75rem; padding:6px 12px; border-radius:6px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">اليوم</button>
-                                <button onclick="window.setReportsDatePreset(7)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.75rem; padding:6px 12px; border-radius:6px; cursor:pointer; font-family:'Cairo';">7 أيام</button>
-                                <button onclick="window.setReportsDatePreset(30)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.75rem; padding:6px 12px; border-radius:6px; cursor:pointer; font-family:'Cairo';">30 يوم</button>
+                                <button onclick="window.setReportsDatePreset(0)" style="background:${global.fromDate === new Date().toISOString().split('T')[0] && global.toDate === new Date().toISOString().split('T')[0] ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}; color:${global.fromDate === new Date().toISOString().split('T')[0] && global.toDate === new Date().toISOString().split('T')[0] ? '#000' : '#fff'}; border:1px solid ${global.fromDate === new Date().toISOString().split('T')[0] && global.toDate === new Date().toISOString().split('T')[0] ? 'var(--primary)' : 'rgba(255,255,255,0.1)'}; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">اليوم</button>
+                                <button onclick="window.setReportsDatePreset(7)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">7 أيام</button>
+                                <button onclick="window.setReportsDatePreset(30)" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">30 يوم</button>
+                                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth(),1); const t=new Date(d.getFullYear(),d.getMonth()+1,0); window.state.reportsGlobal.fromDate=f.toISOString().split('T')[0]; window.state.reportsGlobal.toDate=t.toISOString().split('T')[0]; window.state.reportsGlobal.viewAll=false; window.state.reportsPagination={statement:1,sales:1,expenses:1}; window.render();" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">الشهر الحالي</button>
+                                <button onclick="const d=new Date(); const f=new Date(d.getFullYear(),d.getMonth()-1,1); const t=new Date(d.getFullYear(),d.getMonth(),0); window.state.reportsGlobal.fromDate=f.toISOString().split('T')[0]; window.state.reportsGlobal.toDate=t.toISOString().split('T')[0]; window.state.reportsGlobal.viewAll=false; window.state.reportsPagination={statement:1,sales:1,expenses:1}; window.render();" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:0.9rem; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">الشهر السابق</button>
                             </div>
 
                             <!-- Date Filter Inputs -->
@@ -8152,9 +8322,9 @@ function renderDashboardSales(c) {
                         }
 
                         return `
-                        <div class="no-print" style="margin: 0 15px 10px 15px; background:rgba(251,191,36,0.03); border:1px solid rgba(251,191,36,0.08); padding:8px 12px; border-radius:8px; font-size:0.75rem; color:#e2e8f0; font-family:'Cairo'; line-height:1.4; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div class="no-print" style="margin: 0 15px 15px 15px; background:linear-gradient(90deg, rgba(251,191,36,0.1), rgba(251,191,36,0.02)); border:1px solid rgba(251,191,36,0.3); border-right:4px solid #fbbf24; padding:12px 15px; border-radius:8px; font-size:0.85rem; color:#fff; font-family:'Cairo'; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; box-shadow:0 5px 15px rgba(0,0,0,0.2);">
                             <span>${desc}</span>
-                            <span style="opacity:0.85; font-size:0.72rem; background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:6px; font-family:'Cairo';">${matchDetails}</span>
+                            <span style="opacity:0.9; font-size:0.8rem; font-weight:bold; background:rgba(0,0,0,0.4); padding:4px 10px; border-radius:6px; font-family:'Cairo'; border:1px solid rgba(255,255,255,0.1);">${matchDetails}</span>
                         </div>
                         `;
                     })() : ''}
@@ -9146,7 +9316,9 @@ function renderDashboardSales(c) {
             const html = `<div style="display:flex; flex-direction:column; gap:10px; font-weight:700;"><div style="display:flex; justify-content:space-between; font-size:1.1rem;"><span>إجمالي المبيعات:</span><span style="color:var(--success);">${sales} ج</span></div><div style="display:flex; justify-content:space-between; font-size:0.9rem; opacity:0.8; padding-right:15px;"><span>كاش:</span><span>${cashSales} ج</span></div><div style="display:flex; justify-content:space-between; font-size:0.9rem; opacity:0.8; padding-right:15px;"><span>فيزا:</span><span>${visaSales} ج</span></div><div style="display:flex; justify-content:space-between; font-size:0.9rem; opacity:0.8; padding-right:15px;"><span>محفظة:</span><span>${walletSales} ج</span></div><hr style="border:1px dashed #ccc; margin:5px 0;"><div style="display:flex; justify-content:space-between; font-size:1.1rem;"><span>إجمالي المصروفات:</span><span style="color:var(--danger);">${ex} ج</span></div>${wasteHtml}<hr style="border:1px dashed #ccc; margin:5px 0;"><div style="display:flex; justify-content:space-between; font-size:1.6rem; background:#f1f5f9; padding:10px; border-radius:10px;"><span>صافي الدرج (كاش):</span><span style="color:var(--panel);">${cashSales - ex} ج</span></div><p style="font-size:0.8rem; opacity:0.6; text-align:center; margin-top:5px;">بدأت الوردية في: ${new Date(window.state.db.shift.start).toLocaleString('ar-EG')}</p></div>`;
             document.getElementById('shift-summary-content').innerHTML = html; document.getElementById('shift-summary-modal').style.display = 'flex';
         };
-        window.confirmEndShift = () => {
+        window.confirmEndShift = (btn) => {
+            if(btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإغلاق...'; btn.disabled = true; }
+            
             const orders = window.state.db.orders || [];
             if (!window.state.db.historical_orders) window.state.db.historical_orders = [];
             if (!window.state.db.shifts_history) window.state.db.shifts_history = [];
@@ -9167,7 +9339,11 @@ function renderDashboardSales(c) {
             window.state.db.orders = [];
             window.save();
             sessionStorage.removeItem('foush_role');
-            location.reload();
+            
+            // Delay reload to allow async fetch/firebase save to complete
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
         };
 
         window.boot = () => {
@@ -9414,11 +9590,8 @@ function renderDashboardSales(c) {
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Only show install banner if the user is already logged in (meaning role is active)
-            if (window.state.role) {
-                const banner = document.getElementById('pwa-install-banner');
-                if (banner) banner.style.display = 'flex';
-            }
+            const banner = document.getElementById('pwa-install-banner');
+            if (banner) banner.style.display = 'flex';
         });
 
         const installBtn = document.getElementById('pwa-install-btn');
@@ -9456,6 +9629,91 @@ function renderDashboardSales(c) {
             }
         });
 
+
+        window.generate30DaysMockData = function() {
+            if(!confirm('تأكيد هام: هل أنت متأكد من مسح بياناتك الحالية وتوليد بيانات تجريبية لآخر 30 يوم؟')) return;
+            
+            // clear old data
+            const menu = localStorage.getItem('f_menu');
+            const tables = localStorage.getItem('f_tables');
+            const employees = localStorage.getItem('f_employees');
+            const main_inventory = localStorage.getItem('f_main_inventory');
+            const settings = localStorage.getItem('f_settings');
+
+            localStorage.clear();
+
+            // restore essentials
+            if(menu) localStorage.setItem('f_menu', menu);
+            if(tables) localStorage.setItem('f_tables', tables);
+            if(employees) localStorage.setItem('f_employees', employees);
+            if(main_inventory) localStorage.setItem('f_main_inventory', main_inventory);
+            if(settings) localStorage.setItem('f_settings', settings);
+            
+            const now = Date.now();
+            const DAY = 24 * 60 * 60 * 1000;
+            
+            const generatedOrders = [];
+            const generatedExp = [];
+            const generatedShifts = [];
+            
+            for(let i=29; i>=0; i--) {
+                const shiftStart = now - (i * DAY) - (8 * 3600000); // 8 hours before midnight approx
+                const shiftEnd = shiftStart + (6 * 3600000); // 6 hour shift
+                
+                let totalShiftSales = 0;
+                let totalShiftExp = 0;
+                
+                // Add 15-25 orders per day
+                const numOrders = Math.floor(Math.random() * 11) + 15;
+                for(let o=0; o<numOrders; o++) {
+                    const orderTime = shiftStart + (Math.random() * (shiftEnd - shiftStart));
+                    const orderTotal = Math.floor(Math.random() * 300) + 100;
+                    totalShiftSales += orderTotal;
+                    generatedOrders.push({
+                        id: 'MOCK' + Math.floor(Math.random()*10000),
+                        time: orderTime,
+                        total: orderTotal,
+                        status: 'completed',
+                        paid: true,
+                        type: Math.random() > 0.5 ? 'takeaway' : 'dine-in',
+                        paymentMethod: Math.random() > 0.7 ? 'visa' : 'cash',
+                        cart: [{name: 'طاجن لحم بلدي', qty: 1, price: 150}]
+                    });
+                }
+                
+                // Add 2-4 expenses per day
+                const numExp = Math.floor(Math.random() * 3) + 2;
+                for(let x=0; x<numExp; x++) {
+                    const expTime = shiftStart + (Math.random() * (shiftEnd - shiftStart));
+                    const expAmt = Math.floor(Math.random() * 200) + 50;
+                    const isShift = Math.random() > 0.2;
+                    if(isShift) totalShiftExp += expAmt;
+                    
+                    generatedExp.push({
+                        time: expTime,
+                        amount: expAmt,
+                        name: ['مشتريات خضار', 'صيانة أدوات المطبخ', 'أكياس وعلب', 'نظافة وضيافة', 'كهرباء وغاز'][Math.floor(Math.random()*5)],
+                        type: 'general',
+                        isShiftExpense: isShift
+                    });
+                }
+                
+                generatedShifts.push({
+                    start: shiftStart,
+                    end: shiftEnd,
+                    sales: totalShiftSales,
+                    expenses: totalShiftExp,
+                    net: totalShiftSales - totalShiftExp
+                });
+            }
+            
+            localStorage.setItem('f_historical_orders', JSON.stringify(generatedOrders));
+            localStorage.setItem('f_exp', JSON.stringify(generatedExp));
+            localStorage.setItem('f_history', JSON.stringify(generatedShifts));
+            
+            alert('تم مسح البيانات القديمة وتوليد بيانات 30 يوم بنجاح! سيتم إعادة تحميل الصفحة.');
+            location.reload();
+        };
 
     </script>
     <script src="pwa-install.js"></script>
