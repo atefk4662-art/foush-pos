@@ -9,7 +9,6 @@ start /min cmd /c "node server.js"
 :: Wait 1 second for the server to start
 timeout /t 1 /nobreak >nul
 
-:: Open the browser to the POS page
-start http://localhost:3000/pos.html
+start http://localhost:3000/index.html
 
 exit

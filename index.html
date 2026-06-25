@@ -8,6 +8,9 @@
     <link rel="icon" type="image/x-icon" href="logo.ico">
     <link rel="shortcut icon" href="logo.ico">
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>فؤش ابن سيد للطواجن | FOUSH POS v11.83</title>
@@ -23,7 +26,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         window.onerror = function (msg, url, lineNo, columnNo, error) {
-            document.body.innerHTML = '<div style="color:white; background:red; padding:20px; z-index:999999; position:fixed; top:0; left:0; width:100%; height:100%; overflow:auto;"><h2>CRITICAL ERROR</h2><p>' + msg + '</p><p>Line: ' + lineNo + '</p><pre>' + (error && error.stack ? error.stack : '') + '</pre></div>';
+            console.error("Global Error:", msg, url, lineNo);
             return false;
         };
     </script>
@@ -1240,22 +1243,7 @@
                 font-size: 1rem !important;
             }
 
-            /* --- Kitchen swipe-able columns --- */
-            .kitchen-layout-grid {
-                display: flex !important;
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch;
-                scroll-snap-type: x mandatory;
-                gap: 0 !important;
-                padding-bottom: 10px !important;
-            }
-
-            .kitchen-layout-grid>div {
-                min-width: 85vw !important;
-                flex-shrink: 0 !important;
-                scroll-snap-align: start;
-                padding: 0 6px !important;
-            }
+            /* The Kitchen swipeable columns block was moved to max-width: 600px */
 
             /* --- Inventory / Admin Inventory tables --- */
             .foush-table {
@@ -1475,6 +1463,8 @@
         }
 
         @media (max-width: 600px) {
+
+
             #role-screen h1 {
                 font-size: 2.2rem !important;
             }
@@ -2120,7 +2110,53 @@
             background: rgba(255, 255, 255, 0.08) !important;
             box-shadow: 0 12px 24px rgba(0,0,0,0.3) !important;
         }
-</style>
+
+        /* Cashier UI Enhancements */
+        .pos-card {
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .pos-card:hover {
+            background: rgba(30, 41, 59, 0.95) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 6px 12px rgba(251, 191, 36, 0.2);
+        }
+        .pos-card h3 {
+            color: #ffffff !important;
+            font-size: 1.05rem !important;
+            font-weight: 800 !important;
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 8px !important;
+            line-height: 1.4;
+        }
+        .pos-card p {
+            font-size: 1.15rem !important;
+            text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
+        }
+        .pos-card small {
+            font-size: 0.8rem !important;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .items-side button.btn-luxury {
+            font-size: 1rem !important;
+            font-weight: bold !important;
+        }
+    
+        /* Dropdown options visibility fix */
+        select.input-luxury option {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-size: 1rem;
+            padding: 10px;
+        }
+    </style>
+
+
 </head>
 
 <body>
@@ -2183,11 +2219,7 @@
                 <button onclick="window.login('kitchen')" class="btn-luxury"
                     style="padding:22px; font-size:1.1rem; grid-column: span 2;">المطبخ🔥</button>
             </div>
-            <button
-                onclick="document.getElementById('attendance-modal').style.display='flex'; setTimeout(()=>document.getElementById('att-pin').focus(),100);"
-                class="btn-luxury"
-                style="margin:20px auto 0; max-width:480px; width:100%; padding:20px; font-size:1.5rem; background:rgba(0,0,0,0.5); border:2px solid var(--primary);">بصمة
-                الحضور والانصراف 👆</button>
+            <!-- Manual attendance button disabled, ZKTeco fingerprint integration active -->
         </div>
     </div>
 
@@ -2198,7 +2230,9 @@
                 التحكم 🎛️</h3>
             <div id="mobile-menu-links"
                 style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; max-height:50vh;"></div>
-            <button onclick="window.logout()" class="btn-luxury danger" style="margin-top:15px;"><i
+            <button onclick="window.location.reload(true)" class="btn-luxury" style="margin-top:15px; background:rgba(59,130,246,0.1); color:#3b82f6; border:1px solid #3b82f6;"><i
+                    class="fa-solid fa-rotate-right"></i> تحديث الشاشة</button>
+            <button onclick="window.logout()" class="btn-luxury danger" style="margin-top:8px;"><i
                     class="fa-solid fa-power-off"></i> خروج آمن</button>
             <button onclick="document.getElementById('mobile-menu-modal').style.display='none'" class="btn-luxury"
                 style="margin-top:8px;">إغلاق</button>
@@ -2426,7 +2460,7 @@
                 <option value="waiter">ويتر 🤵</option>
                 <option value="cashier">كاشير 💰</option>
                 <option value="kitchen">شيف / مطبخ 👨‍🍳</option>
-                <option value="manager">مدير فرع 👔</option>
+                
             </select>
             
             <label style="font-size:0.8rem; opacity:0.7;">كود الدخول (PIN):</label>
@@ -2655,11 +2689,8 @@
                 style="display:none; background:#a855f7; color:#fff; font-weight:900; padding:5px 12px; border-radius:20px; font-size:0.9rem; animation:pulse-purple 1.5s infinite; cursor:pointer;"
                 onclick="window.switchPage('pos')">💰 <span id="billing-count">0</span> طلب حساب!</div>
 
-            <button id="clear-storage-btn"
-                onclick="if(prompt('تحذير! هذا الخيار سيمسح جميع البيانات من النظام! أدخل الرقم السري (12345) للتأكيد:') === '12345') { localStorage.clear(); location.reload(); }"
-                class="btn-luxury"
-                style="width:auto; background:var(--bg); color:var(--primary); border:1px solid var(--primary); padding:5px 10px; font-size:0.7rem;">مسح
-                التخزين 🧹</button>
+            <button onclick="window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now()" style="background:none; border:none; color:#3b82f6; font-size:1.4rem; cursor:pointer; padding:0 10px;" title="تحديث الشاشة 🔄"><i class="fa-solid fa-rotate-right"></i></button>
+            <button onclick="window.logout()" style="background:none; border:none; color:var(--danger); font-size:1.4rem; cursor:pointer; padding:0 10px;" title="خروج آمن 🚪"><i class="fa-solid fa-power-off"></i></button>
             <h2
                 style="font-family:'Orbitron'; color:var(--primary); letter-spacing:3px; font-weight:900; font-size:1.4rem;">
                 FOUSH</h2>
@@ -2676,8 +2707,11 @@
                 <p style="font-size:0.7rem; opacity:0.5;">v12.1</p>
             </div>
             <div id="menu-links" style="flex:1;"></div>
+            <button onclick="window.location.reload(true)" class="sidebar-link"
+                style="color:#3b82f6; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; margin-top:10px;"><i
+                    class="fa-solid fa-rotate-right"></i> تحديث الشاشة</button>
             <button onclick="window.logout()" class="sidebar-link"
-                style="color:var(--danger); border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; margin-top:10px;"><i
+                style="color:var(--danger); margin-top:5px;"><i
                     class="fa-solid fa-power-off"></i> خروج آمن</button>
         </aside>
         <main class="main-content">
@@ -3059,7 +3093,7 @@
             const isEmployeeManagement = (emp.role === 'manager' || emp.role === 'admin');
             if (emp.role !== role && !(isManagementRequested && isEmployeeManagement)) {
                 const roleLabels = { waiter: 'ويتر🤵', cashier: 'كاشير💰', kitchen: 'طباخ🔥', manager: 'المالك👑', admin: 'إدارة💼' };
-                error.textContent = `عفواً، هذا الكود خاص بـ ${roleLabels[emp.role] || emp.role} وليس ${roleLabels[role]}! ❌`;
+                error.textContent = "عفواً، كود البصمة غير صحيح! ❌";
                 window.playSound('error');
                 return;
             }
@@ -3091,7 +3125,7 @@
         window.logout = () => {
             sessionStorage.removeItem('foush_role');
             sessionStorage.removeItem('foush_emp_name');
-            location.reload();
+            setTimeout(() => { window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now(); }, 50);
         };
         window.startShift = () => { window.state.db.shift = { start: Date.now() }; window.save(); };
         window.showToast = (m) => { const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2500); };
@@ -3931,68 +3965,77 @@
                 </div>
 
                 <!-- Top Feedback Categories -->
-                <div style="margin-bottom:5px;">
-                    <h4 style="margin:0 0 15px 0; font-family:'Cairo'; font-size:1.1rem; color:#fff;">الحالة العامة للمطعم</h4>
-                        <div onclick="${opStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:flex; align-items:center; gap:12px;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
-                            <div style="width:45px; height:45px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:${opStatus.color}; font-size:1.4rem; flex-shrink:0;">
+                <div style="margin-bottom:25px;">
+                    <div style="margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
+                        <h4 style="margin:0; font-family:'Cairo'; font-size:1.15rem; color:#e2e8f0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-chart-line" style="color:#64748b; font-size:1rem;"></i> المؤشرات التشغيلية للمطعم</h4>
+                        <p style="margin:4px 0 0 0; font-size:0.8rem; color:#64748b;">متابعة حالة التشغيل، جاهزية المنيو، أرصدة المخازن الأساسية، وتواجد فريق العمل.</p>
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px;">
+                        <div onclick="${opStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(30,41,59,0.5); border:1px solid rgba(255,255,255,0.03); border-radius:12px; padding:15px; display:flex; align-items:center; gap:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(51,65,85,0.5)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(30,41,59,0.5)'; this.style.transform='translateY(0)';">
+                            <div style="width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:1.2rem; flex-shrink:0;">
                                 <i class="fa-solid ${opStatus.icon}"></i>
                             </div>
                             <div>
-                                <div style="font-size:0.85rem; color:#cbd5e1; font-weight:bold; margin-bottom:3px;">حالة التشغيل</div>
-                                <div style="font-size:1.15rem; font-weight:900; color:${opStatus.color};">${opStatus.text}</div>
-                                <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px; opacity:0.9;">${opStatus.subtext}</div>
+                                <div style="font-size:0.8rem; color:#64748b; font-weight:bold; margin-bottom:2px;">حالة التشغيل</div>
+                                <div style="font-size:1.1rem; font-weight:900; color:#f8fafc;">${opStatus.text}</div>
+                                <div style="font-size:0.75rem; color:${opStatus.color}; margin-top:2px; font-weight:bold; opacity:0.9;">${opStatus.subtext}</div>
                             </div>
                         </div>
                         
-                        <div onclick="${menuInvStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:flex; align-items:center; gap:12px;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
-                            <div style="width:45px; height:45px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:${menuInvStatus.color}; font-size:1.4rem; flex-shrink:0;">
+                        <div onclick="${menuInvStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(30,41,59,0.5); border:1px solid rgba(255,255,255,0.03); border-radius:12px; padding:15px; display:flex; align-items:center; gap:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(51,65,85,0.5)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(30,41,59,0.5)'; this.style.transform='translateY(0)';">
+                            <div style="width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:1.2rem; flex-shrink:0;">
                                 <i class="fa-solid ${menuInvStatus.icon}"></i>
                             </div>
                             <div>
-                                <div style="font-size:0.85rem; color:#cbd5e1; font-weight:bold; margin-bottom:3px;">مخزن المنيو</div>
-                                <div style="font-size:1.15rem; font-weight:900; color:${menuInvStatus.color};">${menuInvStatus.text}</div>
-                                <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px; opacity:0.9;">${menuInvStatus.subtext}</div>
+                                <div style="font-size:0.8rem; color:#64748b; font-weight:bold; margin-bottom:2px;">مخزن المنيو</div>
+                                <div style="font-size:1.1rem; font-weight:900; color:#f8fafc;">${menuInvStatus.text}</div>
+                                <div style="font-size:0.75rem; color:${menuInvStatus.color}; margin-top:2px; font-weight:bold; opacity:0.9;">${menuInvStatus.subtext}</div>
                             </div>
                         </div>
 
-                        <div onclick="${mainInvStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:flex; align-items:center; gap:12px;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
-                            <div style="width:45px; height:45px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:${mainInvStatus.color}; font-size:1.4rem; flex-shrink:0;">
+                        <div onclick="${mainInvStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(30,41,59,0.5); border:1px solid rgba(255,255,255,0.03); border-radius:12px; padding:15px; display:flex; align-items:center; gap:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(51,65,85,0.5)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(30,41,59,0.5)'; this.style.transform='translateY(0)';">
+                            <div style="width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:1.2rem; flex-shrink:0;">
                                 <i class="fa-solid ${mainInvStatus.icon}"></i>
                             </div>
                             <div>
-                                <div style="font-size:0.85rem; color:#cbd5e1; font-weight:bold; margin-bottom:3px;">المخزن الرئيسي</div>
-                                <div style="font-size:1.15rem; font-weight:900; color:${mainInvStatus.color};">${mainInvStatus.text}</div>
-                                <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px; opacity:0.9;">${mainInvStatus.subtext}</div>
+                                <div style="font-size:0.8rem; color:#64748b; font-weight:bold; margin-bottom:2px;">المخزن الرئيسي</div>
+                                <div style="font-size:1.1rem; font-weight:900; color:#f8fafc;">${mainInvStatus.text}</div>
+                                <div style="font-size:0.75rem; color:${mainInvStatus.color}; margin-top:2px; font-weight:bold; opacity:0.9;">${mainInvStatus.subtext}</div>
                             </div>
                         </div>
 
-                        <div onclick="${staffStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:flex; align-items:center; gap:12px;" onmouseover="this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
-                            <div style="width:45px; height:45px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:${staffStatus.color}; font-size:1.4rem; flex-shrink:0;">
+                        <div onclick="${staffStatus.action}" style="cursor:pointer; transition:all 0.3s; background:rgba(30,41,59,0.5); border:1px solid rgba(255,255,255,0.03); border-radius:12px; padding:15px; display:flex; align-items:center; gap:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(51,65,85,0.5)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(30,41,59,0.5)'; this.style.transform='translateY(0)';">
+                            <div style="width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:1.2rem; flex-shrink:0;">
                                 <i class="fa-solid ${staffStatus.icon}"></i>
                             </div>
                             <div>
-                                <div style="font-size:0.85rem; color:#cbd5e1; font-weight:bold; margin-bottom:3px;">طاقم العمل</div>
-                                <div style="font-size:1.15rem; font-weight:900; color:${staffStatus.color};">${staffStatus.text}</div>
-                                <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px; opacity:0.9;">${staffStatus.subtext}</div>
+                                <div style="font-size:0.8rem; color:#64748b; font-weight:bold; margin-bottom:2px;">طاقم العمل</div>
+                                <div style="font-size:1.1rem; font-weight:900; color:#f8fafc;">${staffStatus.text}</div>
+                                <div style="font-size:0.75rem; color:${staffStatus.color}; margin-top:2px; font-weight:bold; opacity:0.9;">${staffStatus.subtext}</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- WOW Factors Section: نظرة سريعة على الوردية الحالية -->
-                <div style="margin-bottom:15px;">
+                <!-- WOW Factors Section: نظرة سريعة على الوردية الحالية -->
+                <div style="margin-bottom:25px;">
+                    <div style="margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
+                        <h4 style="margin:0; font-family:'Cairo'; font-size:1.15rem; color:#e2e8f0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-vault" style="color:#64748b; font-size:1rem;"></i> الملخص المالي للوردية</h4>
+                        <p style="margin:4px 0 0 0; font-size:0.8rem; color:#64748b;">نظرة سريعة على المبيعات، المصروفات، وصافي الكاش المتوقع بالدرج.</p>
+                    </div>
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:15px;">
                         
                         <!-- Cash Flow Card -->
-                        <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:15px; position:relative; overflow:hidden; transition:all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)';" onmouseout="this.style.background='rgba(0,0,0,0.25)';">
+                        <div style="background:rgba(30,41,59,0.5); border:1px solid rgba(255,255,255,0.03); border-radius:12px; padding:15px; position:relative; overflow:hidden; transition:all 0.3s;" onmouseover="this.style.background='rgba(51,65,85,0.5)';" onmouseout="this.style.background='rgba(30,41,59,0.5)';">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                <div style="font-size:0.8rem; color:#94a3b8; font-weight:bold;"><i class="fa-solid fa-wallet" style="margin-left:5px; color:var(--success);"></i> ملخص خزينة الوردية</div>
+                                <div style="font-size:0.8rem; color:#94a3b8; font-weight:bold;"><i class="fa-solid fa-wallet" style="margin-left:5px; color:#cbd5e1;"></i> ملخص خزينة الوردية</div>
                             </div>
                             <div style="display:flex; flex-direction:column; gap:5px; margin-top:5px;">
                                 <div style="display:flex; justify-content:space-between; font-size:0.85rem;"><span style="color:#94a3b8;">مبيعات:</span> <span style="font-family:'Orbitron'; color:var(--success); font-weight:bold;">${shiftSalesValue.toLocaleString()} ج</span></div>
                                 <div style="display:flex; justify-content:space-between; font-size:0.85rem;"><span style="color:#94a3b8;">مصروفات:</span> <span style="font-family:'Orbitron'; color:#ef4444; font-weight:bold;">${shiftExpValue.toLocaleString()} ج</span></div>
-                                <div style="width:100%; height:1px; background:rgba(255,255,255,0.1); margin:2px 0;"></div>
-                                <div style="display:flex; justify-content:space-between; font-size:1rem; font-weight:900;"><span style="color:#fff;">الصافي المتوقع:</span> <span style="font-family:'Orbitron'; color:${netCash >= 0 ? 'var(--success)' : '#ef4444'};">${netCash.toLocaleString()} ج</span></div>
+                                <div style="width:100%; height:1px; background:rgba(255,255,255,0.05); margin:2px 0;"></div>
+                                <div style="display:flex; justify-content:space-between; font-size:1rem; font-weight:900;"><span style="color:#f8fafc;">الصافي المتوقع:</span> <span style="font-family:'Orbitron'; color:${netCash >= 0 ? 'var(--success)' : '#ef4444'};">${netCash.toLocaleString()} ج</span></div>
                             </div>
                         </div>
 
@@ -4000,12 +4043,18 @@
                 </div>
 
                 <!-- Quick Actions -->
-                <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:30px; margin-top:25px;">
-                    <button onclick="window.switchPage('shift_ops')" class="btn-luxury" style="flex:1; min-width:200px; justify-content:center; padding:15px 25px; font-size:1.1rem; font-weight:bold; border-radius:12px; display:flex; gap:10px; align-items:center; background:rgba(14,165,233,0.15); border:1px solid rgba(14,165,233,0.4); color:#fff; transition:all 0.3s; box-shadow:0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(14,165,233,0.3)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(14,165,233,0.15)'; this.style.transform='translateY(0)';"><i class="fa-solid fa-cash-register" style="color:#38bdf8; font-size:1.4rem;"></i> <span>${isShiftActive ? 'متابعة الوردية الحالية' : 'متابعة الوردية'}</span></button>
-                    
-                    <button onclick="window.switchPage('expenses'); setTimeout(()=>document.getElementById('ex-amount').focus(), 300);" class="btn-luxury" style="flex:1; min-width:200px; justify-content:center; padding:15px 25px; font-size:1.1rem; font-weight:bold; border-radius:12px; display:flex; gap:10px; align-items:center; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#fff; transition:all 0.3s; box-shadow:0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(239,68,68,0.3)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(239,68,68,0.15)'; this.style.transform='translateY(0)';"><i class="fa-solid fa-money-bill-wave" style="color:#f87171; font-size:1.4rem;"></i> <span>تسجيل مصروف سريع</span></button>
-                    
-                    <button onclick="window.switchPage('admin_inventory'); setTimeout(()=>window.openAdminInventoryAdd(), 300);" class="btn-luxury" style="flex:1; min-width:200px; justify-content:center; padding:15px 25px; font-size:1.1rem; font-weight:bold; border-radius:12px; display:flex; gap:10px; align-items:center; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#fff; transition:all 0.3s; box-shadow:0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(245,158,11,0.3)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(245,158,11,0.15)'; this.style.transform='translateY(0)';"><i class="fa-solid fa-box-open" style="color:#fbbf24; font-size:1.4rem;"></i> <span>إضافة خامة للمخزن</span></button>
+                <div style="margin-bottom:30px; margin-top:15px;">
+                    <div style="margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">
+                        <h4 style="margin:0; font-family:'Cairo'; font-size:1.15rem; color:#e2e8f0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-bolt" style="color:#64748b; font-size:1rem;"></i> العمليات السريعة</h4>
+                        <p style="margin:4px 0 0 0; font-size:0.8rem; color:#64748b;">إختصارات لتسريع العمل وتسهيل المهام المتكررة.</p>
+                    </div>
+                    <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                        <button onclick="window.switchPage('shift_ops')" class="btn-luxury" style="flex:1; min-width:200px; justify-content:center; padding:15px 25px; font-size:1.1rem; font-weight:bold; border-radius:12px; display:flex; gap:10px; align-items:center; background:rgba(30,41,59,0.8); border:1px solid rgba(255,255,255,0.03); color:#cbd5e1; transition:all 0.2s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(51,65,85,0.9)'; this.style.color='#fff'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(30,41,59,0.8)'; this.style.color='#cbd5e1'; this.style.transform='translateY(0)';"><i class="fa-solid fa-cash-register" style="color:#38bdf8; font-size:1.4rem;"></i> <span>${isShiftActive ? 'متابعة الوردية الحالية' : 'متابعة الوردية'}</span></button>
+                        
+                        <button onclick="window.switchPage('expenses'); setTimeout(()=>document.getElementById('ex-amount').focus(), 300);" class="btn-luxury" style="flex:1; min-width:200px; justify-content:center; padding:15px 25px; font-size:1.1rem; font-weight:bold; border-radius:12px; display:flex; gap:10px; align-items:center; background:rgba(30,41,59,0.8); border:1px solid rgba(255,255,255,0.03); color:#cbd5e1; transition:all 0.2s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(51,65,85,0.9)'; this.style.color='#fff'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(30,41,59,0.8)'; this.style.color='#cbd5e1'; this.style.transform='translateY(0)';"><i class="fa-solid fa-money-bill-wave" style="color:#f87171; font-size:1.4rem;"></i> <span>تسجيل مصروف سريع</span></button>
+                        
+                        <button onclick="window.switchPage('admin_inventory'); setTimeout(()=>window.openAdminInventoryAdd(), 300);" class="btn-luxury" style="flex:1; min-width:200px; justify-content:center; padding:15px 25px; font-size:1.1rem; font-weight:bold; border-radius:12px; display:flex; gap:10px; align-items:center; background:rgba(30,41,59,0.8); border:1px solid rgba(255,255,255,0.03); color:#cbd5e1; transition:all 0.2s; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(51,65,85,0.9)'; this.style.color='#fff'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(30,41,59,0.8)'; this.style.color='#cbd5e1'; this.style.transform='translateY(0)';"><i class="fa-solid fa-box-open" style="color:#fbbf24; font-size:1.4rem;"></i> <span>إضافة خامة للمخزن</span></button>
+                    </div>
                 </div>
 
                 <div class="control-center-grid" style="display:grid; grid-template-columns: 2fr 1fr; gap:30px; align-items:start;">
@@ -4388,39 +4437,52 @@
                 const toTime = new Date(filter.to).setHours(23,59,59,999);
                 const daysCount = Math.ceil((toTime - fromTime) / (1000 * 60 * 60 * 24));
                 
-                if (daysCount <= 31) {
-                    for (let i = 0; i < daysCount; i++) {
-                        let currentDay = new Date(fromTime + i * 24 * 60 * 60 * 1000);
-                        labels.push(currentDay.toLocaleDateString('ar-EG', {month:'short', day:'numeric'}));
-                        
-                        let dFrom = currentDay.setHours(0,0,0,0);
-                        let dTo = currentDay.setHours(23,59,59,999);
-                        
-                        let dOrders = curOrders.filter(o => o.time >= dFrom && o.time <= dTo);
-                        let dExps = curExp.filter(e => e.time >= dFrom && e.time <= dTo);
-                        
-                        let dSales = dOrders.filter(o => o.paid).reduce((s,o) => s + o.total - (o.discount||0), 0);
-                        let dExpVal = dExps.reduce((s,e) => s + e.amount, 0);
-                        
-                        salesData.push(dSales);
-                        expData.push(dExpVal);
-                        profitData.push(dSales - dExpVal);
-                        
-                        let adminDAllOrders = allPeriodOrders.filter(o => o.time >= dFrom && o.time <= dTo);
-                        adminOrdersData.push(adminDAllOrders.filter(o => o.status !== 'canceled').length);
-                        adminCanceledData.push(adminDAllOrders.filter(o => o.status === 'canceled').length);
-                        adminItemsData.push(adminDAllOrders.filter(o => o.status !== 'canceled').reduce((sum, o) => sum + (o.items || []).reduce((s2, i) => s2 + (i.qty || 1), 0), 0));
-                    }
-                } else {
-                    labels.push('إجمالي الفترة');
-                    salesData.push(curSalesVal);
-                    expData.push(curExpVal);
-                    profitData.push(curProfitVal);
+                
+                // Always Group by Month
+                const fromDateObj = new Date(filter.from);
+                const toDateObj = new Date(filter.to);
+                
+                let startY = fromDateObj.getFullYear();
+                let startM = fromDateObj.getMonth();
+                let endY = toDateObj.getFullYear();
+                let endM = toDateObj.getMonth();
+                
+                let totalMonths = (endY - startY) * 12 + (endM - startM) + 1;
+                
+                if (totalMonths > 24) totalMonths = 24; // Limit to 24 months to avoid too many columns
+                
+                const monthsNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+                
+                for (let i = 0; i < totalMonths; i++) {
+                    let m = startM + i;
+                    let y = startY + Math.floor(m / 12);
+                    m = m % 12;
                     
-                    adminOrdersData.push(totalOrdersCount);
-                    adminCanceledData.push(canceledOrdersCount);
-                    adminItemsData.push(totalItemsSold);
+                    labels.push(monthsNames[m] + ' ' + y);
+                    
+                    let mFrom = new Date(y, m, 1).getTime();
+                    let mTo = new Date(y, m + 1, 0, 23, 59, 59, 999).getTime();
+                    
+                    // Constrain the month boundaries to the filter boundaries
+                    if (mFrom < fromDateObj.getTime()) mFrom = fromDateObj.getTime();
+                    if (mTo > toDateObj.setHours(23,59,59,999)) mTo = toDateObj.setHours(23,59,59,999);
+                    
+                    let dOrders = curOrders.filter(o => o.time >= mFrom && o.time <= mTo);
+                    let dExps = curExp.filter(e => e.time >= mFrom && e.time <= mTo);
+                    
+                    let dSales = dOrders.filter(o => o.paid).reduce((s,o) => s + o.total - (o.discount||0), 0);
+                    let dExpVal = dExps.reduce((s,e) => s + e.amount, 0);
+                    
+                    salesData.push(dSales);
+                    expData.push(dExpVal);
+                    profitData.push(dSales - dExpVal);
+                    
+                    let adminDAllOrders = allPeriodOrders.filter(o => o.time >= mFrom && o.time <= mTo);
+                    adminOrdersData.push(adminDAllOrders.filter(o => o.status !== 'canceled').length);
+                    adminCanceledData.push(adminDAllOrders.filter(o => o.status === 'canceled').length);
+                    adminItemsData.push(adminDAllOrders.filter(o => o.status !== 'canceled').reduce((sum, o) => sum + (o.items || []).reduce((s2, i) => s2 + (i.qty || 1), 0), 0));
                 }
+
             }
 
             // Textual Summary Logic
@@ -6655,7 +6717,44 @@ function renderDashboardSales(c) {
                         from { opacity: 0; transform: translateY(-8px); }
                         to { opacity: 1; transform: translateY(0); }
                     }
-                </style>
+                
+        /* Cashier UI Enhancements */
+        .pos-card {
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .pos-card:hover {
+            background: rgba(30, 41, 59, 0.95) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 6px 12px rgba(251, 191, 36, 0.2);
+        }
+        .pos-card h3 {
+            color: #ffffff !important;
+            font-size: 1.05rem !important;
+            font-weight: 800 !important;
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 8px !important;
+            line-height: 1.4;
+        }
+        .pos-card p {
+            font-size: 1.15rem !important;
+            text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
+        }
+        .pos-card small {
+            font-size: 0.8rem !important;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .items-side button.btn-luxury {
+            font-size: 1rem !important;
+            font-weight: bold !important;
+        }
+    </style>
+
                 `;
             }
 
@@ -6707,7 +6806,44 @@ function renderDashboardSales(c) {
                         50% { transform: translateY(-6px); }
                         100% { transform: translateY(0px); }
                     }
-                </style>
+                
+        /* Cashier UI Enhancements */
+        .pos-card {
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .pos-card:hover {
+            background: rgba(30, 41, 59, 0.95) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 6px 12px rgba(251, 191, 36, 0.2);
+        }
+        .pos-card h3 {
+            color: #ffffff !important;
+            font-size: 1.05rem !important;
+            font-weight: 800 !important;
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 8px !important;
+            line-height: 1.4;
+        }
+        .pos-card p {
+            font-size: 1.15rem !important;
+            text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
+        }
+        .pos-card small {
+            font-size: 0.8rem !important;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .items-side button.btn-luxury {
+            font-size: 1rem !important;
+            font-weight: bold !important;
+        }
+    </style>
+
                 `;
             } else if (activeTab === 'financials') {
                 // Financial summary view
@@ -6780,7 +6916,44 @@ function renderDashboardSales(c) {
                                     <div id="financial-transaction-modal-content"></div>
                                     <button onclick="document.getElementById('financial-transaction-modal').style.display='none'" class="btn-luxury danger" style="width:100%; padding:10px; font-weight:bold; margin-top:10px;">إغلاق التفاصيل</button>
                                 </div>
-                                <style>@keyframes modalPop { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }</style>
+                                <style>@keyframes modalPop { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
+        /* Cashier UI Enhancements */
+        .pos-card {
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .pos-card:hover {
+            background: rgba(30, 41, 59, 0.95) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 6px 12px rgba(251, 191, 36, 0.2);
+        }
+        .pos-card h3 {
+            color: #ffffff !important;
+            font-size: 1.05rem !important;
+            font-weight: 800 !important;
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 8px !important;
+            line-height: 1.4;
+        }
+        .pos-card p {
+            font-size: 1.15rem !important;
+            text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
+        }
+        .pos-card small {
+            font-size: 0.8rem !important;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .items-side button.btn-luxury {
+            font-size: 1rem !important;
+            font-weight: bold !important;
+        }
+    </style>
+
                             `;
                             document.body.appendChild(modal);
                         }
@@ -7254,7 +7427,44 @@ function renderDashboardSales(c) {
                         .no-print { display: none !important; }
                         .print-only { display: block !important; }
                     }
-                </style>
+                
+        /* Cashier UI Enhancements */
+        .pos-card {
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .pos-card:hover {
+            background: rgba(30, 41, 59, 0.95) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 6px 12px rgba(251, 191, 36, 0.2);
+        }
+        .pos-card h3 {
+            color: #ffffff !important;
+            font-size: 1.05rem !important;
+            font-weight: 800 !important;
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 8px !important;
+            line-height: 1.4;
+        }
+        .pos-card p {
+            font-size: 1.15rem !important;
+            text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
+        }
+        .pos-card small {
+            font-size: 0.8rem !important;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .items-side button.btn-luxury {
+            font-size: 1rem !important;
+            font-weight: bold !important;
+        }
+    </style>
+
 
                 ${kpiCardsHtml}
                 ${ledgerSummaryHtml}
@@ -7324,7 +7534,44 @@ function renderDashboardSales(c) {
                         from { opacity: 0; transform: scale(0.9); }
                         to { opacity: 1; transform: scale(1); }
                     }
-                </style>
+                
+        /* Cashier UI Enhancements */
+        .pos-card {
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .pos-card:hover {
+            background: rgba(30, 41, 59, 0.95) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 6px 12px rgba(251, 191, 36, 0.2);
+        }
+        .pos-card h3 {
+            color: #ffffff !important;
+            font-size: 1.05rem !important;
+            font-weight: 800 !important;
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 8px !important;
+            line-height: 1.4;
+        }
+        .pos-card p {
+            font-size: 1.15rem !important;
+            text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
+        }
+        .pos-card small {
+            font-size: 0.8rem !important;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .items-side button.btn-luxury {
+            font-size: 1rem !important;
+            font-weight: bold !important;
+        }
+    </style>
+
                 `;
             } else if (activeTab === 'sales_history') {
                 // 2. Tab: Sales History
@@ -7602,7 +7849,44 @@ function renderDashboardSales(c) {
                         padding: 0 !important;
                         border: none !important;
                     }
-                </style>
+                
+        /* Cashier UI Enhancements */
+        .pos-card {
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .pos-card:hover {
+            background: rgba(30, 41, 59, 0.95) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 6px 12px rgba(251, 191, 36, 0.2);
+        }
+        .pos-card h3 {
+            color: #ffffff !important;
+            font-size: 1.05rem !important;
+            font-weight: 800 !important;
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 8px !important;
+            line-height: 1.4;
+        }
+        .pos-card p {
+            font-size: 1.15rem !important;
+            text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
+        }
+        .pos-card small {
+            font-size: 0.8rem !important;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .items-side button.btn-luxury {
+            font-size: 1rem !important;
+            font-weight: bold !important;
+        }
+    </style>
+
 
                 ${salesHeaderHtml}
 
@@ -7679,7 +7963,44 @@ function renderDashboardSales(c) {
                         from { opacity: 0; transform: scale(0.9); }
                         to { opacity: 1; transform: scale(1); }
                     }
-                </style>
+                
+        /* Cashier UI Enhancements */
+        .pos-card {
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .pos-card:hover {
+            background: rgba(30, 41, 59, 0.95) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 6px 12px rgba(251, 191, 36, 0.2);
+        }
+        .pos-card h3 {
+            color: #ffffff !important;
+            font-size: 1.05rem !important;
+            font-weight: 800 !important;
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 8px !important;
+            line-height: 1.4;
+        }
+        .pos-card p {
+            font-size: 1.15rem !important;
+            text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
+        }
+        .pos-card small {
+            font-size: 0.8rem !important;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .items-side button.btn-luxury {
+            font-size: 1rem !important;
+            font-weight: bold !important;
+        }
+    </style>
+
                 `;
             } else if (activeTab === 'expenses_history') {
                 // 3. Tab: Expenses History
@@ -7937,7 +8258,44 @@ function renderDashboardSales(c) {
                         font-weight: 600;
                         text-align: center;
                     }
-                </style>
+                
+        /* Cashier UI Enhancements */
+        .pos-card {
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .pos-card:hover {
+            background: rgba(30, 41, 59, 0.95) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 6px 12px rgba(251, 191, 36, 0.2);
+        }
+        .pos-card h3 {
+            color: #ffffff !important;
+            font-size: 1.05rem !important;
+            font-weight: 800 !important;
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 8px !important;
+            line-height: 1.4;
+        }
+        .pos-card p {
+            font-size: 1.15rem !important;
+            text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
+        }
+        .pos-card small {
+            font-size: 0.8rem !important;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .items-side button.btn-luxury {
+            font-size: 1rem !important;
+            font-weight: bold !important;
+        }
+    </style>
+
 
                 ${expensesHeaderHtml}
 
@@ -8027,7 +8385,44 @@ function renderDashboardSales(c) {
                         from { opacity: 0; transform: scale(0.9); }
                         to { opacity: 1; transform: scale(1); }
                     }
-                </style>
+                
+        /* Cashier UI Enhancements */
+        .pos-card {
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .pos-card:hover {
+            background: rgba(30, 41, 59, 0.95) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 6px 12px rgba(251, 191, 36, 0.2);
+        }
+        .pos-card h3 {
+            color: #ffffff !important;
+            font-size: 1.05rem !important;
+            font-weight: 800 !important;
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 8px !important;
+            line-height: 1.4;
+        }
+        .pos-card p {
+            font-size: 1.15rem !important;
+            text-shadow: 0px 1px 3px rgba(0,0,0,0.8);
+        }
+        .pos-card small {
+            font-size: 0.8rem !important;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .items-side button.btn-luxury {
+            font-size: 1rem !important;
+            font-weight: bold !important;
+        }
+    </style>
+
                 `;
             }
 
@@ -8426,7 +8821,7 @@ function renderDashboardSales(c) {
                     <option value="waiter">ويتر🤵</option>
                     <option value="cashier">كاشير💰</option>
                     <option value="kitchen">طباخ🔥</option>
-                    <option value="manager">مدير👑</option>
+                    
                 </select>
                 <input id="emp-pin" type="password" placeholder="كود الدخول للسيستم (مثال: 1234)" class="input-luxury">
                 <input id="emp-zk-id" type="number" placeholder="رقم الموظف في جهاز البصمة ZKTeco (اختياري)" class="input-luxury">
@@ -8480,11 +8875,11 @@ function renderDashboardSales(c) {
                 
                 <div style="background:linear-gradient(90deg, rgba(16,185,129,0.05), rgba(16,185,129,0.01)); border:1px solid rgba(16,185,129,0.2); border-right:4px solid #10b981; border-radius:12px; padding:15px; margin-bottom:20px; display:flex; align-items:center; gap:15px;">
                     <div style="width:45px; height:45px; border-radius:10px; background:rgba(16,185,129,0.1); color:#10b981; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0;">
-                        <i class="fa-solid fa-satellite-dish"></i>
+                        <i id="zk-status-icon" class="fa-solid fa-satellite-dish" style="color:${window.zkConnected ? '#10b981' : '#9ca3af'}"></i>
                     </div>
                     <div>
-                        <h4 style="margin:0 0 5px 0; font-size:1rem; color:#10b981;">حالة جهاز البصمة (ZKTeco)</h4>
-                        <p style="margin:0; font-size:0.85rem; color:#9ca3af; line-height:1.4;">الجهاز غير متصل بالشبكة حالياً. يرجى توصيل الجهاز وإعداد الـ IP.</p>
+                        <h4 id="zk-status-title" style="margin:0 0 5px 0; font-size:1rem; color:#10b981;">${window.zkConnected ? 'جهاز البصمة متصل ✅' : 'حالة جهاز البصمة (ZKTeco)'}</h4>
+                        <p id="zk-status-text" style="margin:0; font-size:0.85rem; color:${window.zkConnected ? '#10b981' : '#9ca3af'}; line-height:1.4;">${window.zkConnected ? 'الجهاز متصل بنجاح، ويتم مزامنة البصمات فورياً.' : 'الجهاز غير متصل بالشبكة حالياً. يرجى توصيل الجهاز وإعداد الـ IP.'}</p>
                     </div>
                 </div>
 
@@ -9434,10 +9829,12 @@ function renderDashboardSales(c) {
             window.render();
 
             // PWA install banner prompt trigger after successful authentication
-            if (typeof deferredPrompt !== 'undefined' && deferredPrompt) {
+            if (typeof deferredPrompt !== 'undefined' && deferredPrompt && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
                 setTimeout(() => {
                     const banner = document.getElementById('pwa-install-banner');
-                    if (banner) banner.style.display = 'flex';
+            if (banner && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                banner.style.display = 'flex';
+            }
                 }, 1000);
             }
             // iOS Safari PWA prompt trigger
@@ -9668,7 +10065,9 @@ function renderDashboardSales(c) {
             e.preventDefault();
             deferredPrompt = e;
             const banner = document.getElementById('pwa-install-banner');
-            if (banner) banner.style.display = 'flex';
+            if (banner && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                banner.style.display = 'flex';
+            }
         });
 
         const installBtn = document.getElementById('pwa-install-btn');
