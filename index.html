@@ -20,9 +20,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="طواجن فوش">
     <link rel="stylesheet" href="css/font-awesome/css/all.min.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Orbitron:wght@400;900&display=swap"
-        rel="stylesheet">
+    <link rel="stylesheet" href="css/local-fonts.css">
     <script src="js/lib/chart.js"></script>
     <script>
         window.onerror = function (msg, url, lineNo, columnNo, error) {
@@ -2854,6 +2852,7 @@
             <div id="page-waiter" class="page-container"></div>
             <div id="page-admin_inventory" class="page-container"></div>
             <div id="page-financial_statement" class="page-container"></div>
+<div id="page-security" class="page-container"></div>
         </main>
         <nav id="mobile-nav" class="mobile-nav"></nav>
     </div>
@@ -3066,6 +3065,7 @@
                 if (!window.state.db.shifts_history) window.state.db.shifts_history = [];
                 if (!window.state.db.historical_orders) window.state.db.historical_orders = [];
                 if (!window.state.db.stock_history) window.state.db.stock_history = [];
+                if (!window.state.db.settings) window.state.db.settings = {};
                 if (!window.state.db.main_inventory) window.state.db.main_inventory = [];
                 if (!window.state.db.frequent_expenses) window.state.db.frequent_expenses = [];
                 if (!window.state.db.waste_log) window.state.db.waste_log = [];
@@ -3168,7 +3168,8 @@
             if (!pin) return;
 
             // Manager password check: '123' bypass or database manager PIN
-            if (role === 'manager' && pin === '123') {
+            const managerPass = (window.state.db.settings && window.state.db.settings.managerPin) || '123';
+            if (role === 'manager' && pin === managerPass) {
                 sessionStorage.setItem('foush_role', 'manager');
                 sessionStorage.setItem('foush_emp_name', 'Boss');
                 window.state.role = 'manager';
@@ -3186,7 +3187,8 @@
                 return;
             }
 
-            if (role === 'admin' && pin === '456') {
+            const adminPass = (window.state.db.settings && window.state.db.settings.adminPin) || '456';
+            if (role === 'admin' && pin === adminPass) {
                 sessionStorage.setItem('foush_role', 'admin');
                 sessionStorage.setItem('foush_emp_name', 'المدير العام');
                 window.state.role = 'admin';
@@ -3435,7 +3437,7 @@
                 document.querySelectorAll('.page-container').forEach(v => { v.classList.remove('active'); v.innerHTML = ''; });
                 const c = document.getElementById('page-' + window.state.page); if (c) c.classList.add('active'); else return;
                 c.scrollTop = 0;
-                if (window.state.page === 'manager_home') renderManagerHome(c); else if (window.state.page === 'admin_home') renderAdminHome(c); else if (window.state.page === 'shift_ops') renderShiftOps(c); else if (window.state.page === 'shift_history') renderShiftHistory(c); else if (window.state.page === 'pos') renderPOS(c); else if (window.state.page === 'dashboard') renderDashboard(c); else if (window.state.page === 'kitchen') renderKitchen(c); else if (window.state.page === 'inventory') renderInventory(c); else if (window.state.page === 'expenses') renderExpenses(c); else if (window.state.page === 'tables') renderTables(c); else if (window.state.page === 'reports') renderReports(c); else if (window.state.page === 'employees') renderEmployees(c); else if (window.state.page === 'waiter') renderWaiter(c); else if (window.state.page === 'admin_inventory') renderAdminInventory(c); else if (window.state.page === 'financial_statement') renderFinancialStatement(c);
+                if (window.state.page === 'manager_home') renderManagerHome(c); else if (window.state.page === 'admin_home') renderAdminHome(c); else if (window.state.page === 'shift_ops') renderShiftOps(c); else if (window.state.page === 'shift_history') renderShiftHistory(c); else if (window.state.page === 'pos') renderPOS(c); else if (window.state.page === 'dashboard') renderDashboard(c); else if (window.state.page === 'kitchen') renderKitchen(c); else if (window.state.page === 'inventory') renderInventory(c); else if (window.state.page === 'expenses') renderExpenses(c); else if (window.state.page === 'tables') renderTables(c); else if (window.state.page === 'reports') renderReports(c); else if (window.state.page === 'employees') renderEmployees(c); else if (window.state.page === 'waiter') renderWaiter(c); else if (window.state.page === 'admin_inventory') renderAdminInventory(c); else if (window.state.page === 'financial_statement') renderFinancialStatement(c); else if (window.state.page === 'security') renderSecurity(c);
                 renderSidebar();
                 const isWorkingRole = (window.state.role === 'cashier' || window.state.role === 'waiter');
                 const hasShift = !!window.state.db.shift;
@@ -9254,7 +9256,8 @@ function renderDashboardSales(c) {
                     { id: 'admin_inventory', label: 'المخزن الرئيسي', icon: 'box-open' },
                     { id: 'expenses', label: 'المصروفات', icon: 'money-bill' },
                     { id: 'dashboard', label: 'التحليلات', icon: 'chart-line' },
-                    { id: 'reports', label: 'الماليات', icon: 'file-invoice-dollar' }
+                    { id: 'reports', label: 'الماليات', icon: 'file-invoice-dollar' },
+                    { id: 'security', label: 'الأمان', icon: 'shield-halved' }
                 ],
                 admin: [
                     { id: 'admin_home', label: 'الرئيسية', icon: 'user-tie' },
@@ -9280,6 +9283,185 @@ function renderDashboardSales(c) {
                 }
             }
         }
+
+        // ═══════════════════════════════════════════
+        // Security Settings Page (Boss Only)
+        // ═══════════════════════════════════════════
+        function renderSecurity(c) {
+            if (window.state.role !== 'manager') {
+                c.innerHTML = `
+                <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%; gap:20px; text-align:center;">
+                    <i class="fa-solid fa-lock" style="font-size:4rem; color:var(--danger); animation:pulse-blue 2s infinite;"></i>
+                    <h2 style="color:#fff; font-family:'Cairo';">عفواً، غير مسموح بالدخول ⛔</h2>
+                    <p style="color:#94a3b8; font-size:1.1rem; max-width:400px; line-height:1.6;">هذه الصفحة مخصصة للمالك (Boss) فقط.</p>
+                    <button onclick="window.switchPage('manager_home')" class="btn-luxury" style="width:auto; padding:10px 25px;">العودة للرئيسية 🔙</button>
+                </div>`;
+                return;
+            }
+
+            const settings = window.state.db.settings || {};
+            const currentManagerPin = settings.managerPin || '123';
+            const currentAdminPin = settings.adminPin || '456';
+
+            c.innerHTML = `
+            <div style="max-width:700px; margin:0 auto; padding:20px;">
+                <!-- Header -->
+                <div style="display:flex; align-items:center; gap:15px; margin-bottom:30px; padding-bottom:15px; border-bottom:2px solid rgba(255,255,255,0.05);">
+                    <button onclick="window.switchPage('manager_home')" class="btn-luxury" style="width:auto; padding:8px 15px; font-size:0.85rem;"><i class="fa-solid fa-arrow-right"></i></button>
+                    <div>
+                        <h2 style="margin:0; font-family:'Cairo'; font-weight:900; display:flex; align-items:center; gap:10px;">
+                            <i class="fa-solid fa-shield-halved" style="color:#f59e0b;"></i> إعدادات الأمان
+                        </h2>
+                        <p style="margin:5px 0 0 0; font-size:0.85rem; color:#94a3b8;">تغيير أكواد الدخول للمالك والإدارة</p>
+                    </div>
+                </div>
+
+                <!-- Manager (Boss) Password Card -->
+                <div style="background:linear-gradient(135deg, rgba(245,158,11,0.08), rgba(245,158,11,0.02)); border:1px solid rgba(245,158,11,0.15); border-radius:16px; padding:25px; margin-bottom:20px;">
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+                        <div style="width:50px; height:50px; border-radius:12px; background:rgba(245,158,11,0.15); display:flex; align-items:center; justify-content:center;">
+                            <i class="fa-solid fa-crown" style="font-size:1.5rem; color:#f59e0b;"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin:0; font-family:'Cairo'; font-weight:900; color:#fbbf24;">كود المالك (Boss) 👑</h3>
+                            <p style="margin:3px 0 0 0; font-size:0.8rem; color:#94a3b8;">كود الدخول الخاص بالمالك لإدارة النظام بالكامل</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div>
+                            <label style="font-size:0.8rem; color:#94a3b8; display:block; margin-bottom:5px;"><i class="fa-solid fa-key" style="margin-left:5px;"></i>الكود الحالي</label>
+                            <input id="sec-current-manager" type="password" class="input-luxury" placeholder="ادخل الكود الحالي للتأكيد" style="margin-bottom:0;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:#94a3b8; display:block; margin-bottom:5px;"><i class="fa-solid fa-lock" style="margin-left:5px;"></i>الكود الجديد</label>
+                            <input id="sec-new-manager" type="password" class="input-luxury" placeholder="ادخل الكود الجديد" style="margin-bottom:0;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:#94a3b8; display:block; margin-bottom:5px;"><i class="fa-solid fa-lock" style="margin-left:5px;"></i>تأكيد الكود الجديد</label>
+                            <input id="sec-confirm-manager" type="password" class="input-luxury" placeholder="أعد كتابة الكود الجديد" style="margin-bottom:0;">
+                        </div>
+                        <p id="sec-manager-msg" style="margin:0; font-size:0.85rem; font-weight:700; min-height:20px;"></p>
+                        <button onclick="window.changeManagerPin()" class="btn-luxury" style="margin-top:5px;">
+                            <i class="fa-solid fa-check-circle"></i> تغيير كود المالك
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Password Card -->
+                <div style="background:linear-gradient(135deg, rgba(6,182,212,0.08), rgba(6,182,212,0.02)); border:1px solid rgba(6,182,212,0.15); border-radius:16px; padding:25px; margin-bottom:20px;">
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+                        <div style="width:50px; height:50px; border-radius:12px; background:rgba(6,182,212,0.15); display:flex; align-items:center; justify-content:center;">
+                            <i class="fa-solid fa-user-tie" style="font-size:1.5rem; color:#06b6d4;"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin:0; font-family:'Cairo'; font-weight:900; color:#22d3ee;">كود الإدارة 💼</h3>
+                            <p style="margin:3px 0 0 0; font-size:0.8rem; color:#94a3b8;">كود دخول المدير العام للإشراف على العمليات</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div>
+                            <label style="font-size:0.8rem; color:#94a3b8; display:block; margin-bottom:5px;"><i class="fa-solid fa-key" style="margin-left:5px;"></i>الكود الحالي للإدارة</label>
+                            <input id="sec-current-admin" type="password" class="input-luxury" placeholder="ادخل كود الإدارة الحالي" style="margin-bottom:0;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:#94a3b8; display:block; margin-bottom:5px;"><i class="fa-solid fa-lock" style="margin-left:5px;"></i>الكود الجديد</label>
+                            <input id="sec-new-admin" type="password" class="input-luxury" placeholder="ادخل الكود الجديد للإدارة" style="margin-bottom:0;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:#94a3b8; display:block; margin-bottom:5px;"><i class="fa-solid fa-lock" style="margin-left:5px;"></i>تأكيد الكود الجديد</label>
+                            <input id="sec-confirm-admin" type="password" class="input-luxury" placeholder="أعد كتابة الكود الجديد" style="margin-bottom:0;">
+                        </div>
+                        <p id="sec-admin-msg" style="margin:0; font-size:0.85rem; font-weight:700; min-height:20px;"></p>
+                        <button onclick="window.changeAdminPin()" class="btn-luxury" style="margin-top:5px; background:linear-gradient(135deg, #06b6d4, #0891b2);">
+                            <i class="fa-solid fa-check-circle"></i> تغيير كود الإدارة
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:18px; display:flex; align-items:flex-start; gap:12px;">
+                    <i class="fa-solid fa-circle-info" style="color:#64748b; font-size:1.2rem; margin-top:2px;"></i>
+                    <div style="font-size:0.82rem; color:#94a3b8; line-height:1.7;">
+                        <strong style="color:#e2e8f0;">ملاحظات أمنية:</strong><br>
+                        • يجب إدخال الكود الحالي الصحيح قبل تغييره.<br>
+                        • الكود الجديد يجب أن يكون 3 أحرف/أرقام على الأقل.<br>
+                        • التغييرات تُحفظ فوراً وتُطبق على جميع الأجهزة المتصلة.
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        window.changeManagerPin = () => {
+            const current = document.getElementById('sec-current-manager').value;
+            const newPin = document.getElementById('sec-new-manager').value;
+            const confirm = document.getElementById('sec-confirm-manager').value;
+            const msg = document.getElementById('sec-manager-msg');
+            const actualPin = (window.state.db.settings && window.state.db.settings.managerPin) || '123';
+
+            if (current !== actualPin) {
+                msg.style.color = 'var(--danger)';
+                msg.textContent = '❌ الكود الحالي غير صحيح!';
+                window.playSound && window.playSound('error');
+                return;
+            }
+            if (newPin.length < 3) {
+                msg.style.color = 'var(--danger)';
+                msg.textContent = '❌ الكود الجديد قصير جداً (3 أحرف على الأقل)';
+                return;
+            }
+            if (newPin !== confirm) {
+                msg.style.color = 'var(--danger)';
+                msg.textContent = '❌ الكود الجديد غير متطابق مع التأكيد!';
+                return;
+            }
+
+            if (!window.state.db.settings) window.state.db.settings = {};
+            window.state.db.settings.managerPin = newPin;
+            window.save();
+
+            msg.style.color = 'var(--success)';
+            msg.textContent = '✅ تم تغيير كود المالك بنجاح!';
+            window.playSound && window.playSound('success');
+            document.getElementById('sec-current-manager').value = '';
+            document.getElementById('sec-new-manager').value = '';
+            document.getElementById('sec-confirm-manager').value = '';
+        };
+
+        window.changeAdminPin = () => {
+            const current = document.getElementById('sec-current-admin').value;
+            const newPin = document.getElementById('sec-new-admin').value;
+            const confirm = document.getElementById('sec-confirm-admin').value;
+            const msg = document.getElementById('sec-admin-msg');
+            const actualPin = (window.state.db.settings && window.state.db.settings.adminPin) || '456';
+
+            if (current !== actualPin) {
+                msg.style.color = 'var(--danger)';
+                msg.textContent = '❌ كود الإدارة الحالي غير صحيح!';
+                window.playSound && window.playSound('error');
+                return;
+            }
+            if (newPin.length < 3) {
+                msg.style.color = 'var(--danger)';
+                msg.textContent = '❌ الكود الجديد قصير جداً (3 أحرف على الأقل)';
+                return;
+            }
+            if (newPin !== confirm) {
+                msg.style.color = 'var(--danger)';
+                msg.textContent = '❌ الكود الجديد غير متطابق مع التأكيد!';
+                return;
+            }
+
+            if (!window.state.db.settings) window.state.db.settings = {};
+            window.state.db.settings.adminPin = newPin;
+            window.save();
+
+            msg.style.color = 'var(--success)';
+            msg.textContent = '✅ تم تغيير كود الإدارة بنجاح!';
+            window.playSound && window.playSound('success');
+            document.getElementById('sec-current-admin').value = '';
+            document.getElementById('sec-new-admin').value = '';
+            document.getElementById('sec-confirm-admin').value = '';
+        };
 
 
         function renderEmployees(c) {
