@@ -1,3 +1,12 @@
 local-server/node_modules/
 .DS_Store
 .env
+_archive/
+*.zip
+*.msi
+*.log
+
+# Local Database & Configuration (Do not upload to Git)
+local-server/foush.db
+local-server/foush.db-journal
+local-server/config.json
